@@ -1,0 +1,25 @@
+# -*- mode: gitconfig; -*-
+[user]
+	name = "Alistair Y. Lewars"
+	email = <your_email@mail.com>
+[push]
+	default = simple
+[alias]
+	pre = !sh -c 'git push origin +master:precommit_$(git config --get user.email | sed s,@.*,,)'
+[core]
+	editor = emacs
+	excludesfile = /home/<username>/.gitignore_global
+[filter "lfs"]
+	smudge = git-lfs smudge -- %f
+	required = true
+	clean = git-lfs clean -- %f
+# [lfs]
+#         url = "http://artifactory/..."
+#         batch = false
+# 	concurrenttransfers = 1
+# [credential "http://artifactory/..."]
+#         username = <your_email@mail.com>
+# [credential]
+# 	helper = cache --timeout=3600
+[commit]
+	template = /home/<username>/.gitmessage

@@ -53,15 +53,15 @@ function prompt() {
 
     case "$ptype" in
 	dev)
-	    export PS1="\w\n\u@\h [\$?] \\$ \[$(tput sgr0)\]"
+	    export PS1="\w\n\u@\h [\$?] $(__git_ps1 " (%s)")\\$ \[$(tput sgr0)\]"
 	    ;;
 	prd)
 	    phost='\[$(tput sgr0)\]\[\033[48;5;1m\]\h\[$(tput sgr0)\]\[\033[48;5;-1m\]'
-	    export PROMPT_COMMAND='rc=$?;PS1="\[\033[38;5;4m\]\w\[$(tput sgr0)\]\n\u@"$phost" `[[ $rc == 0 ]] && echo 😎 || echo 😈 `  \\$ \[$(tput sgr0)\]"'
+	    export PROMPT_COMMAND='rc=$?;PS1="\[\033[38;5;4m\]\w\[$(tput sgr0)\]\n\u@"$phost" `[[ $rc == 0 ]] && echo 😎 || echo 😈 `  $(__git_ps1 " (%s)")\\$ \[$(tput sgr0)\]"'
 	    ;;
 	emoji)
 	    phost='\h'
-	    export PROMPT_COMMAND='rc=$?;PS1="\[\033[38;5;4m\]\w\[$(tput sgr0)\]\n\u@"$phost" `[[ $rc == 0 ]] && echo 😎 || echo 😈 `  \\$ \[$(tput sgr0)\]"'
+	    export PROMPT_COMMAND='rc=$?;PS1="\[\033[38;5;4m\]\w\[$(tput sgr0)\]\n\u@"$phost" `[[ $rc == 0 ]] && echo 😎 || echo 😈 `  $(__git_ps1 " (%s)")\\$ \[$(tput sgr0)\]"'
 	    ;;
 	*)
 	    export PS1='[\h \w \$] '

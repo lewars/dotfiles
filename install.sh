@@ -15,7 +15,7 @@ function mklnk(){
     dotdir=$(pwd)
     pushd $HOME >/dev/null
     ln -fvs ${dotdir/${HOME}/.}/$1 $1
-    popd >/devn/null
+    popd >/dev/null
 }
 
 # copy over bash profiles and rc

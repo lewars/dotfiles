@@ -4,6 +4,7 @@
 if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
+source ~/.git-prompt.sh
 
 export HISTSIZE=1001
 shopt -s histappend

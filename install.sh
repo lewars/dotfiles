@@ -34,7 +34,8 @@ mklnk .emacs
 
 # copy over git files
 pout "The following git files will be saved and installed:"
-for g in git/.git*;do
+cd git
+for g in .git*;do
     save $g
-    mklnk $(basename $g)
+    mklnk $g
 done

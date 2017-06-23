@@ -14,7 +14,7 @@ function mklnk(){
 
     dotdir=$(pwd)
     pushd $HOME >/dev/null
-    ln -fvs ${dotdir/${HOME}/.}/$1 $1
+    ln -fvs ${dotdir/${HOME}/.}/$fl $fl
     popd >/dev/null
 }
 
@@ -39,3 +39,11 @@ for g in .git*;do
     save $g
     mklnk $g
 done
+
+# fix bug: relative path bug
+# install iterm2 config; recommend you put this on a webserver though
+# [[ ! -d "${HOME}/._iterm2" ]] && mkdir "${HOME}/._iterm2"
+# pout "The following iterm2 config will be saved:"
+# save ._iterm2/com.googlecode.iterm2.plist
+# pout "The following iterm2 file will be installed:"
+# mklnk ._iterm2/com.googlecode.iterm2.plist

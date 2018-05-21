@@ -1,4 +1,5 @@
 ;;;; my init file
+;;;; Author: Alistair Y. Lewars
 
 ;;; package setup
 (require 'package)
@@ -6,7 +7,8 @@
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
 (add-to-list 'package-archives '("marmalade" . "https://marmalade-repo.org/packages/"))
 
-;; --
+;; disable tabs.
+(setq-default indent-tabs-mode nil)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -27,7 +29,7 @@
  '(org-agenda-files (quote ("~/tmp/outline.txt")))
  '(package-selected-packages
    (quote
-    (magit gitignore-mode browse-at-remote git-ps1-mode gitconfig-mode ibuffer-git rpm-spec-mode emojify tangotango-theme solarized-theme jedi-direx edit-server)))
+    (jedi groovy-mode anaconda-mode json-mode magit gitignore-mode browse-at-remote git-ps1-mode gitconfig-mode ibuffer-git rpm-spec-mode emojify tangotango-theme solarized-theme edit-server)))
  '(show-paren-mode t)
  '(show-trailing-whitespace t)
  '(tool-bar-mode nil)

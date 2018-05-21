@@ -1,0 +1,18 @@
+#!/bin/bash
+
+env=$1
+http_proxy_host=localhost
+https_proxy_host=localhost
+if [[ $env == 'int' ]];then
+    echo export http_proxy=http://${http_proxy_host}:80
+    echo export https_proxy=http://${http_proxy_host}:80
+    echo export HTTP_PROXY=http://${http_proxy_host}:80
+    echo export HTTPS_PROXY=http://${http_proxy_host}:80
+elif [[ $env == 'info' ]];then
+    echo $http_proxy | grep -q bproxy && echo "-- Using BPROXY --" || echo "-- Using PROXY --"
+else
+    echo export http_proxy=http://${https_proxy_host}:80
+    echo export https_proxy=http://${https_proxy_host}:80
+    echo export HTTP_PROXY=http://${https_proxy_host}:80
+    echo export HTTPS_PROXY=http://${https_proxy_host}:80
+fi

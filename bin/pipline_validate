@@ -1,0 +1,14 @@
+#!/bin/bash -x
+user=${1:-alewars}; shift
+jenv=${1:-prod}; shift
+jfile=${1:-Jenkinsfile}
+
+proxy=${https_proxy:-http://localhost:80}
+
+if [[ $jenv == 'prod' ]];then
+    JENKINS_URL=https://localhost/jenkins
+else
+    JENKINS_URL=https://localhost/jenkins
+fi
+
+curl -v -u $user -x $proxy -X POST -F "jenkinsfile=<${jfile}" $JENKINS_URL/pipeline-model-converter/validate

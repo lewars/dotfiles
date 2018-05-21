@@ -26,3 +26,4 @@ export TMPDIR=$HOME/tmp
 # load gcloud setting
 [ -f "~/._gcloud" ] && source ~/._gcloud
 
+export PATH="/usr/local/opt/tcl-tk/bin:$PATH"

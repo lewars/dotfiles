@@ -1,0 +1,19 @@
+#!/bin/bash -x
+
+jumphost=localhost # of course, update this
+
+function get_ssh_target() {
+    # you may have to compensate due to broken /etc/resolv.conf
+
+    local ip=$1
+    local fqdn
+    local dn2
+
+    fqdn=$(dig +short -x $ip)
+    dn2=$(echo $fqdn | awk -F. '{print $1"."$2}')
+    echo $dn2
+}
+
+target=$(get_ssh_target $1)
+
+ssh -t -Y -i ~/.ssh/id_rsa -oStrictHostKeyChecking=no -oUseRoaming=no alistair.lewars@$jumphost inline $target

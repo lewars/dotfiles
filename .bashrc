@@ -26,6 +26,10 @@ alias slide='sudo su -'
 alias chx='chmod +x'
 alias top='top -o cpu'
 
+if [ -f $(brew --prefix)/etc/bash_completion ]; then
+      . $(brew --prefix)/etc/bash_completion
+fi
+
 function u() {
     l=$(printf '../%.0s' $(seq 1 ${1}))
     cd $l

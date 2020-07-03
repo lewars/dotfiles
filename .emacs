@@ -19,7 +19,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(auto-image-file-mode t)
  '(blink-matching-paren t)
  '(column-number-mode 1)
  '(custom-safe-themes
@@ -106,6 +105,9 @@
 
 ;; ---
 
+;;; aspell
+(setq ispell-program-name "/usr/local/bin/aspell")
+
 ;;; eshell
 (setq eshell-prompt-function
       (lambda ()
@@ -118,6 +120,9 @@
 (setq org-log-done 'note)
 
 ;; ---
+
+;;; SVG
+(add-to-list `auto-mode-alist '("\\.svg\\'" . xml-mode))
 
 ;;; Python
 (add-hook 'python-mode-hook 'jedi:setup)

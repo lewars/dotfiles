@@ -8,7 +8,7 @@
 	pre = !sh -c 'git push origin +master:precommit_$(git config --get user.email | sed s,@.*,,)'
 [core]
 	editor = emacs
-	excludesfile = /home/<username>/.gitignore_global
+	excludesfile = /User/slams/.gitignore_global
 [filter "lfs"]
 	smudge = git-lfs smudge -- %f
 	required = true

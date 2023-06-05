@@ -1,0 +1,44 @@
+- name: Set up local workstation
+  hosts: local
+  roles:
+    - role: git
+      tags:
+        - git
+    - role: dnf
+      tags:
+        - dnf
+    - role: fzf
+      tags:
+        - fzf
+      when: false
+    - role: tmux
+      tags:
+        - tmux
+      when: false
+    - role: asdf
+      tags:
+        - asdf
+      when: false
+    - role: python
+      tags:
+        - python
+      when: false
+    - role: terraform
+      tags:
+        - terraform
+      when: false
+    - role: golang
+      tags:
+        - golang
+      when: false
+    - role: node
+      tags:
+        - node
+      when: false
+    - role: emacs
+      tags:
+        - emacs
+    - role: bash
+      tags:
+        - bash
+      when: false

@@ -1,0 +1,12 @@
+package_upgrade: yes
+packages:
+  - curl
+  - fzf
+  - gnome-boxes
+  - gnome-keyring
+  - htop
+  - i3lock
+  - jq
+  - make
+  - wget
+remove_packages: []

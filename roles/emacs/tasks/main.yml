@@ -1,0 +1,13 @@
+- name: Check if .emacs configuration exists
+  stat: path="{{dotfiles_user_home}}/.emacs"
+  register: emacsconfig_stat
+- name: Back up .emacs configuration
+  command: mv ~/.emacs ~/.emacs.{{ ansible_date_time.epoch }}
+  when: emacsconfig_stat.stat.exists
+- name: Copy .emacs to homd folder
+  file:
+    src: '{{ dotfiles_home }}/roles/emacs/files/emacs'
+    dest: '{{ dotfiles_user_home }}/.emacs'
+    owner: '{{ user }}'
+    group: '{{ group }}'
+    state: hard

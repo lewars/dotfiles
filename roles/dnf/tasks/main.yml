@@ -1,0 +1,23 @@
+- name: Upgrade dnf
+  dnf:
+  when: package_upgrade == "yes"
+  become: yes
+  become_user: root
+  become_method: sudo
+- name: Install dnf packages
+  dnf:
+    name: '{{ item }}'
+    update_cache: yes
+  become: yes
+  become_user: root
+  become_method: sudo
+  loop: '{{ packages }}'
+- name: Remove dnf packages
+  dnf:
+    name: '{{ item }}'
+    update_cache: yes
+    state: absent
+  become: yes
+  become_user: root
+  become_method: sudo
+  loop: '{{ remove_packages }}'

@@ -40,15 +40,16 @@
  ;; If there is more than one, they won't work right.
  '(blink-matching-paren t)
  '(column-number-mode 1)
+ '(custom-safe-themes
+   '("2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350" default))
  '(display-fill-column-indicator-column 120)
  '(frame-background-mode nil)
  '(highlight-indent-guides-method 'bitmap)
- '(ido-mode 'both nil (ido))
  '(imenu-auto-rescan t)
  '(iswitchb-mode nil)
  '(iswitchb-use-frame-buffer-list nil)
  '(package-selected-packages
-   '(vertico-posframe corfu icomplete-vertical orderless embark vertico ghub treemacs treemacs-all-the-icons treemacs-magit treemacs-nerd-icons treemacs-projectile all-the-icons doom-themes doom-modeline git-modes vterm dash copilot editorconfig quelpa-use-package quelpa helm-gtags flyspell-correct-helm multiple-cursors find-file-in-project projectile highlight-indent-guides iedit company elpy go-mode windresize flymake-yamllint python-black flymd flycheck-yamllint flymake-go flymake-go-staticcheck flymake-golangci flymake-gradle flymake-grammarly flymake-json flymake-python-pyflakes flymake-shell flycheck flycheck-aspell flycheck-color-mode-line dockerfile-mode terraform-doc terraform-mode yaml-mode use-package markdown-mode jedi groovy-mode anaconda-mode json-mode magit gitignore-mode browse-at-remote git-ps1-mode gitconfig-mode rpm-spec-mode emojify edit-server))
+   '(embark-consult consult vertico-posframe corfu icomplete-vertical orderless embark vertico ghub treemacs treemacs-all-the-icons treemacs-magit treemacs-nerd-icons treemacs-projectile all-the-icons doom-themes doom-modeline git-modes vterm dash copilot editorconfig quelpa-use-package quelpa helm-gtags flyspell-correct-helm multiple-cursors find-file-in-project projectile highlight-indent-guides iedit company elpy go-mode windresize flymake-yamllint python-black flymd flycheck-yamllint flymake-go flymake-go-staticcheck flymake-golangci flymake-gradle flymake-grammarly flymake-json flymake-python-pyflakes flymake-shell flycheck flycheck-aspell flycheck-color-mode-line dockerfile-mode terraform-doc terraform-mode yaml-mode use-package markdown-mode jedi groovy-mode anaconda-mode json-mode magit gitignore-mode browse-at-remote git-ps1-mode gitconfig-mode rpm-spec-mode emojify edit-server))
  '(show-paren-mode t)
  '(show-trailing-whitespace t)
  '(tool-bar-mode nil)
@@ -67,10 +68,21 @@
 (add-hook 'org-mode-hook 'flymake-grammarly-load)
 (add-hook 'markdown-mode-hook 'flymake-grammarly-load)
 
+;; IDO
+;; (use-package ido
+  ;; :diminish ido-mode
+  ;; :bind ("C-x C-b" . 'ibuffer)
+;;  :init
+  ;; (setq ido-enable-flex-matching t)
+  ;; (setq ido-use-filename-at-point 'guess)
+  ;; (setq ido-auto-merge-work-directories-length -1)
+  ;; (setq ido-create-new-buffer 'always)
+  ;; (setq ido-file-extensions-order '(".py" ".tf" ".yml" ".yaml" ".json" ".groovy" ".gv" ".emacs" ".org" ".txt" ))
+;;  (setq ido-use-virtual-buffers t))
 
-;;; ibuffer
+;; ibuffer
 (use-package ibuffer
-  :bind ("C-x C-b" . ibuffer)
+  :bind ("C-x C-b" . 'ibuffer)
   :custom
   (ibuffer-default-display-maybe-show-predicates t)
   (ibuffer-expert t)
@@ -187,8 +199,8 @@
       (windmove-default-keybindings))
 (global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
 (global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
-(global-set-key (kbd "S-C-<up>") 'shrink-window)
-(global-set-key (kbd "S-C-<down>") 'enlarge-window)
+(global-set-key (kbd "S-C-<down>") 'shrink-window)
+(global-set-key (kbd "S-C-<up>") 'enlarge-window)
 
 ;; mighty mouse scroll
 (setq mouse-wheel-scroll-amount '(0.01))
@@ -397,7 +409,9 @@
  '(mode-line-inactive ((t (:background "#304047" :foreground "#70828A" :box nil))))
  '(org-headline-done ((t (:foreground "gray"))))
  '(org-hide ((t (:foreground "dim gray"))))
- '(show-paren-match ((t (:background "dim gray" :foreground "cyan" :weight ultra-bold)))))
+ '(shadow ((t (:foreground "rosy brown"))))
+ '(show-paren-match ((t (:background "dim gray" :foreground "cyan" :weight ultra-bold))))
+ '(vertical-border ((t (:background "dark slate gray" :foreground "dark slate gray")))))
 
 (use-package treemacs
   :ensure t
@@ -473,6 +487,12 @@
   ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
   (setq vertico-cycle t))
 
+(require 'vertico-posframe)
+(vertico-posframe-mode 1)
+(setq vertico-posframe-parameters
+      '((left-fringe . 8)
+        (right-fringe . 8)))
+
 ;; Persist history over Emacs restarts. Vertico sorts by history position.
 (use-package savehist
   :init
@@ -508,8 +528,15 @@
   ;; Enable recursive minibuffers
   (setq enable-recursive-minibuffers t))
 
-(require 'vertico-posframe)
-(vertico-posframe-mode 1)
+;; (use-package vertico-posframe
+;;   :ensure t
+;;   :init
+;; (setq vertico-posframe-parameters
+;;       '((left-fringe . 8)
+;;         (right-fringe . 8))))
+
+;; (require 'vertico-posframe)
+;; (vertico-posframe-mode 1)
 
 (use-package embark
   :ensure t
@@ -569,3 +596,105 @@
 ;;   (global-corfu-mode)
 ;;   (corfu-history-mode))
 
+;; Example configuration for Consult
+(use-package consult
+  :bind (;; C-c bindings in `mode-specific-map'
+         ("C-c M-x" . consult-mode-command)
+         ("C-c h" . consult-history)
+         ("C-c k" . consult-kmacro)
+         ("C-c m" . consult-man)
+         ("C-c i" . consult-info)
+         ([remap Info-search] . consult-info)
+         ;; C-x bindings in `ctl-x-map'
+         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+         ;; M-g bindings in `goto-map'
+         ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+         ("M-g g" . consult-goto-line)             ;; orig. goto-line
+         ("M-g m" . consult-mark)
+         ("M-g k" . consult-global-mark)
+         ;; M-s bindings in `search-map'
+         ("M-s d" . consult-find)
+         ("M-s D" . consult-locate)
+         ("M-s g" . consult-grep)
+         ("M-s G" . consult-git-grep)
+         ("M-s r" . consult-ripgrep)
+         ("M-s l" . consult-line)
+         ("M-s L" . consult-line-multi)
+         ("M-s k" . consult-keep-lines)
+         ("M-s u" . consult-focus-lines)
+         ;; Isearch integration
+         ("M-s e" . consult-isearch-history)
+         :map isearch-mode-map
+         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+         ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+         ;; Minibuffer history
+         :map minibuffer-local-map
+         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+
+  ;; Enable automatic preview at point in the *Completions* buffer. This is
+  ;; relevant when you use the default completion UI.
+  :hook (completion-list-mode . consult-preview-at-point-mode)
+
+  ;; The :init configuration is always executed (Not lazy)
+  :init
+
+  ;; Optionally configure the register formatting. This improves the register
+  ;; preview for `consult-register', `consult-register-load',
+  ;; `consult-register-store' and the Emacs built-ins.
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
+
+  ;; Optionally tweak the register preview window.
+  ;; This adds thin lines, sorting and hides the mode line of the window.
+  (advice-add #'register-preview :override #'consult-register-window)
+
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+
+  ;; Configure other variables and modes in the :config section,
+  ;; after lazily loading the package.
+  :config
+
+  ;; Optionally configure preview. The default value
+  ;; is 'any, such that any key triggers the preview.
+  ;; (setq consult-preview-key 'any)
+  ;; (setq consult-preview-key "M-.")
+  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+  ;; For some commands and buffer sources it is useful to configure the
+  ;; :preview-key on a per-command basis using the `consult-customize' macro.
+  (consult-customize
+   consult-theme :preview-key '(:debounce 0.2 any)
+   consult-ripgrep consult-git-grep consult-grep
+;;   consult-bookmark consult-recent-file consult-xref
+   consult--source-bookmark consult--source-file-register
+   consult--source-recent-file consult--source-project-recent-file
+   ;; :preview-key "M-."
+   :preview-key '(:debounce 0.4 any))
+
+  ;; Optionally configure the narrowing key.
+  ;; Both < and C-+ work reasonably well.
+  (setq consult-narrow-key "<") ;; "C-+"
+
+  ;; Optionally make narrowing help available in the minibuffer.
+  ;; You may want to use `embark-prefix-help-command' or which-key instead.
+  ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
+
+  ;; By default `consult-project-function' uses `project-root' from project.el.
+  ;; Optionally configure a different project root function.
+  ;;;; 1. project.el (the default)
+  ;; (setq consult-project-function #'consult--default-project--function)
+  ;;;; 2. vc.el (vc-root-dir)
+  ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
+  ;;;; 3. locate-dominating-file
+  ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
+  ;;;; 4. projectile.el (projectile-project-root)
+  ;; (autoload 'projectile-project-root "projectile")
+  ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
+  ;;;; 5. No project support
+  ;; (setq consult-project-function nil)
+)

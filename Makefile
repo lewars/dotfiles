@@ -7,5 +7,8 @@ all:
 $(tags):
 	ansible-playbook -t $@ dotfiles.yml
 
+diff-emacs:
+	diff roles/emacs/files/emacs ~/.emacs 
+
 save-emacs:
 	cp -v ~/.emacs roles/emacs/files/emacs

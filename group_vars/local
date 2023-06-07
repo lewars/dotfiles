@@ -4,5 +4,4 @@ dotfiles_home: "{{ dotfiles_user_home }}/.dotfiles"
 full_name: Alistair Y. Lewars
 git_user: lewars
 git_email: alistair.lewars@gmail.com
-user: slams
-group: slams
+user: "{{ lookup('env', 'USER') }}"

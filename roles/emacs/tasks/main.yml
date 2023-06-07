@@ -9,5 +9,4 @@
     src: '{{ dotfiles_home }}/roles/emacs/files/emacs'
     dest: '{{ dotfiles_user_home }}/.emacs'
     owner: '{{ user }}'
-    group: '{{ group }}'
     state: hard

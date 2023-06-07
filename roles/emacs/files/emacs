@@ -62,11 +62,11 @@
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 
 ;; Configure Flymake Grammarly
-(require 'flymake-grammarly)
-(add-hook 'text-mode-hook 'flymake-grammarly-load)
-(add-hook 'latex-mode-hook 'flymake-grammarly-load)
-(add-hook 'org-mode-hook 'flymake-grammarly-load)
-(add-hook 'markdown-mode-hook 'flymake-grammarly-load)
+;; (require 'flymake-grammarly)
+;; (add-hook 'text-mode-hook 'flymake-grammarly-load)
+;; (add-hook 'latex-mode-hook 'flymake-grammarly-load)
+;; (add-hook 'org-mode-hook 'flymake-grammarly-load)
+;; (add-hook 'markdown-mode-hook 'flymake-grammarly-load)
 
 ;; IDO
 ;; (use-package ido
@@ -396,7 +396,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:height 100))))
+ '(default ((t (:height 100 :foundry "ADBO" :family "Source Code Pro"))))
  '(ansi-color-bright-black ((t (:background "#222D32" :foreground "dark gray"))))
  '(copilot-overlay-face ((t (:foreground "pale violet red"))))
  '(custom-comment ((t (:background "#171F24" :foreground "#EEFFFF"))))

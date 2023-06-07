@@ -1,20 +1,38 @@
-;;;; my init file
+;;;; My Emacs configuration
 ;;;; Author: Alistair Y. Lewars
 
-;;; package setup
+;;; Package setup
 (require 'package)
-; (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/"))
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
-; (add-to-list 'package-archives '("marmalade" . "https://marmalade-repo.org/packages/"))
 (package-initialize)
 
-;; disable hard tabs.
+
+;; Install use-package if it's not already installed
+(require 'use-package)
+(require 'quelpa-use-package)
+
+;; Disable hard tabs
 (setq-default indent-tabs-mode nil)
 (defun my-c-mode-hook ()
   (setq indent-tabs-mode nil))
-
 (add-hook 'c-mode-hook 'my-c-mode-hook)
 
+;; Disable scrollbar and menubar but start server
+(set-scroll-bar-mode nil)
+(menu-bar-mode -1)
+(if (display-graphic-p)
+  '(server-mode t))
+
+;; TODO(alewars): remove this
+;; (add-to-list 'load-path "~/.emacs.d/font-lock+")
+;; (load "font-lock+.el")
+;; (require 'font-lock+)
+
+;; auto-complete
+(setq ac-auto-start t)
+(setq ac-use-menu-map t)
+
+;; Set variables
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -22,19 +40,15 @@
  ;; If there is more than one, they won't work right.
  '(blink-matching-paren t)
  '(column-number-mode 1)
- '(custom-safe-themes
-   '("d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" default))
- '(display-fill-column-indicator-column 80)
+ '(display-fill-column-indicator-column 120)
  '(frame-background-mode nil)
  '(highlight-indent-guides-method 'bitmap)
  '(ido-mode 'both nil (ido))
  '(imenu-auto-rescan t)
- '(iswitchb-buffer-ignore '("^ " "*Buffer"))
  '(iswitchb-mode nil)
  '(iswitchb-use-frame-buffer-list nil)
- '(org-agenda-files '("~/tmp/2.org" "/home/slams/tmp/outline.txt"))
  '(package-selected-packages
-   '(git-modes vterm dash copilot editorconfig quelpa-use-package quelpa helm-gtags flyspell-correct-helm multiple-cursors find-file-in-project projectile highlight-indent-guides iedit company elpy go-mode windresize flymake-yamllint python-black flymd flycheck-yamllint flymake-go flymake-go-staticcheck flymake-golangci flymake-gradle flymake-grammarly flymake-json flymake-python-pyflakes flymake-shell flycheck flycheck-aspell flycheck-color-mode-line dockerfile-mode terraform-doc terraform-mode yaml-mode use-package markdown-mode jedi groovy-mode anaconda-mode json-mode magit gitignore-mode browse-at-remote git-ps1-mode gitconfig-mode ibuffer-git rpm-spec-mode emojify tangotango-theme solarized-theme edit-server))
+   '(vertico-posframe corfu icomplete-vertical orderless embark vertico ghub treemacs treemacs-all-the-icons treemacs-magit treemacs-nerd-icons treemacs-projectile all-the-icons doom-themes doom-modeline git-modes vterm dash copilot editorconfig quelpa-use-package quelpa helm-gtags flyspell-correct-helm multiple-cursors find-file-in-project projectile highlight-indent-guides iedit company elpy go-mode windresize flymake-yamllint python-black flymd flycheck-yamllint flymake-go flymake-go-staticcheck flymake-golangci flymake-gradle flymake-grammarly flymake-json flymake-python-pyflakes flymake-shell flycheck flycheck-aspell flycheck-color-mode-line dockerfile-mode terraform-doc terraform-mode yaml-mode use-package markdown-mode jedi groovy-mode anaconda-mode json-mode magit gitignore-mode browse-at-remote git-ps1-mode gitconfig-mode rpm-spec-mode emojify edit-server))
  '(show-paren-mode t)
  '(show-trailing-whitespace t)
  '(tool-bar-mode nil)
@@ -42,48 +56,125 @@
  '(which-function-mode 1)
  '(whitespace-style '(face trailing tabs spaces)))
 
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :extend nil :stipple nil :background "#2e3436" :foreground "#eeeeec" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 115 :width normal :foundry "ADBO" :family "Source Code Pro"))))
- '(ido-only-match ((t (:foreground "SpringGreen3")))))
+;; Configure projectile
+(projectile-mode +1)
+(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 
-(if (display-graphic-p)
-     '(server-mode t))
-
-;; --
-
-;; grammalry
+;; Configure Flymake Grammarly
 (require 'flymake-grammarly)
+(add-hook 'text-mode-hook 'flymake-grammarly-load)
+(add-hook 'latex-mode-hook 'flymake-grammarly-load)
+(add-hook 'org-mode-hook 'flymake-grammarly-load)
+(add-hook 'markdown-mode-hook 'flymake-grammarly-load)
 
-;; auto-complete
-(setq ac-auto-start t)
-(setq ac-use-menu-map t)
 
 ;;; ibuffer
-(global-set-key (kbd "C-x C-b") 'ibuffer)
-(autoload 'ibuffer "ibuffer" "List buffers." t)
-(setq ibuffer-saved-filter-groups
-      (quote (("default"
-	       ("dired" (mode . dired-mode))
-	       ("perl" (mode . cperl-mode))
-	       ("emacs" (or
-			 (name . "^\\*scratch\\*$")
-			 (name . "^\\*Messages\\*$")))
-	       ("gnus" (or
-			(mode . message-mode)
-			(mode . bbdb-mode)
-			(mode . mail-mode)
-			(mode . gnus-group-mode)
-			(mode . gnus-summary-mode)
-			(mode . gnus-article-mode)
-			(name . "^\\.bbdb$")
-			(name . "^\\.newsrc-dribble")))))))
+(use-package ibuffer
+  :bind ("C-x C-b" . ibuffer)
+  :custom
+  (ibuffer-default-display-maybe-show-predicates t)
+  (ibuffer-expert t)
+  (ibuffer-saved-filter-groups
+   '(("default"
+      ("Magit"
+       (or
+        (mode . magit-status-mode)
+        (mode . magit-log-mode)
+        (name . "\\*magit")
+        (name . "magit-")
+        (name . "git-monitor")))
+      ("Commands"
+       (or
+        (mode . shell-mode)
+        (mode . ansi-mode)
+        (mode . eshell-mode)
+        (mode . term-mode)
+        (mode . compilation-mode)))
+      ("Rust"
+       (or
+        (mode . rust-mode)
+        (mode . cargo-mode)
+        (name . "\\*Cargo")
+        (name . "^\\*rls\\(::stderr\\)?\\*")
+        (name . "eglot")))
+      ("C++"
+       (or
+        (mode . c-mode)
+        (mode . c++-mode)))
+      ("Lisp"
+       (mode . emacs-lisp-mode))
+      ("Dired"
+       (mode . dired-mode))
+      ("Gnus"
+       (or
+        (mode . message-mode)
+        (mode . mail-mode)
+        (mode . gnus-group-mode)
+        (mode . gnus-summary-mode)
+        (mode . gnus-article-mode)
+        (name . "^\\.newsrc-dribble")
+        (name . "^\\*\\(sent\\|unsent\\|fetch\\)")
+        (name . "^ \\*\\(nnimap\\|nntp\\|nnmail\\|gnus\\|server\\|mm\\*\\)")
+        (name . "\\(Original Article\\|canonical address\\|extract address\\)")))
+      ("Org"
+       (or
+        (name . "^\\*Calendar\\*$")
+        (name . "^\\*Org Agenda")
+        (name . "^ \\*Agenda")
+        (name . "^diary$")
+        (mode . org-mode)))
+      ("Perl"
+       (or
+        (mode . cperl-mode)
+        (mode . perl-mode)))
+      ("Python"
+       (mode . python-mode))
+      ("Terraform"
+       (or
+        (mode . terraform-mode)
+	(name . "^\\.tf")
+	(name . "^\\.tfvars")))
+      ("Go"
+       (or
+        (mode . go-mode)
+        (name . "^\\.go")))
+      ("Groovy"
+       (or
+        (mode . groovy-mode)
+        (name . "^\\.groovy")))
+      ("Yaml"
+       (or
+        (mode . yaml-mode)
+        (name . "^\\.yaml")
+        (name . "^\\.yml")))
+      ("JSON"
+       (or
+        (mode . json-mode)
+        (name . "^\\.json")))
+      ("Markdown"
+       (or
+        (mode . markdown-mode)
+        (name . "^\\.md")))
+      ("Emacs"
+       (or
+        (name . "^\\*scratch\\*$")
+        (name . "^\\*Messages\\*$")
+        (name . "^\\*\\(Customize\\|Help\\)")
+        (name . "\\*\\(Echo\\|Minibuf\\)"))))))
+  (ibuffer-show-empty-filter-groups nil)
+  (ibuffer-shrink-to-minimum-size t t)
+  (ibuffer-use-other-window t)
+  :init
+  (add-hook 'ibuffer-mode-hook
+            #'(lambda ()
+                (ibuffer-switch-to-saved-filter-groups "default"))))
+
+(use-package ibuffer-git
+  :after ibuffer
+  :bind (:map ibuffer-mode-map
+              ("M-g" . ibuffer-git-filter-by-name)))
 
 ;; ;;; theme
-(load-theme 'tango-dark t)
 (setq inhibit-startup-message t)
 (setq display-time-day-and-date t)
 (display-time-mode t)
@@ -123,13 +214,12 @@
 (add-hook 'terraform-mode-hook #'outline-minor-mode)
 
 ;; enable line number mode in gutter
-(add-hook 'yaml-mode-hook 'display-line-numbers-mode)
+;; (add-hook 'yaml-mode-hook 'display-line-numbers-mode)
 ;; (add-hook 'python-mode-hook 'display-line-numbers-mode)
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
 
 ;; fill column indicator column
-;; (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
-(add-hook 'markdown-mode-hook 'display-fill-column-indicator-mode)
-;; (add-hook 'python-mode-hook 'display-fill-column-indicator-mode)
+(add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
 
 ;; ---
 
@@ -242,15 +332,240 @@
     (eval-buffer)
     (quelpa-self-upgrade)))
 
-(require 'use-package)
-(require 'quelpa-use-package)
 (use-package copilot
   :quelpa (copilot :fetcher github
                    :repo "zerolfx/copilot.el"
                    :branch "main"
-                   :files ("dist" "*.el")))
+                   :files ("dist" "*.el")
+                   :config (setq copilot-idle-delay 1)))
 ;; you can utilize :map :hook and :config to customize copilot
-(add-hook 'prog-mode-hook 'copilot-mode)
+;; (add-hook 'prog-mode-hook 'copilot-mode)
 (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
 (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+
+;; Configure doom-modeline
+(use-package doom-modeline
+  :init (setq doom-modeline-support-imenu t)
+  :config (setq doom-modeline-icon t
+                doom-modeline-major-mode-icon t
+                doom-modeline-major-mode-color-icon t
+                doom-modeline-buffer-state-icon t
+                doom-modeline-buffer-modification-icon t
+                doom-modeline-indent-info t
+                doom-modeline-env-enable-python t
+                doom-modeline-github t
+                doom-modeline-modal t
+                doom-modeline-modal-icon t)
+  :ensure t
+  :hook (after-init . doom-modeline-mode))
+(add-hook 'after-init-hook #'doom-modeline-mode)
+
+;; Configure doom-themes
+(use-package doom-themes
+  :ensure t
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (load-theme 'doom-material t)
+
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+  ;; Enable custom neotree theme (all-the-icons must be installed!)
+  (doom-themes-neotree-config)
+  ;; or for treemacs users
+  (setq doom-themes-treemacs-theme "doom-material")
+  (doom-themes-treemacs-config)
+  (doom-themes-org-config))
+
+;; customize theme
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:height 100))))
+ '(ansi-color-bright-black ((t (:background "#222D32" :foreground "dark gray"))))
+ '(copilot-overlay-face ((t (:foreground "pale violet red"))))
+ '(custom-comment ((t (:background "#171F24" :foreground "#EEFFFF"))))
+ '(custom-comment-tag ((t (:foreground "dark gray"))))
+ '(font-lock-comment-delimiter-face ((t (:inherit font-lock-comment-face :foreground "light gray"))))
+ '(font-lock-comment-face ((t (:foreground "gray"))))
+ '(ido-only-match ((t (:foreground "SpringGreen3"))))
+ '(line-number ((t (:foreground "gray"))))
+ '(line-number-current-line ((t (:foreground "white"))))
+ '(mode-line-inactive ((t (:background "#304047" :foreground "#70828A" :box nil))))
+ '(org-headline-done ((t (:foreground "gray"))))
+ '(org-hide ((t (:foreground "dim gray"))))
+ '(show-paren-match ((t (:background "dim gray" :foreground "cyan" :weight ultra-bold)))))
+
+(use-package treemacs
+  :ensure t
+  :defer t
+  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  :config
+  (progn
+    (setq treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
+          treemacs-directory-name-transformer      #'identity
+          treemacs-display-in-side-window          t)
+
+    ;; The default width and height of the icons is 22 pixels. If you are
+    ;; using a Hi-DPI display, uncomment this to double the icon size.
+    ;;(treemacs-resize-icons 44)
+
+    (treemacs-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (treemacs-fringe-indicator-mode 'always)
+    (when treemacs-python-executable
+      (treemacs-git-commit-diff-mode t))
+
+    (pcase (cons (not (null (executable-find "git")))
+                 (not (null treemacs-python-executable)))
+      (`(t . t)
+       (treemacs-git-mode 'deferred))
+      (`(t . _)
+       (treemacs-git-mode 'simple)))
+
+    (treemacs-hide-gitignored-files-mode nil))
+  :bind
+  (:map global-map
+        ("M-0"       . treemacs-select-window)
+        ("C-x t 1"   . treemacs-delete-other-windows)
+        ("C-x t t"   . treemacs)
+        ("C-x t d"   . treemacs-select-directory)
+        ("C-x t B"   . treemacs-bookmark)
+        ("C-x t C-t" . treemacs-find-file)
+        ("C-x t M-t" . treemacs-find-tag)))
+
+(use-package treemacs-projectile
+  :after (treemacs projectile)
+  :ensure t)
+
+(use-package treemacs-icons-dired
+  :hook (dired-mode . treemacs-icons-dired-enable-once)
+  :ensure t)
+
+(use-package treemacs-magit
+  :after (treemacs magit)
+  :ensure t)
+
+(use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
+  :after (treemacs persp-mode) ;;or perspective vs. persp-mode
+  :ensure t
+  :config (treemacs-set-scope-type 'Perspectives))
+
+;; Enable vertico
+(use-package vertico
+  :init
+  (vertico-mode)
+
+  ;; Different scroll margin
+  ;; (setq vertico-scroll-margin 0)
+
+  ;; Show more candidates
+  (setq vertico-count 20)
+
+  ;; Grow and shrink the Vertico minibuffer
+  ;; (setq vertico-resize t)
+
+  ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
+  (setq vertico-cycle t))
+
+;; Persist history over Emacs restarts. Vertico sorts by history position.
+(use-package savehist
+  :init
+  (savehist-mode))
+
+;; A few more useful configurations...
+(use-package emacs
+  :init
+  ;; Add prompt indicator to `completing-read-multiple'.
+  ;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
+  (defun crm-indicator (args)
+    (cons (format "[CRM%s] %s"
+                  (replace-regexp-in-string
+                   "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" ""
+                   crm-separator)
+                  (car args))
+          (cdr args)))
+  (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
+
+  ;; Do not allow the cursor in the minibuffer prompt
+  (setq minibuffer-prompt-properties
+        '(read-only t cursor-intangible t face minibuffer-prompt))
+  (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+  ;; TAB cycle if there are only few candidates
+  (setq completion-cycle-threshold 3)
+  (setq tab-always-indent 'complete)
+
+  ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
+  ;; Vertico commands are hidden in normal buffers.
+  ;; (setq read-extended-command-predicate
+  ;;       #'command-completion-default-include-p)
+
+  ;; Enable recursive minibuffers
+  (setq enable-recursive-minibuffers t))
+
+(require 'vertico-posframe)
+(vertico-posframe-mode 1)
+
+(use-package embark
+  :ensure t
+  :bind
+  (("C-." . embark-act)
+   ("M-." . embark-dwim)
+   ("C-h B" . embark-bindings))
+  :init
+  ;; TODO(slams): remove this later
+  (setq prefix-help-command #'embark-prefix-help-command)
+  (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+  :config
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+
+(use-package orderless
+  :ensure t
+  :init (icomplete-mode)
+  :custom
+  (completion-styles '(orderless)))
+;;  (completion-category-overrides '((file (styles basic partial-completion))))
+
+;; Use Dabbrev with Corfu!
+(use-package dabbrev
+  ;; Swap M-/ and C-M-/
+  :bind (("M-/" . dabbrev-expand)
+         ("C-M-/" . dabbrev-completion)))
+
+;; (use-package corfu
+;;   ;; Optional customizations
+;;   :custom
+;;   (corfu-cycle t)
+;;   (corfu-auto t)
+;;   (corfu-auto-prefix 2)
+;;   (corfu-auto-prefix 0.1)
+;;   (corfu-sepator ESC)
+;;   (corfu-quit-no-match 'separator)
+;;   :bind (:map corfu-map
+;;       ;; ("M-SPC" . (lambda () (interactive)
+;;       ;;   	   (insert #x268b)))
+;;       ;; ("RET" . nil)
+;;       ("TAB" . corfu-next)
+;;       ([tab] . corfu-next)
+;;       ("S-TAB" . corfu-previous)
+;;       ([backtab] . corfu-previous))
+
+;;   :hook ((prog-mode . corfu-mode)
+;;          (python-mode . corfu-mode)
+;;          (shell-mode . corfu-mode)
+;;          (eshell-mode . corfu-mode))
+;;   ;; Recommended: Enable Corfu globally.
+;;   ;; This is recommended since Dabbrev can be used globally (M-/).
+;;   ;; See also `corfu-exclude-modes'.
+;;   :init
+;;   (global-corfu-mode)
+;;   (corfu-history-mode))
 

@@ -73,7 +73,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:height 100 :foundry "ADBO" :family "Source Code Pro"))))
+ '(default ((t (:height 125 :foundry "ADBO" :family "Source Code Pro"))))
  '(ansi-color-bright-black ((t (:background "#222D32" :foreground "dark gray"))))
  '(completions-common-part ((t (:background "slate blue" :foreground "white smoke"))))
  '(copilot-overlay-face ((t (:foreground "pale violet red"))))
@@ -92,6 +92,11 @@
  '(show-paren-match ((t (:background "dim gray" :foreground "cyan" :weight ultra-bold))))
  '(vertical-border ((t (:background "dark slate gray" :foreground "dark slate gray")))))
 
+;; Misc
+(use-package all-the-icons
+  :if (display-graphic-p)
+  :ensure t)
+
 ;; Developer configurations
 (use-package prog-mode
   :config
@@ -101,7 +106,6 @@
   (add-hook 'prog-mode-hook 'display-line-numbers-mode)
   (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
   (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
-
 
 (use-package text-mode
   :config

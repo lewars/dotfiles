@@ -119,7 +119,7 @@
          ("M-S" . highlight-symbol-remove-all)))
 
 (use-package multiple-cursors
-  ensure: t
+  :ensure t
   :bind (("C->" . mc/mark-next-like-this)
          ("C-<" . mc/mark-previous-like-this)
 	 ("C-c C-<" . mc/mark-all-like-this)
@@ -154,7 +154,7 @@
 (use-package python-mode
   :ensure t)
 (use-package groovy-mode
-  ensure: t
+  :ensure t
   :init 
   (add-to-list 'auto-mode-alist '("\.groovy$" . groovy-mode))
   (add-to-list 'auto-mode-alist '("\.gy$" . groovy-mode))
@@ -220,7 +220,7 @@
                    :files ("dist" "*.el")
                    :config (setq copilot-idle-delay 1))
   :ensure t
-  :hook (prog-mode . copilot-mode)
+;;  :hook (prog-mode . copilot-mode)
   :bind (("C-c M-f" . copilot-complete)
          :map copilot-completion-map
          ("C-g" . 'copilot-clear-overlay)

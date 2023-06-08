@@ -1,6 +1,6 @@
 ;-*-emacs-lisp-*-
-;;;; My Emacs configuration
-;;;; Author: Alistair Y. Lewars
+;; My Emacs configuration
+;; Author: Alistair Y. Lewars
 
 (when (string-equal system-type "darwin")
   ;; TODO(lewars): This is needed to overcome a bug with Emacs <29,
@@ -11,36 +11,50 @@
   (setq ispell-program-name "aspell"))
 
 (require 'package)
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize)
 
-
-;; Install use-package if it's not already installed
 (require 'use-package)
 (require 'quelpa-use-package)
 
-;; Disable hard tabs
+;; Misc configs
 (setq-default indent-tabs-mode nil)
+
 (defun my-c-mode-hook ()
   (setq indent-tabs-mode nil))
+
 (add-hook 'c-mode-hook 'my-c-mode-hook)
-
-;; Disable scrollbar and menubar but start server
 (set-scroll-bar-mode nil)
+(tool-bar-mode -1)
 (menu-bar-mode -1)
+
 (if (display-graphic-p)
-  '(server-mode t))
+    '(server-mode t))
 
-;; TODO(alewars): remove this
-;; (add-to-list 'load-path "~/.emacs.d/font-lock+")
-;; (load "font-lock+.el")
-;; (require 'font-lock+)
+(defun text-mode-init ()
+  (visual-line-mode 1)
+  (toggle-word-wrap 1))
+(add-hook 'text-mode-hook 'text-mode-init)
+(add-hook 'org-mode-hook 'text-mode-init)
 
-;; auto-complete
-(setq ac-auto-start t)
-(setq ac-use-menu-map t)
+(global-set-key "\C-cw" 'whitespace-mode)
+(when (fboundp 'windmove-default-keybindings)
+      (windmove-default-keybindings))
+(global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
+(global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
+(global-set-key (kbd "S-C-<down>") 'shrink-window)
+(global-set-key (kbd "S-C-<up>") 'enlarge-window)
+(global-set-key (read-kbd-macro "C-x f") 'find-file-at-point)
 
-;; Set variables
+(setq inhibit-startup-screen t)
+(setq display-time-day-and-date t)
+(display-time-mode t)
+(setq fill-column 79)
+(setq auto-fill-mode t)
+
+(setq mouse-wheel-scroll-amount '(0.01))
+(fido-vertical-mode t)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -52,39 +66,162 @@
  '(frame-background-mode nil)
  '(highlight-indent-guides-method 'bitmap)
  '(imenu-auto-rescan t)
- '(iswitchb-mode nil)
- '(iswitchb-use-frame-buffer-list nil)
  '(package-selected-packages
-   '(dot-mode treemacs-icons-dired treemacs-persp embark-consult consult vertico-posframe corfu icomplete-vertical orderless embark vertico ghub treemacs treemacs-all-the-icons treemacs-magit treemacs-nerd-icons treemacs-projectile all-the-icons doom-themes doom-modeline git-modes vterm dash copilot editorconfig quelpa-use-package quelpa multiple-cursors find-file-in-project projectile highlight-indent-guides iedit company elpy go-mode windresize flymake-yamllint python-black flymd flycheck-yamllint flymake-go flymake-go-staticcheck flymake-golangci flymake-gradle flymake-grammarly flymake-json flymake-python-pyflakes flymake-shell flycheck flycheck-aspell flycheck-color-mode-line dockerfile-mode terraform-doc terraform-mode yaml-mode use-package markdown-mode jedi groovy-mode anaconda-mode json-mode magit gitignore-mode browse-at-remote git-ps1-mode gitconfig-mode rpm-spec-mode emojify edit-server))
- '(show-paren-mode t)
- '(show-trailing-whitespace t)
- '(tool-bar-mode nil)
- '(warning-suppress-types '((comp)))
- '(which-function-mode 1)
- '(whitespace-style '(face trailing tabs spaces)))
+   '(nerd-icons python-mode org-projectile groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-grammarly flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult elpy doom-themes doom-modeline dockerfile-mode corfu copilot)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:height 100 :foundry "ADBO" :family "Source Code Pro"))))
+ '(ansi-color-bright-black ((t (:background "#222D32" :foreground "dark gray"))))
+ '(completions-common-part ((t (:background "slate blue" :foreground "white smoke"))))
+ '(copilot-overlay-face ((t (:foreground "pale violet red"))))
+ '(custom-comment ((t (:background "#171F24" :foreground "#EEFFFF"))))
+ '(custom-comment-tag ((t (:foreground "dark gray"))))
+ '(font-lock-comment-delimiter-face ((t (:inherit font-lock-comment-face :foreground "light gray"))))
+ '(font-lock-comment-face ((t (:foreground "gray"))))
+ '(ido-only-match ((t (:foreground "SpringGreen3"))))
+ '(line-number ((t (:foreground "gray"))))
+ '(line-number-current-line ((t (:foreground "white"))))
+ '(mode-line-inactive ((t (:background "#304047" :foreground "#70828A" :box nil))))
+ '(org-headline-done ((t (:foreground "gray"))))
+ '(org-hide ((t (:foreground "dim gray"))))
+ '(region ((t (:extend t :background "IndianRed4"))))
+ '(shadow ((t (:foreground "rosy brown"))))
+ '(show-paren-match ((t (:background "dim gray" :foreground "cyan" :weight ultra-bold))))
+ '(vertical-border ((t (:background "dark slate gray" :foreground "dark slate gray")))))
 
-;; Configure projectile
-(projectile-mode +1)
-(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+;; Developer configurations
+(use-package prog-mode
+  :config
+  (add-hook 'prog-mode-hook 'outline-minor-mode)
+  (add-hook 'prog-mode-hook 'hs-minor-mode)
+  (add-hook 'prog-mode-hook #'hl-line-mode)
+  (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+  (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
+  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
 
-;; Configure Flymake Grammarly
-;; (require 'flymake-grammarly)
-;; (add-hook 'text-mode-hook 'flymake-grammarly-load)
-;; (add-hook 'latex-mode-hook 'flymake-grammarly-load)
-;; (add-hook 'org-mode-hook 'flymake-grammarly-load)
-;; (add-hook 'markdown-mode-hook 'flymake-grammarly-load)
 
-;; IDO
-;; (use-package ido
-  ;; :diminish ido-mode
-  ;; :bind ("C-x C-b" . 'ibuffer)
-;;  :init
-  ;; (setq ido-enable-flex-matching t)
-  ;; (setq ido-use-filename-at-point 'guess)
-  ;; (setq ido-auto-merge-work-directories-length -1)
-  ;; (setq ido-create-new-buffer 'always)
-  ;; (setq ido-file-extensions-order '(".py" ".tf" ".yml" ".yaml" ".json" ".groovy" ".gv" ".emacs" ".org" ".txt" ))
-;;  (setq ido-use-virtual-buffers t))
+(use-package text-mode
+  :config
+  (add-hook 'text-mode-hook #'hl-line-mode))
+
+(use-package highlight-symbol
+  :config
+  (setf highlight-symbol-idle-delay 0)
+  (add-hook 'prog-mode-hook 'highlight-symbol-mode)
+  :bind (("M-s" . highlight-symbol-at-point)
+         ("M-S" . highlight-symbol-remove-all)))
+
+(use-package multiple-cursors
+  :bind (("C->" . mc/mark-next-like-this)
+         ("C-<" . mc/mark-previous-like-this)
+	 ("C-c C-<" . mc/mark-all-like-this)
+         ("C-c C-/" . mc/mark-all-dwim)))
+
+(use-package imenu-list
+  :ensure t
+  :bind ("C-." . imenu-list-minor-mode)
+  :config
+  (setq imenu-list-focus-after-activation t))    
+
+(use-package imenu-anywhere
+  :ensure t
+  :bind (("C-c C-g" . ido-imenu-anywhere)))
+
+(use-package bicycle
+  :after outline
+  :bind (:map outline-minor-mode-map
+              ([C-tab] . bicycle-cycle)
+              ([S-tab] . bicycle-cycle-global)))
+
+(use-package projectile
+  :ensure t
+  :init
+  (projectile-mode +1)
+  :bind (:map projectile-mode-map
+              ("s-p" . projectile-command-map)
+              ("C-c p" . projectile-command-map)))
+
+;; Language confguration
+(add-to-list `auto-mode-alist '("\\.svg\\'" . nxml-mode))
+(use-package python-mode
+  :ensure t)
+(use-package groovy-mode
+  :init 
+  (add-to-list 'auto-mode-alist '("\.groovy$" . groovy-mode))
+  (add-to-list 'auto-mode-alist '("\.gy$" . groovy-mode))
+  :config
+  (setf (alist-get "Jenkinsfile$" auto-mode-alist) 'groovy-mode))
+
+(use-package yaml-mode
+  :ensure t
+  :config
+  (defun frmt-yaml ()
+    "Reformat YAML file with yq."
+    (when (eq major-mode 'yaml-mode)
+      (shell-command-to-string (format "yq e -P -i -v %s" buffer-file-name))
+      (auto-revert-mode)))
+  (add-hook 'after-save-hook #'frmt-yaml)
+  (add-hook 'yaml-mode-hook 'highlight-indent-guides-mode)
+  (add-hook 'yaml-mode-hook 'flymake-yamllint-setup))
+
+(use-package terraform-mode
+  :ensure t
+  :config
+  (defun frmt-hcl ()
+    "Reformat HCL file with terraform fmt."
+    (when (eq major-mode 'terraform-mode)
+      (shell-command-to-string (format "terraform fmt %s" buffer-file-name))
+      (auto-revert-mode)))
+  (add-hook 'after-save-hook #'frmt-hcl)
+  (add-hook 'terraform-mode-hook #'outline-minor-mode))
+
+(use-package markdown-mode
+  :ensure t
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init (setq markdown-command "multimarkdown"))
+
+;; Linters
+(use-package python-black
+  :demand t
+  :after python
+  :hook (python-mode . python-black-on-save-mode-enable-dwim))
+
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode)
+  :config
+  (add-hook 'after-init-hook #'global-flycheck-mode))
+
+(setq-default flycheck-disabled-checkers '(emacs-lisp))
+
+(use-package flymake-grammarly
+  :config
+  (add-hook 'text-mode-hook 'flymake-grammarly-load)
+  (add-hook 'markdown-mode-hook 'flymake-grammarly-load))
+
+;; Productivity
+(use-package copilot
+  :quelpa (copilot :fetcher github
+                   :repo "zerolfx/copilot.el"
+                   :branch "main"
+                   :files ("dist" "*.el")
+                   :config (setq copilot-idle-delay 1))
+  :ensure t
+  :hook (prog-mode . copilot-mode)
+  :bind (("C-c M-f" . copilot-complete)
+         :map copilot-completion-map
+         ("C-g" . 'copilot-clear-overlay)
+         ("M-p" . 'copilot-previous-completion)
+         ("M-n" . 'copilot-next-completion)
+         ("<tab>" . 'copilot-accept-completion)
+         ("M-f" . 'copilot-accept-completion-by-word)
+         ("M-<return>" . 'copilot-accept-completion-by-line)))
 
 ;; ibuffer
 (use-package ibuffer
@@ -192,230 +329,23 @@
   :bind (:map ibuffer-mode-map
               ("M-g" . ibuffer-git-filter-by-name)))
 
-;; ;;; theme
-(setq inhibit-startup-message t)
-(setq display-time-day-and-date t)
-(display-time-mode t)
-(setq fill-column 79)
-(setq auto-fill-mode t)
-
-;;; keybindings
-(global-set-key "\C-cw" 'whitespace-mode)
-(when (fboundp 'windmove-default-keybindings)
-      (windmove-default-keybindings))
-(global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
-(global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
-(global-set-key (kbd "S-C-<down>") 'shrink-window)
-(global-set-key (kbd "S-C-<up>") 'enlarge-window)
-
-;; mighty mouse scroll
-(setq mouse-wheel-scroll-amount '(0.01))
-
-;; set key binding for ffap (find file at point)
-(global-set-key (read-kbd-macro "C-x f") 'find-file-at-point)
-
-;; reformat yaml on save
-(defun frmt-yaml ()
-  "Reformat YAML file with yq."
-  (when (eq major-mode 'yaml-mode)
-    (shell-command-to-string (format "yq e -P -i -v %s" buffer-file-name))
-    (auto-revert-mode)))
-(add-hook 'after-save-hook #'frmt-yaml)
-
-;; reformat hcl on save
-(defun frmt-hcl ()
-  "Reformat HCL file with terraform fmt."
-  (when (eq major-mode 'terraform-mode)
-    (shell-command-to-string (format "terraform fmt %s" buffer-file-name))
-    (auto-revert-mode)))
-(add-hook 'after-save-hook #'frmt-hcl)
-(add-hook 'terraform-mode-hook #'outline-minor-mode)
-
-;; enable line number mode in gutter
-;; (add-hook 'yaml-mode-hook 'display-line-numbers-mode)
-;; (add-hook 'python-mode-hook 'display-line-numbers-mode)
-(add-hook 'prog-mode-hook 'display-line-numbers-mode)
-
-;; fill column indicator column
-(add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
-
-;;; eshell
-(setq eshell-prompt-function
-      (lambda ()
-	(concat (if (= (user-uid) 0) " #" " $") "> ")))
-
-;;; org mode
-(require 'org)
-(add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
-(setq org-todo-keywords
-      '((sequence "TODO" "IN-PROGRESS" "DELEGATED" "WAITING" "|" "DONE" "CLOSED")))
-(setq org-log-done 'time)
-(setq org-log-done 'note)
-(global-set-key (kbd "C-c l") #'org-store-link)
-(global-set-key (kbd "C-c a") #'org-agenda)
-(global-set-key (kbd "C-c c") #'org-capture)
-
-;;; highlight indent guide
-(add-hook 'yaml-mode-hook 'highlight-indent-guides-mode)
-;; (add-hook 'python-mode-hook 'highlight-indent-guides-mode)
+(use-package org
+  :mode (("\\.org$" . org-mode)))
 
 
-;;; SVG
-(add-to-list `auto-mode-alist '("\\.svg\\'" . xml-mode))
-
-;;; Python
-;; (add-hook 'python-mode-hook 'jedi:setup)
-;; (setq jedi:complete-on-dot t)
-;; (defun jedi:get-in-function-call-when-idle () (nil))
-(define-key global-map (kbd "C-c o") 'iedit-mode)
-;; (elpy-enable)
-
-;;; Groovy
-(autoload 'groovy-mode "groovy-mode" "Major mode for editing Groovy code." t)
-(add-to-list 'auto-mode-alist '("\.groovy$" . groovy-mode))
-(add-to-list 'interpreter-mode-alist '("groovy" . groovy-mode))
-(add-hook 'groovy-mode-hook
-          '(lambda ()
-             (require 'groovy-electric)
-             (groovy-electric-mode)))
-
-;;; Markdown
-(use-package markdown-mode
-  :ensure t
-  :commands (markdown-mode gfm-mode)
-  :mode (("README\\.md\\'" . gfm-mode)
-         ("\\.md\\'" . markdown-mode)
-         ("\\.markdown\\'" . markdown-mode))
-  :init (setq markdown-command "multimarkdown"))
-(add-hook 'markdown-mode-hook 'flymake-grammarly-load)
-
-;; git-modes
-(use-package git-modes
-  :ensure t
-  :commands (gitconfig-mode)
-  :mode ((".gitconfig\\'" . gitconfig-mode)))
-
-;;; web-mode
-;;(require 'web-mode)
-
-;; (setq web-mode-engines-alist '(("django"    . "\\.html\\'")))
-;; (setq web-mode-enable-current-column-highlight t)
-;; (setq web-mode-enable-auto-closing t)
-;; (setq web-mode-enable-auto-quoting t)
-;; (setq web-mode-enable-auto-opening t)
-;; (setq web-mode-enable-auto-pairing t)
-;; (setq web-mode-enable-auto-indentation t)
-;; (setq web-mode-enable-auto-quoting t)
-
-;; (add-to-list 'auto-mode-alist '("\\.html\\'" . web-mode))
-;; (add-to-list 'auto-mode-alist '("\\.css\\'" . web-mode))
-;; (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
-;; (add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
-;; (add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))
-;; (add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
-;; (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
-;; (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
-;; (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
-;; (setq web-mode-markup-indent-offset 2)
-;; (setq web-mode-css-indent-offset 2)
-;; (set-face-attribute 'web-mode-html-tag-face nil :foreground "#6dd6ff")
-;; (set-face-attribute 'web-mode-html-attr-name-face nil :foreground "#e9b96d")
-;; (set-face-attribute 'web-mode-html-attr-value-face nil :foreground "#a8f76a")
-;; (add-hook 'web-mode-hook (lambda () (add-to-list 'ac-sources 'ac-source-css-property)))
-
-;;; black formatter
-(use-package python-black
-  :demand t
-  :after python
-  :hook (python-mode . python-black-on-save-mode-enable-dwim))
-
-(require 'multiple-cursors)
-(global-set-key (kbd "C->") 'mc/mark-next-like-this)
-(global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
-(global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
-(global-set-key (kbd "C-C C-/") 'mc/mark-all-dwim)
-
-(unless (package-installed-p 'quelpa)
-  (with-temp-buffer
-    (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
-    (eval-buffer)
-    (quelpa-self-upgrade)))
-
-(use-package copilot
-  :quelpa (copilot :fetcher github
-                   :repo "zerolfx/copilot.el"
-                   :branch "main"
-                   :files ("dist" "*.el")
-                   :config (setq copilot-idle-delay 1)))
-;; you can utilize :map :hook and :config to customize copilot
-;; (add-hook 'prog-mode-hook 'copilot-mode)
-(define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
-(define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
-(define-key copilot-completion-map (kbd "<escape>") 'copilot-clear-overlay)
-(define-key copilot-completion-map (kbd "ESC") 'copilot-clear-overlay)
-(define-key copilot-completion-map (kbd "C-g") 'copilot-clear-overlay)
-;; (global-set-key (kbd "M-\\") 'copilot-complete)
-;; (define-key copilot-completion-map (kbd "C-n") 'copilot-next-completion)
-;; (define-key copilot-completion-map (kbd "C-p") 'copilot-previous-completion)
-
-;; Configure doom-modeline
-(use-package doom-modeline
-  :init (setq doom-modeline-support-imenu t)
-  :config (setq doom-modeline-icon t
-                doom-modeline-major-mode-icon t
-                doom-modeline-major-mode-color-icon t
-                doom-modeline-buffer-state-icon t
-                doom-modeline-buffer-modification-icon t
-                doom-modeline-indent-info t
-                doom-modeline-env-enable-python t
-                doom-modeline-github t
-                doom-modeline-modal t
-                doom-modeline-modal-icon t)
-  :ensure t
-  :hook (after-init . doom-modeline-mode))
-(add-hook 'after-init-hook #'doom-modeline-mode)
-
-;; Configure doom-themes
-(use-package doom-themes
-  :ensure t
+(use-package org-projectile
+  :bind (("C-c n p" . org-projectile-project-todo-completing-read)
+         ("C-c l" . org-store-link)
+         ("C-c a" . org-agenda)
+         ("C-c c" . org-capture))
   :config
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-material t)
+  (progn
+    (setq org-projectile-projects-file (concat (getenv "HOME") "/git/proj.orgs"))
+    (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
+    (push (org-projectile-project-todo-entry) org-capture-templates))
+  :ensure t)
 
-  ;; Enable flashing mode-line on errors
-  (doom-themes-visual-bell-config)
-  ;; Enable custom neotree theme (all-the-icons must be installed!)
-  (doom-themes-neotree-config)
-  ;; or for treemacs users
-  (setq doom-themes-treemacs-theme "doom-atom")
-  (doom-themes-treemacs-config)
-  (doom-themes-org-config))
-
-;; customize theme
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:height 125 :foundry "ADBO" :family "Source Code Pro"))))
- '(ansi-color-bright-black ((t (:background "#222D32" :foreground "dark gray"))))
- '(copilot-overlay-face ((t (:foreground "pale violet red"))))
- '(custom-comment ((t (:background "#171F24" :foreground "#EEFFFF"))))
- '(custom-comment-tag ((t (:foreground "dark gray"))))
- '(font-lock-comment-delimiter-face ((t (:inherit font-lock-comment-face :foreground "light gray"))))
- '(font-lock-comment-face ((t (:foreground "gray"))))
- '(ido-only-match ((t (:foreground "SpringGreen3"))))
- '(line-number ((t (:foreground "gray"))))
- '(line-number-current-line ((t (:foreground "white"))))
- '(mode-line-inactive ((t (:background "#304047" :foreground "#70828A" :box nil))))
- '(org-headline-done ((t (:foreground "gray"))))
- '(org-hide ((t (:foreground "dim gray"))))
- '(region ((t (:extend t :background "IndianRed4"))))
- '(shadow ((t (:foreground "rosy brown"))))
- '(show-paren-match ((t (:background "dim gray" :foreground "cyan" :weight ultra-bold))))
- '(vertical-border ((t (:background "dark slate gray" :foreground "dark slate gray")))))
+(use-package magit)
 
 (use-package treemacs
   :ensure t
@@ -457,248 +387,38 @@
         ("C-x t C-t" . treemacs-find-file)
         ("C-x t M-t" . treemacs-find-tag)))
 
-(use-package treemacs-projectile
-  :after (treemacs projectile)
-  :ensure t)
-
-(use-package treemacs-icons-dired
-  :hook (dired-mode . treemacs-icons-dired-enable-once)
-  :ensure t)
-
-(use-package treemacs-magit
-  :after (treemacs magit)
-  :ensure t)
-
-(use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
-  :after (treemacs persp-mode) ;;or perspective vs. persp-mode
+;; UI
+;; Configure doom-modeline
+(use-package doom-modeline
+  :init (setq doom-modeline-support-imenu t)
+  :config (setq doom-modeline-icon t
+                doom-modeline-major-mode-icon t
+                doom-modeline-major-mode-color-icon t
+                doom-modeline-buffer-state-icon t
+                doom-modeline-buffer-modification-icon t
+                doom-modeline-indent-info t
+                doom-modeline-env-enable-python t
+                doom-modeline-github t
+                doom-modeline-modal t
+                doom-modeline-modal-icon t)
   :ensure t
-  :config (treemacs-set-scope-type 'Perspectives))
+  :hook (after-init . doom-modeline-mode))
+(add-hook 'after-init-hook #'doom-modeline-mode)
 
-;; Enable vertico
-(use-package vertico
-  :init
-  (vertico-mode)
-
-  ;; Different scroll margin
-  ;; (setq vertico-scroll-margin 0)
-
-  ;; Show more candidates
-  (setq vertico-count 20)
-
-  ;; Grow and shrink the Vertico minibuffer
-  ;; (setq vertico-resize t)
-
-  ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
-  (setq vertico-cycle t))
-
-(require 'vertico-posframe)
-(vertico-posframe-mode -1)
-(setq vertico-posframe-parameters
-      '((left-fringe . 8)
-        (right-fringe . 8)))
-
-;; Persist history over Emacs restarts. Vertico sorts by history position.
-(use-package savehist
-  :init
-  (savehist-mode))
-
-;; A few more useful configurations...
-(use-package emacs
-  :init
-  ;; Add prompt indicator to `completing-read-multiple'.
-  ;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
-  (defun crm-indicator (args)
-    (cons (format "[CRM%s] %s"
-                  (replace-regexp-in-string
-                   "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" ""
-                   crm-separator)
-                  (car args))
-          (cdr args)))
-  (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
-
-  ;; Do not allow the cursor in the minibuffer prompt
-  (setq minibuffer-prompt-properties
-        '(read-only t cursor-intangible t face minibuffer-prompt))
-  (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
-  ;; TAB cycle if there are only few candidates
-  (setq completion-cycle-threshold 3)
-  (setq tab-always-indent 'complete)
-
-  ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
-  ;; Vertico commands are hidden in normal buffers.
-  ;; (setq read-extended-command-predicate
-  ;;       #'command-completion-default-include-p)
-
-  ;; Enable recursive minibuffers
-  (setq enable-recursive-minibuffers t))
-
-;; (use-package vertico-posframe
-;;   :ensure t
-;;   :init
-;; (setq vertico-posframe-parameters
-;;       '((left-fringe . 8)
-;;         (right-fringe . 8))))
-
-;; (require 'vertico-posframe)
-;; (vertico-posframe-mode 1)
-
-(use-package embark
+;; Configure doom-themes
+(use-package doom-themes
   :ensure t
-  :bind
-  (("C-." . embark-act)
-   ("M-." . embark-dwim)
-   ("C-h B" . embark-bindings))
-  :init
-  ;; TODO(slams): remove this later
-  (setq prefix-help-command #'embark-prefix-help-command)
-  (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
   :config
-  (add-to-list 'display-buffer-alist
-               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-                 nil
-                 (window-parameters (mode-line-format . none)))))
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (load-theme 'doom-material t)
 
-(use-package orderless
-  :ensure t
-  :init (fido-mode)
-  :custom
-  (completion-styles '(orderless)))
-;;  (completion-category-overrides '((file (styles basic partial-completion))))
-
-;; Use Dabbrev with Corfu!
-(use-package dabbrev
-  ;; Swap M-/ and C-M-/
-  :bind (("M-/" . dabbrev-expand)
-         ("C-M-/" . dabbrev-completion)))
-
-;; (use-package corfu
-;;   ;; Optional customizations
-;;   :custom
-;;   (corfu-cycle t)
-;;   (corfu-auto t)
-;;   (corfu-auto-prefix 2)
-;;   (corfu-auto-prefix 0.1)
-;;   (corfu-sepator ESC)
-;;   (corfu-quit-no-match 'separator)
-;;   :bind (:map corfu-map
-;;       ;; ("M-SPC" . (lambda () (interactive)
-;;       ;;   	   (insert #x268b)))
-;;       ;; ("RET" . nil)
-;;       ("TAB" . corfu-next)
-;;       ([tab] . corfu-next)
-;;       ("S-TAB" . corfu-previous)
-;;       ([backtab] . corfu-previous))
-
-;;   :hook ((prog-mode . corfu-mode)
-;;          (python-mode . corfu-mode)
-;;          (shell-mode . corfu-mode)
-;;          (eshell-mode . corfu-mode))
-;;   ;; Recommended: Enable Corfu globally.
-;;   ;; This is recommended since Dabbrev can be used globally (M-/).
-;;   ;; See also `corfu-exclude-modes'.
-;;   :init
-;;   (global-corfu-mode)
-;;   (corfu-history-mode))
-
-;; Example configuration for Consult
-(use-package consult
-  :bind (;; C-c bindings in `mode-specific-map'
-         ("C-c M-x" . consult-mode-command)
-         ("C-c h" . consult-history)
-         ("C-c k" . consult-kmacro)
-         ("C-c m" . consult-man)
-         ("C-c i" . consult-info)
-         ([remap Info-search] . consult-info)
-         ;; C-x bindings in `ctl-x-map'
-         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
-         ;; M-g bindings in `goto-map'
-         ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
-         ("M-g g" . consult-goto-line)             ;; orig. goto-line
-         ("M-g m" . consult-mark)
-         ("M-g k" . consult-global-mark)
-         ;; M-s bindings in `search-map'
-         ("M-s d" . consult-find)
-         ("M-s D" . consult-locate)
-         ("M-s g" . consult-grep)
-         ("M-s G" . consult-git-grep)
-         ("M-s r" . consult-ripgrep)
-         ("M-s l" . consult-line)
-         ("M-s L" . consult-line-multi)
-         ("M-s k" . consult-keep-lines)
-         ("M-s u" . consult-focus-lines)
-         ;; Isearch integration
-         ("M-s e" . consult-isearch-history)
-         :map isearch-mode-map
-         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
-         ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
-         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
-         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
-         ;; Minibuffer history
-         :map minibuffer-local-map
-         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
-
-  ;; Enable automatic preview at point in the *Completions* buffer. This is
-  ;; relevant when you use the default completion UI.
-  :hook (completion-list-mode . consult-preview-at-point-mode)
-
-  ;; The :init configuration is always executed (Not lazy)
-  :init
-
-  ;; Optionally configure the register formatting. This improves the register
-  ;; preview for `consult-register', `consult-register-load',
-  ;; `consult-register-store' and the Emacs built-ins.
-  (setq register-preview-delay 0.5
-        register-preview-function #'consult-register-format)
-
-  ;; Optionally tweak the register preview window.
-  ;; This adds thin lines, sorting and hides the mode line of the window.
-  (advice-add #'register-preview :override #'consult-register-window)
-
-  ;; Use Consult to select xref locations with preview
-  (setq xref-show-xrefs-function #'consult-xref
-        xref-show-definitions-function #'consult-xref)
-
-  ;; Configure other variables and modes in the :config section,
-  ;; after lazily loading the package.
-  :config
-
-  ;; Optionally configure preview. The default value
-  ;; is 'any, such that any key triggers the preview.
-  ;; (setq consult-preview-key 'any)
-  ;; (setq consult-preview-key "M-.")
-  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
-  ;; For some commands and buffer sources it is useful to configure the
-  ;; :preview-key on a per-command basis using the `consult-customize' macro.
-  (consult-customize
-   consult-theme :preview-key '(:debounce 0.2 any)
-   consult-ripgrep consult-git-grep consult-grep
-;;   consult-bookmark consult-recent-file consult-xref
-   consult--source-bookmark consult--source-file-register
-   consult--source-recent-file consult--source-project-recent-file
-   ;; :preview-key "M-."
-   :preview-key '(:debounce 0.4 any))
-
-  ;; Optionally configure the narrowing key.
-  ;; Both < and C-+ work reasonably well.
-  (setq consult-narrow-key "<") ;; "C-+"
-
-  ;; Optionally make narrowing help available in the minibuffer.
-  ;; You may want to use `embark-prefix-help-command' or which-key instead.
-  ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
-
-  ;; By default `consult-project-function' uses `project-root' from project.el.
-  ;; Optionally configure a different project root function.
-  ;;;; 1. project.el (the default)
-  ;; (setq consult-project-function #'consult--default-project--function)
-  ;;;; 2. vc.el (vc-root-dir)
-  ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
-  ;;;; 3. locate-dominating-file
-  ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
-  ;;;; 4. projectile.el (projectile-project-root)
-  ;; (autoload 'projectile-project-root "projectile")
-  ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
-  ;;;; 5. No project support
-  ;; (setq consult-project-function nil)
-)
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+  ;; Enable custom neotree theme (all-the-icons must be installed!)
+  (doom-themes-neotree-config)
+  ;; or for treemacs users
+  (setq doom-themes-treemacs-theme "doom-atom")
+  (doom-themes-treemacs-config)
+  (doom-themes-org-config))

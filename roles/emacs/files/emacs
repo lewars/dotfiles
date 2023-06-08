@@ -115,6 +115,7 @@
          ("M-S" . highlight-symbol-remove-all)))
 
 (use-package multiple-cursors
+  ensure: t
   :bind (("C->" . mc/mark-next-like-this)
          ("C-<" . mc/mark-previous-like-this)
 	 ("C-c C-<" . mc/mark-all-like-this)
@@ -149,6 +150,7 @@
 (use-package python-mode
   :ensure t)
 (use-package groovy-mode
+  ensure: t
   :init 
   (add-to-list 'auto-mode-alist '("\.groovy$" . groovy-mode))
   (add-to-list 'auto-mode-alist '("\.gy$" . groovy-mode))
@@ -201,6 +203,7 @@
 (setq-default flycheck-disabled-checkers '(emacs-lisp))
 
 (use-package flymake-grammarly
+  :ensure t
   :config
   (add-hook 'text-mode-hook 'flymake-grammarly-load)
   (add-hook 'markdown-mode-hook 'flymake-grammarly-load))
@@ -325,15 +328,18 @@
                 (ibuffer-switch-to-saved-filter-groups "default"))))
 
 (use-package ibuffer-git
+  :ensure t
   :after ibuffer
   :bind (:map ibuffer-mode-map
               ("M-g" . ibuffer-git-filter-by-name)))
 
 (use-package org
+  :ensure t
   :mode (("\\.org$" . org-mode)))
 
 
 (use-package org-projectile
+  :ensure t
   :bind (("C-c n p" . org-projectile-project-todo-completing-read)
          ("C-c l" . org-store-link)
          ("C-c a" . org-agenda)
@@ -345,7 +351,9 @@
     (push (org-projectile-project-todo-entry) org-capture-templates))
   :ensure t)
 
-(use-package magit)
+(use-package magit
+    :ensure t
+)
 
 (use-package treemacs
   :ensure t

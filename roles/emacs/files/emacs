@@ -1,13 +1,15 @@
+;-*-emacs-lisp-*-
 ;;;; My Emacs configuration
 ;;;; Author: Alistair Y. Lewars
 
-
-;; TODO(lewars): This is needed to overcome a bug with Emacs <29,
-;; running on MacOs >=13. Remove when upgrading Emacs 29.
 (when (string-equal system-type "darwin")
+  ;; TODO(lewars): This is needed to overcome a bug with Emacs <29,
+  ;; running on MacOs >=13. Remove when upgrading Emacs 29.
   (setq image-types (cons 'svg image-types)))
 
-;;; Package setup
+(when (string-equal system-type "gnu/linux")
+  (setq ispell-program-name "aspell"))
+
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
 (package-initialize)
@@ -53,7 +55,7 @@
  '(iswitchb-mode nil)
  '(iswitchb-use-frame-buffer-list nil)
  '(package-selected-packages
-   '(treemacs-icons-dired treemacs-persp embark-consult consult vertico-posframe corfu icomplete-vertical orderless embark vertico ghub treemacs treemacs-all-the-icons treemacs-magit treemacs-nerd-icons treemacs-projectile all-the-icons doom-themes doom-modeline git-modes vterm dash copilot editorconfig quelpa-use-package quelpa multiple-cursors find-file-in-project projectile highlight-indent-guides iedit company elpy go-mode windresize flymake-yamllint python-black flymd flycheck-yamllint flymake-go flymake-go-staticcheck flymake-golangci flymake-gradle flymake-grammarly flymake-json flymake-python-pyflakes flymake-shell flycheck flycheck-aspell flycheck-color-mode-line dockerfile-mode terraform-doc terraform-mode yaml-mode use-package markdown-mode jedi groovy-mode anaconda-mode json-mode magit gitignore-mode browse-at-remote git-ps1-mode gitconfig-mode rpm-spec-mode emojify edit-server))
+   '(dot-mode treemacs-icons-dired treemacs-persp embark-consult consult vertico-posframe corfu icomplete-vertical orderless embark vertico ghub treemacs treemacs-all-the-icons treemacs-magit treemacs-nerd-icons treemacs-projectile all-the-icons doom-themes doom-modeline git-modes vterm dash copilot editorconfig quelpa-use-package quelpa multiple-cursors find-file-in-project projectile highlight-indent-guides iedit company elpy go-mode windresize flymake-yamllint python-black flymd flycheck-yamllint flymake-go flymake-go-staticcheck flymake-golangci flymake-gradle flymake-grammarly flymake-json flymake-python-pyflakes flymake-shell flycheck flycheck-aspell flycheck-color-mode-line dockerfile-mode terraform-doc terraform-mode yaml-mode use-package markdown-mode jedi groovy-mode anaconda-mode json-mode magit gitignore-mode browse-at-remote git-ps1-mode gitconfig-mode rpm-spec-mode emojify edit-server))
  '(show-paren-mode t)
  '(show-trailing-whitespace t)
  '(tool-bar-mode nil)
@@ -237,11 +239,6 @@
 ;; fill column indicator column
 (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
 
-;; ---
-
-;;; aspell
-(setq ispell-program-name "aspell")
-
 ;;; eshell
 (setq eshell-prompt-function
       (lambda ()
@@ -262,7 +259,6 @@
 (add-hook 'yaml-mode-hook 'highlight-indent-guides-mode)
 ;; (add-hook 'python-mode-hook 'highlight-indent-guides-mode)
 
-;; ---
 
 ;;; SVG
 (add-to-list `auto-mode-alist '("\\.svg\\'" . xml-mode))
@@ -283,7 +279,6 @@
              (require 'groovy-electric)
              (groovy-electric-mode)))
 
-;; --
 ;;; Markdown
 (use-package markdown-mode
   :ensure t
@@ -356,6 +351,12 @@
 ;; (add-hook 'prog-mode-hook 'copilot-mode)
 (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
 (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+(define-key copilot-completion-map (kbd "<escape>") 'copilot-clear-overlay)
+(define-key copilot-completion-map (kbd "ESC") 'copilot-clear-overlay)
+(define-key copilot-completion-map (kbd "C-g") 'copilot-clear-overlay)
+;; (global-set-key (kbd "M-\\") 'copilot-complete)
+;; (define-key copilot-completion-map (kbd "C-n") 'copilot-next-completion)
+;; (define-key copilot-completion-map (kbd "C-p") 'copilot-previous-completion)
 
 ;; Configure doom-modeline
 (use-package doom-modeline
@@ -388,7 +389,7 @@
   ;; Enable custom neotree theme (all-the-icons must be installed!)
   (doom-themes-neotree-config)
   ;; or for treemacs users
-  (setq doom-themes-treemacs-theme "doom-material")
+  (setq doom-themes-treemacs-theme "doom-atom")
   (doom-themes-treemacs-config)
   (doom-themes-org-config))
 
@@ -398,7 +399,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:height 100 :foundry "ADBO" :family "Source Code Pro"))))
+ '(default ((t (:height 125 :foundry "ADBO" :family "Source Code Pro"))))
  '(ansi-color-bright-black ((t (:background "#222D32" :foreground "dark gray"))))
  '(copilot-overlay-face ((t (:foreground "pale violet red"))))
  '(custom-comment ((t (:background "#171F24" :foreground "#EEFFFF"))))
@@ -411,6 +412,7 @@
  '(mode-line-inactive ((t (:background "#304047" :foreground "#70828A" :box nil))))
  '(org-headline-done ((t (:foreground "gray"))))
  '(org-hide ((t (:foreground "dim gray"))))
+ '(region ((t (:extend t :background "IndianRed4"))))
  '(shadow ((t (:foreground "rosy brown"))))
  '(show-paren-match ((t (:background "dim gray" :foreground "cyan" :weight ultra-bold))))
  '(vertical-border ((t (:background "dark slate gray" :foreground "dark slate gray")))))
@@ -490,7 +492,7 @@
   (setq vertico-cycle t))
 
 (require 'vertico-posframe)
-(vertico-posframe-mode 1)
+(vertico-posframe-mode -1)
 (setq vertico-posframe-parameters
       '((left-fringe . 8)
         (right-fringe . 8)))
@@ -558,7 +560,7 @@
 
 (use-package orderless
   :ensure t
-  :init (icomplete-mode)
+  :init (fido-mode)
   :custom
   (completion-styles '(orderless)))
 ;;  (completion-category-overrides '((file (styles basic partial-completion))))

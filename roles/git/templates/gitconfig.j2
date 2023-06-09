@@ -45,6 +45,8 @@
         remote-branches = "!f() { git ls-remote --heads ${1:origin} | sed 's?.*refs/heads/??'; }; f "
 
 	pre = !sh -c 'git push origin +master:precommit_$(git config --get user.email | sed s,@.*,,)'
+        dbranch = "!f() { test -n \"$1\" && r=\"$1\" || r=origin; \
+              basename \"$(git rev-parse --abbrev-ref \"$r\"/HEAD)\"; }; f"
 [color]
         diff = auto
         status = auto

@@ -75,12 +75,16 @@
  ;; If there is more than one, they won't work right.
  '(default ((t (:height 125 :foundry "ADBO" :family "Source Code Pro"))))
  '(ansi-color-bright-black ((t (:background "#222D32" :foreground "dark gray"))))
- '(completions-common-part ((t (:background "slate blue" :foreground "white smoke"))))
+ '(completions-common-part ((t (:foreground "#b7ff9a" :underline t :height 1.128))))
+ '(completions-first-difference ((t (:foreground "white" :weight bold :height 1.128))))
  '(copilot-overlay-face ((t (:foreground "pale violet red"))))
+ '(cursor ((t (:background "#c792ea"))))
  '(custom-comment ((t (:background "#171F24" :foreground "#EEFFFF"))))
  '(custom-comment-tag ((t (:foreground "dark gray"))))
  '(font-lock-comment-delimiter-face ((t (:inherit font-lock-comment-face :foreground "light gray"))))
  '(font-lock-comment-face ((t (:foreground "gray"))))
+ '(highlight ((t (:background "#c792ea" :foreground "#171F24"))))
+ '(icomplete-selected-match ((t (:background "#a383b5"))))
  '(ido-only-match ((t (:foreground "SpringGreen3"))))
  '(line-number ((t (:foreground "gray"))))
  '(line-number-current-line ((t (:foreground "white"))))
@@ -98,13 +102,16 @@
   :ensure t)
 
 ;; Developer configurations
-(use-package prog-mode
+(add-hook 'prog-mode-hook 'outline-minor-mode)
+(add-hook 'prog-mode-hook 'hs-minor-mode)
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+(add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
+
+(add-hook 'prod-mode-hook (lambda () (setq-local hl-line-mode t)))
+
+(use-package highlight-indent-guides
+  :ensure t
   :config
-  (add-hook 'prog-mode-hook 'outline-minor-mode)
-  (add-hook 'prog-mode-hook 'hs-minor-mode)
-  (add-hook 'prog-mode-hook #'hl-line-mode)
-  (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-  (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
   (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
 
 (use-package text-mode
@@ -133,7 +140,7 @@
 
 (use-package imenu-anywhere
   :ensure t
-  :bind (("C-c C-g" . ido-imenu-anywhere)))
+  :bind (("C-." . ido-imenu-anywhere)))
 
 (use-package bicycle
   :after outline

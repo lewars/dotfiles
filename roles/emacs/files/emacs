@@ -67,7 +67,7 @@
  '(highlight-indent-guides-method 'bitmap)
  '(imenu-auto-rescan t)
  '(package-selected-packages
-   '(nerd-icons python-mode org-projectile groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-grammarly flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult elpy doom-themes doom-modeline dockerfile-mode corfu copilot)))
+   '(fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode org-projectile groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-grammarly flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult elpy doom-themes doom-modeline dockerfile-mode corfu copilot)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -101,7 +101,30 @@
   :if (display-graphic-p)
   :ensure t)
 
-;; Developer configurations
+;; ========== Developer configurations ===========
+(use-package fzf
+  :bind
+    ;; Don't forget to set keybinds!
+  :config
+  (setq fzf/args "-x --print-query --margin=1,0 --no-hscroll"
+        fzf/executable "fzf"
+        fzf/git-grep-args "-i --line-number %s"
+        ;; command used for `fzf-grep-*` functions
+        ;; example usage for ripgrep:
+        ;; fzf/grep-command "rg --no-heading -nH"
+        fzf/grep-command "grep -nrH"
+        ;; If nil, the fzf buffer will appear at the top of the window
+        fzf/position-bottom t
+        fzf/window-height 15))
+
+(use-package dumb-jump
+  :ensure t)
+(add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+
+(use-package rg
+  :ensure t)
+(rg-enable-default-bindings)
+
 (add-hook 'prog-mode-hook 'outline-minor-mode)
 (add-hook 'prog-mode-hook 'hs-minor-mode)
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
@@ -136,7 +159,9 @@
   :ensure t
   :bind ("C-." . imenu-list-minor-mode)
   :config
-  (setq imenu-list-focus-after-activation t))    
+  (setq imenu-list-focus-after-activation nil))
+(global-set-key (kbd "C-'") #'imenu-list-smart-toggle)
+
 
 (use-package imenu-anywhere
   :ensure t
@@ -156,13 +181,36 @@
               ("s-p" . projectile-command-map)
               ("C-c p" . projectile-command-map)))
 
-;; Language confguration
+(use-package json
+  :ensure t
+  :config
+  (add-hook 'json-mode-hook 'json-mode))
+  
+;; ======= Language configuration ============
 (add-to-list `auto-mode-alist '("\\.svg\\'" . nxml-mode))
+
 (use-package python-mode
   :ensure t)
+
+(use-package pyvenv-auto
+  :hook ((python-mode . pyvenv-auto-run)))
+
+(use-package pyvenv
+  :ensure t
+  :config
+  (pyvenv-mode t)
+
+  ;; Set correct Python interpreter
+  (setq pyvenv-post-activate-hooks
+        (list (lambda ()
+                (setq python-shell-interpreter (concat pyvenv-virtual-env "bin/python3")))))
+  (setq pyvenv-post-deactivate-hooks
+        (list (lambda ()
+                (setq python-shell-interpreter "python3")))))
+
 (use-package groovy-mode
   :ensure t
-  :init 
+  :init
   (add-to-list 'auto-mode-alist '("\.groovy$" . groovy-mode))
   (add-to-list 'auto-mode-alist '("\.gy$" . groovy-mode))
   :config
@@ -176,9 +224,8 @@
     (when (eq major-mode 'yaml-mode)
       (shell-command-to-string (format "yq e -P -i -v %s" buffer-file-name))
       (auto-revert-mode)))
-  (add-hook 'after-save-hook #'frmt-yaml)
-  (add-hook 'yaml-mode-hook 'highlight-indent-guides-mode)
-  (add-hook 'yaml-mode-hook 'flymake-yamllint-setup))
+  (add-hook 'after-save-hook 'frmt-yaml)
+  (add-hook 'yaml-mode-hook 'highlight-indent-guides-mode))
 
 (use-package terraform-mode
   :ensure t
@@ -188,7 +235,7 @@
     (when (eq major-mode 'terraform-mode)
       (shell-command-to-string (format "terraform fmt %s" buffer-file-name))
       (auto-revert-mode)))
-  (add-hook 'after-save-hook #'frmt-hcl)
+  (add-hook 'after-save-hook 'frmt-hcl)
   (add-hook 'terraform-mode-hook #'outline-minor-mode))
 
 (use-package markdown-mode
@@ -205,19 +252,23 @@
   :after python
   :hook (python-mode . python-black-on-save-mode-enable-dwim))
 
+(with-eval-after-load 'flycheck
+  (flycheck-grammarly-setup))
+
 (use-package flycheck
   :ensure t
   :init (global-flycheck-mode)
-  :config
-  (add-hook 'after-init-hook #'global-flycheck-mode))
+  :bind (("M-p" . flycheck-next-error)
+         ("M-n" . flycheck-previous-error))
+  :config (setq-default flycheck-disabled-checkers '(emacs-lisp)))
 
-(setq-default flycheck-disabled-checkers '(emacs-lisp))
-
-(use-package flymake-grammarly
+(use-package flycheck-posframe
   :ensure t
+  :after flycheck
   :config
-  (add-hook 'text-mode-hook 'flymake-grammarly-load)
-  (add-hook 'markdown-mode-hook 'flymake-grammarly-load))
+  (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
+  (flycheck-posframe-configure-pretty-defaults)
+  (setq flycheck-posframe-warning-prefix "\u26a0 "))
 
 ;; Productivity
 (use-package copilot
@@ -230,12 +281,12 @@
 ;;  :hook (prog-mode . copilot-mode)
   :bind (("C-c M-f" . copilot-complete)
          :map copilot-completion-map
-         ("C-g" . 'copilot-clear-overlay)
-         ("M-p" . 'copilot-previous-completion)
-         ("M-n" . 'copilot-next-completion)
-         ("<tab>" . 'copilot-accept-completion)
-         ("M-f" . 'copilot-accept-completion-by-word)
-         ("M-<return>" . 'copilot-accept-completion-by-line)))
+         ("C-g" . copilot-clear-overlay)
+         ("M-p" . copilot-previous-completion)
+         ("M-n" . copilot-next-completion)
+         ("<tab>" . copilot-accept-completion)
+         ("M-f" . copilot-accept-completion-by-word)
+         ("M-<return>" . copilot-accept-completion-by-line)))
 
 ;; ibuffer
 (use-package ibuffer
@@ -338,11 +389,11 @@
             #'(lambda ()
                 (ibuffer-switch-to-saved-filter-groups "default"))))
 
-(use-package ibuffer-git
-  :ensure t
-  :after ibuffer
-  :bind (:map ibuffer-mode-map
-              ("M-g" . ibuffer-git-filter-by-name)))
+;; (use-package ibuffer-git
+;;   :ensure t
+;;   :after ibuffer
+;;   :bind (:map ibuffer-mode-map
+;;               ("M-g" . ibuffer-git-filter-by-name)))
 
 (use-package org
   :ensure t
@@ -441,3 +492,4 @@
   (setq doom-themes-treemacs-theme "doom-atom")
   (doom-themes-treemacs-config)
   (doom-themes-org-config))
+

@@ -2,11 +2,10 @@ package_upgrade: yes
 packages:
   - curl
   - fzf
-  - gnome-boxes
-  - gnome-keyring
+  - fd-find
+  - ripgrep
   - htop
-  - i3lock
   - jq
+  - yq
   - make
-  - wget
 remove_packages: []

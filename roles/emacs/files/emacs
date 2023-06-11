@@ -181,6 +181,17 @@
               ("s-p" . projectile-command-map)
               ("C-c p" . projectile-command-map)))
 
+(use-package org-projectile
+  :bind (("C-c n p" . org-projectile-project-todo-completing-read)
+         ("C-c c" . org-capture))
+  :config
+  (progn
+    (setq org-projectile-projects-file
+          (expand-file-name "~/git/projects-org"))
+    (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
+    (push (org-projectile-project-todo-entry) org-capture-templates))
+  :ensure t)
+
 (use-package json
   :ensure t
   :config
@@ -254,12 +265,13 @@
 
 (with-eval-after-load 'flycheck
   (flycheck-grammarly-setup))
+(setq flycheck-grammarly-check-time 0.8)
 
 (use-package flycheck
   :ensure t
   :init (global-flycheck-mode)
-  :bind (("M-p" . flycheck-next-error)
-         ("M-n" . flycheck-previous-error))
+  :bind (("M-n" . flycheck-next-error)
+         ("M-p" . flycheck-previous-error))
   :config (setq-default flycheck-disabled-checkers '(emacs-lisp)))
 
 (use-package flycheck-posframe
@@ -492,4 +504,3 @@
   (setq doom-themes-treemacs-theme "doom-atom")
   (doom-themes-treemacs-config)
   (doom-themes-org-config))
-

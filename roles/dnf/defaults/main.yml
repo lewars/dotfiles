@@ -2,6 +2,7 @@ package_upgrade: yes
 packages:
   - curl
   - fzf
+  - bat
   - fd-find
   - ripgrep
   - htop

@@ -1,27 +1,20 @@
-- name: Install zsh
-  apt: name=zsh state=present
-  become: yes
-  become_user: root
-  become_method: sudo
-- name: Check for oh-my-zsh installation
-  stat: path=~/.oh-my-zsh
-  register: oh_my_zsh_stat
-- name: Install oh-my-zsh
-  raw: sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
-  when: not oh_my_zsh_stat.stat.exists
-- name: Check for .zshrc
-  stat: path="{{dotfiles_user_home}}/.zshrc"
-  register: zshrc_stat
-- name: Back up .zshrc
-  command: mv ~/.zshrc ~/.zshrc.bak
-  args:
-    creates: '{{dotfiles_user_home}}/.zshrc.bak'
-  when: zshrc_stat.stat.exists
-- name: Remove .zshrc
-  command: rm ~/.zshrc
-  when: zshrc_stat.stat.exists
-- name: Symlink .zshrc
+---
+- name: Check for oh-my-bash installation
+  stat: path="{{ dotfiles_home }}"/oh-my-bash
+  register: oh_my_bash_stat
+- name: Install oh-my-bash
+  raw: |
+    bash -c "export OSH="{{ dotfiles_home }}/oh-my-bash"; $(curl -fsSL \
+    https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)" --unattended
+  when: not oh_my_bash_stat.stat.exists
+- name: Check for .bashrc
+  stat: path="{{dotfiles_user_home}}/.bashrc"
+  register: bashrc_stat
+- name: Back up .bashrc
+  command: mv ~/.bashrc ~/.bashrc.bak.{{ ansible_date_time.iso8601 }}
+  when: bashrc_stat.stat.exists
+- name: Symlink .bashrc
   file:
-    src: '{{ dotfiles_home }}/roles/zsh/files/zshrc'
-    dest: '{{dotfiles_user_home}}/.zshrc'
+    src: '{{ dotfiles_home }}/roles/bash/files/bashrc'
+    dest: '{{dotfiles_user_home}}/.bashrc'
     state: link

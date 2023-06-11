@@ -5,7 +5,7 @@ all:
 	ansible-playbook dotfiles.yml --tags all
 
 $(tags):
-	ansible-playbook -t $@ dotfiles.yml
+	ansible-playbook -vvv -t $@ dotfiles.yml
 
 diff-emacs:
 	diff roles/emacs/files/emacs ~/.emacs

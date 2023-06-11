@@ -125,10 +125,12 @@
   :ensure t)
 (rg-enable-default-bindings)
 
+(add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
 (add-hook 'prog-mode-hook 'outline-minor-mode)
 (add-hook 'prog-mode-hook 'hs-minor-mode)
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
+(add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
 
 (add-hook 'prod-mode-hook (lambda () (setq-local hl-line-mode t)))
 
@@ -195,7 +197,13 @@
 (use-package json
   :ensure t
   :config
-  (add-hook 'json-mode-hook 'json-mode))
+  (add-hook 'json-mode-hook 'json-mode)
+  (add-hook 'json-mode-hook 'outline-minor-mode)
+  (add-hook 'json-mode-hook 'highlight-indent-guides-mode)
+  (add-hook 'json-mode-hook 'hs-minor-mode)
+  (add-hook 'json-mode-hook 'display-line-numbers-mode)
+  (add-hook 'json-mode-hook 'display-fill-column-indicator-mode))
+
   
 ;; ======= Language configuration ============
 (add-to-list `auto-mode-alist '("\\.svg\\'" . nxml-mode))
@@ -236,7 +244,11 @@
       (shell-command-to-string (format "yq e -P -i -v %s" buffer-file-name))
       (auto-revert-mode)))
   (add-hook 'after-save-hook 'frmt-yaml)
-  (add-hook 'yaml-mode-hook 'highlight-indent-guides-mode))
+  (add-hook 'yaml-mode-hook 'highlight-indent-guides-mode)
+  (add-hook 'yaml-mode-hook 'outline-minor-mode)
+  (add-hook 'yaml-mode-hook 'hs-minor-mode)
+  (add-hook 'yaml-mode-hook 'display-line-numbers-mode)
+  (add-hook 'yaml-mode-hook 'display-fill-column-indicator-mode))
 
 (use-package terraform-mode
   :ensure t
@@ -247,7 +259,11 @@
       (shell-command-to-string (format "terraform fmt %s" buffer-file-name))
       (auto-revert-mode)))
   (add-hook 'after-save-hook 'frmt-hcl)
-  (add-hook 'terraform-mode-hook #'outline-minor-mode))
+  (add-hook 'terraform-mode-hook 'outline-minor-mode)
+  (add-hook 'terraform-mode-hook 'highlight-indent-guides-mode)
+  (add-hook 'terraform-mode-hook 'hs-minor-mode)
+  (add-hook 'terraform-mode-hook 'display-line-numbers-mode)
+  (add-hook 'terraform-mode-hook 'display-fill-column-indicator-mode))
 
 (use-package markdown-mode
   :ensure t
@@ -255,7 +271,14 @@
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
          ("\\.markdown\\'" . markdown-mode))
-  :init (setq markdown-command "multimarkdown"))
+  :init (setq markdown-command "multimarkdown")
+  :config
+  (add-hook 'markdown-mode-hook 'outline-minor-mode)
+  (add-hook 'markdown-mode-hook 'highlight-indent-guides-mode)
+  (add-hook 'markdown-mode-hook 'hs-minor-mode)
+  (add-hook 'markdown-mode-hook 'display-line-numbers-mode)
+  (add-hook 'markdown-mode-hook 'display-fill-column-indicator-mode))
+
 
 ;; Linters
 (use-package python-black

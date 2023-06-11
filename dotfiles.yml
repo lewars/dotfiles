@@ -1,11 +1,14 @@
 - name: Set up local workstation
   hosts: local
+  vars:
+    ansible_become_user: '{{user}}'
   roles:
     - role: git
+      become: false
       tags:
         - git
     - role: dnf
-      ansible_become: true
+      become: true
       tags:
         - dnf
     - role: fzf
@@ -37,11 +40,9 @@
         - node
       when: false
     - role: emacs
-      ansible_become: false
+      become: false
       tags:
         - emacs
     - role: bash
       tags:
         - bash
-      ansible_become: false
-      when: false

@@ -323,9 +323,9 @@
          ("<tab>" . copilot-accept-completion)
          ("[tab]" . copilot-accept-completion)
          ("RET" . copilot-accept-completion)
-         ("space" . copilot-accept-completion)
-         ("S-w" . copilot-accept-completion-by-word)
-         ("S-l" . copilot-accept-completion-by-line)))
+         ("SPC" . copilot-accept-completion)
+         ("C-w" . copilot-accept-completion-by-word)
+         ("C-l" . copilot-accept-completion-by-line)))
 
 ;; ibuffer
 (use-package ibuffer

@@ -1,0 +1,21 @@
+# .bash_profile
+#
+# {{ full_name }}
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+   . ~/.bashrc
+fi
+
+export GOBIN=$(go env GOPATH)/bin
+export PATH=$HOME/bin:$HOME/.local/bin:$GOBIN:$PATH
+export PAGER=less
+export LESS=-iXMr
+export EDITOR=emacs
+export VISUAL=$EDITOR
+export LSCOLORS=exgxcxfxbxegedabagacad
+export CLICOLOR=1
+
+# create tmp dir if not present
+export TMPDIR=$HOME/tmp
+[ ! -d $TMPDIR ] && mkdir -p $TMPDIR

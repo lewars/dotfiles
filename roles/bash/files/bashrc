@@ -141,6 +141,12 @@ export LANG=en_US.UTF-8
 # alias ohmybash="mate ~/.oh-my-bash"
 
 # Personal Configuration
+
+# Tooling
+. "$HOME/.asdf/asdf.sh"
+
+# variables
+
 # shopts
 set +o noclobber
 shopt -u autocd
@@ -157,3 +163,6 @@ alias fpv="fzf --preview 'bat --color=always {}' --preview-window '~3'"
 alias fh="fzf --bind 'enter:become(history)'"
 alias fem="fzf --preview 'bat --color=always {}' --preview-window '~3' --bind 'enter:become(emacs {})'"
 alias jf='sudo journalctl --follow'
+
+# completion scripts
+. "$HOME/.asdf/completions/asdf.bash"

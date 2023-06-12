@@ -11,26 +11,22 @@
       become: true
       tags:
         - dnf
-    - role: fzf
-      tags:
-        - fzf
-      when: false
     - role: tmux
       tags:
         - tmux
       when: false
     - role: asdf
+      become: false
       tags:
         - asdf
-      when: false
     - role: python
       tags:
         - python
       when: false
     - role: terraform
+      become: false
       tags:
         - terraform
-      when: false
     - role: golang
       tags:
         - golang
@@ -44,5 +40,6 @@
       tags:
         - emacs
     - role: bash
+      become: false
       tags:
         - bash

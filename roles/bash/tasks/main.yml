@@ -1,20 +1,33 @@
 ---
 - name: Check for oh-my-bash installation
-  stat: path="{{ dotfiles_home }}"/oh-my-bash
+  stat: path="{{dotfiles_home}}/oh-my-bash"
   register: oh_my_bash_stat
 - name: Install oh-my-bash
   raw: |
-    bash -c "export OSH="{{ dotfiles_home }}/oh-my-bash"; $(curl -fsSL \
+    bash -c "export OSH="{{dotfiles_home}}/oh-my-bash"; $(curl -fsSL \
     https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)" --unattended
   when: not oh_my_bash_stat.stat.exists
 - name: Check for .bashrc
   stat: path="{{dotfiles_user_home}}/.bashrc"
   register: bashrc_stat
 - name: Back up .bashrc
-  command: mv ~/.bashrc ~/.bashrc.bak.{{ ansible_date_time.iso8601 }}
-  when: bashrc_stat.stat.exists
+  command: mv ~/.bashrc ~/.bashrc.bak.{{ansible_date_time.iso8601}}
+  when:
+    - bashrc_stat.stat.exists
+    - bashrc_stat.stat.islnk == False
 - name: Symlink .bashrc
   file:
-    src: '{{ dotfiles_home }}/roles/bash/files/bashrc'
+    src: '{{dotfiles_home}}/roles/bash/files/bashrc'
     dest: '{{dotfiles_user_home}}/.bashrc'
     state: link
+- name: Check for .bash_profile
+  stat: path="{{dotfiles_user_home}}/.bash_profile"
+  register: bash_profile_stat
+- name: Back up .bash_profile
+  command: mv ~/.bash_profile ~/.bash_profile.bak.{{ansible_date_time.iso8601}}
+  when:
+    - bash_profile_stat.stat.exists
+- name: Install .bash_profile
+  template:
+    src: bash_profile.j2
+    dest: '{{dotfiles_user_home}}/.bash_profile'

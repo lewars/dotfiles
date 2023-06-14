@@ -8,13 +8,13 @@ $(tags):
 	ansible-playbook -vvv -t $@ dotfiles.yml
 
 diff-emacs:
-	diff roles/emacs/files/emacs ~/.emacs
+	diff --color=always roles/emacs/files/emacs ~/.emacs
 
 save-emacs:
 	cp -v ~/.emacs roles/emacs/files/emacs
 
 diff-git:
-	diff roles/git/templates/gitconfig.j2 ~/.gitconfig
+	diff --color=always roles/git/templates/gitconfig.j2 ~/.gitconfig
 
 save-git:
 	@echo "WARNING: Can't import gitignore_global config!!"
@@ -22,8 +22,8 @@ save-git:
 	@echo "WARNING: Hand edit roles/bash/template/gitconfig.j2"
 
 diff-bash:
-	diff roles/bash/files/bashrc ~/.bashrc
-	diff roles/bash/templates/bash_profile.j2 ~/.bash_profile
+	diff --color=always roles/bash/files/bashrc ~/.bashrc
+	diff --color=always roles/bash/templates/bash_profile.j2 ~/.bash_profile
 
 save-bash:
 	@echo "WARNING: Can't import bash configs!!"

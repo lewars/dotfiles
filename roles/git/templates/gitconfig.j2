@@ -49,7 +49,7 @@
 
         remote-branches = "!f() { git ls-remote --heads ${1:origin} | sed 's?.*refs/heads/??'; }; f "
 
-	pre = !sh -c 'git push origin +master:precommit_$(git config --get user.email | sed s,@.*,,)'
+        pre = !sh -c 'git push origin +master:precommit_$(git config --get user.email | sed s,@.*,,)'
         dbranch = "!f() { test -n \"$1\" && r=\"$1\" || r=origin; \
               basename \"$(git rev-parse --abbrev-ref \"$r\"/HEAD)\"; }; f"
 [color]
@@ -57,14 +57,20 @@
         status = auto
         branch = auto
         ui = true
-# [apply]
-#         whitespace = nowarn
-# [mergetool]
-#         keepBackup = false
-# [difftool]
-#         prompt = false
+[core]
+        editor = emacs -nw
+        excludesfile = ~/.gitignore_global
+        editor = vim
+[apply]
+        whitespace = warn
+[difftool]
+        prompt = false
 [push]
         default = simple
         followTags = true
 [github]
         user = {{ git_user }}
+[credential "https://github.com"]
+        helper = !/usr/bin/op plugin run -- gh auth git-credential
+[credential "https://gist.github.com"]
+        helper = !/usr/bin/op plugin run -- gh auth git-credential

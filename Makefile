@@ -14,10 +14,12 @@ save-emacs:
 	cp -v ~/.emacs roles/emacs/files/emacs
 
 diff-git:
-	diff roles/git/files/git ~/.git
+	diff roles/git/templates/gitconfig.j2 ~/.gitconfig
 
 save-git:
-	cp -v ~/.git roles/git/files/git
+	@echo "WARNING: Can't import gitignore_global config!!"
+	@echo "WARNING: It is a symoblic link"
+	@echo "WARNING: Hand edit roles/bash/template/gitconfig.j2"
 
 diff-bash:
 	diff roles/bash/files/bashrc ~/.bashrc

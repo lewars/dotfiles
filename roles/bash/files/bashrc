@@ -143,9 +143,8 @@ export LANG=en_US.UTF-8
 # Personal Configuration
 
 # Tooling
-. "$HOME/.asdf/asdf.sh"
-
-# variables
+source "${HOME}/.asdf/asdf.sh"
+source "${HOME}/.config/op/plugins.sh"
 
 # shopts
 set +o noclobber

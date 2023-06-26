@@ -539,7 +539,7 @@
                 doom-modeline-modal-icon t
                 doom-modeline-github t
                 doom-modeline-vcs-max-length 24
-                doom-modeline-buffer-file-name-style 'truncate-except-project)
+                doom-modeline-buffer-file-name-style 'relative-from-project)
   :ensure t
   :hook (after-init . doom-modeline-mode))
 (add-hook 'after-init-hook #'doom-modeline-mode)

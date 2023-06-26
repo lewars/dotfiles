@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: src_tag
+# key: ;src
+# --
+#+begin_src  ${1:shell}
+  $0
+#+end_src

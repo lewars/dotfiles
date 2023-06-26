@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: log
+# key: @log
+# --
+`(format-time-string "%Y-%m-%d - %T%z" (current-time))` $0

@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: tshoot
+# key: ;tshoot
+# --
+#+title: TSHOOT: ${1:title}
+#+author: ${2:name}
+#+date: ${3:date}
+#+ticket: ${4:ticket}
+
+* Problem
+$0
+
+* Log
+
+
+* Solution

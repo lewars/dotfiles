@@ -13,3 +13,10 @@
     owner: '{{ user }}'
     state: hard
   become: false
+- name: create a symbolic link of a directory
+  file:
+    src: '{{ dotfiles_home }}/roles/emacs/files/emacs.d/snippets'
+    dest: '{{ dotfiles_user_home }}/.emacs.d/snippets'
+    owner: '{{ user }}'
+    state: link
+  become: false

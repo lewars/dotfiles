@@ -56,6 +56,24 @@
 (setq read-buffer-completion-ignore-case t)
 (setq read-file-name-completion-ignore-case t)
 (setq completion-cycle-threshold t)
+
+(add-hook 'prog-mode-hook 'outline-minor-mode)
+(add-hook 'prog-mode-hook 'hs-minor-mode)
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+(add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
+(add-hook 'prod-mode-hook (lambda () (setq-local hl-line-mode t)))
+
+(require 'yasnippet)
+(setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+(setq yas-wrap-around-region t)
+
+(yas-global-mode 1)
+;; (yas-reload-all)
+;; (add-hook 'prog-mode-hook #'yas-minor-mode)
+
+(global-set-key "\M-/" 'hippie-expand)
+(add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -123,13 +141,6 @@
 (use-package rg
   :ensure t)
 (rg-enable-default-bindings)
-
-(add-hook 'prog-mode-hook 'outline-minor-mode)
-(add-hook 'prog-mode-hook 'hs-minor-mode)
-(add-hook 'prog-mode-hook 'display-line-numbers-mode)
-(add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
-
-(add-hook 'prod-mode-hook (lambda () (setq-local hl-line-mode t)))
 
 (use-package highlight-indent-guides
   :ensure t
@@ -438,9 +449,13 @@
 
 (use-package org
   :ensure t
-  :mode (("\\.org$" . org-mode)))
+  :mode (("\\.org$" . org-mode))
+  ;; :bind (("s-<down>" . org-shiftdown)
+  ;;        ("s-<up>" . org-shiftup)
+  ;;        ("s-<left>" . org-shiftleft)
+  ;;        ("s-<right>" . org-shiftright))
+  )
 
-(with-eval-after-load 'org (global-org-modern-mode))
 (setq
  ;; Edit settings
  org-auto-align-tags nil
@@ -454,6 +469,26 @@
  org-pretty-entities t
  org-ellipsis "…"
 
+ ;; TODO setup
+ ;; org-todo-keywords
+ ;; '((sequence "TODO(t)" "IN-PROGRESS(p)" "IN-REVIEW(r)" "WAITING(w)" "BLOCKED(b)" "|" "DONE(d)" "DELEGATE(D)"))
+ org-todo-keywords
+ '((sequence "TODO" "IN-PROGRESS" "IN-REVIEW" "WAITING" "BLOCKED" "|" "DONE" "DELEGATE" "WONT-DO"))
+
+ org-modern-todo-faces
+ '(("IN-PROGRESS" . (:forground "blue" :weight bold))
+   ("IN-REVIEW" . org-verbatim)
+   ("WAITING" . org-warning)
+   ("BLOCKED" . org-mode-line-clock-overrun)
+   ("DELEGATE" . org-warning)
+   ("WONT-DO" . org-modern-time-inactive))
+ ;; '(("IN-PROGRESS" . org-clock-overlay)
+ ;;   ("IN-REVIEW" . org-verbatim)
+ ;;   ("WAITING" . org-warning)
+ ;;   ("BLOCKED" . org-mode-line-clock-overrun)
+ ;;   ("DELEGATE" . org-warning)
+ ;;   ("WONT-DO" . org-modern-time-inactive))
+ 
  ;; Agenda styling
  org-agenda-tags-column 0
  org-agenda-block-separator ?─
@@ -464,7 +499,11 @@
  org-agenda-current-time-string
  "⭠ now ─────────────────────────────────────────────────")
 
+(with-eval-after-load 'org (global-org-modern-mode))
+
 (global-org-modern-mode)
+
+(require 'ox-md)
 
 (use-package org-projectile
   :ensure t
@@ -539,7 +578,7 @@
                 doom-modeline-modal-icon t
                 doom-modeline-github t
                 doom-modeline-vcs-max-length 24
-                doom-modeline-buffer-file-name-style 'relative-from-project)
+                doom-modeline-buffer-file-name-style 'truncate-with-project)
   :ensure t
   :hook (after-init . doom-modeline-mode))
 (add-hook 'after-init-hook #'doom-modeline-mode)

@@ -163,6 +163,68 @@ alias fpv="fzf --preview 'bat --color=always {}' --preview-window '~3'"
 alias fh="fzf --bind 'enter:become(history)'"
 alias fem="fzf --preview 'bat --color=always {}' --preview-window '~3' --bind 'enter:become(emacs {})'"
 alias jf='sudo journalctl --follow'
+alias k=kubectl
 
 # completion scripts
+. "$HOME/.asdf/asdf.sh"
 . "$HOME/.asdf/completions/asdf.bash"
+
+# functions
+## A function that changes the k8 context and namespace
+function k8ns() {
+    if [ -z "$1" ]; then
+        kubectl get namespaces
+        return 0
+    fi
+    kubectl config set-context --current --namespace="$1"
+}
+
+## A function that list the current namespace
+function k8listns() {
+    kubectl config view --minify | grep namespace: | awk '{print $2}'
+}
+
+## A function obtains a shell on a running container
+function k8sh() {
+    # Set pod name
+    if [ -z "$1" ]; then
+        echo "Usage: k8sh <pod-name> <container-name>"
+        return 1
+    fi
+
+    # Set container name
+    if [ -z "$2" ]; then
+        echo "Usage: k8sh <pod-name> <container-name>"
+        return 1
+    fi
+
+    # Select command to run
+    cmd="$3"
+    if [ -z "$cmd" ]; then
+        cmd="/bin/bash"
+    fi
+
+    kubectl exec -it "$1" -c "$2" -- sh -c $"$cmd"
+}
+
+## A function that obtains a shell on a legacy jenkins agent
+function jenkins-lg-agent() {
+    # Select jenkins agent by number
+    if [ -z "$1" ]; then
+        echo "Usage: jenkins-lg-agent <agent_number> [cmd]"
+        return 1
+    fi
+
+    # Select command to run
+    cmd="$2"
+    if [ -z "$cmd" ]; then
+        cmd="/bin/bash"
+    fi
+
+    k8sh prod-cicd-jenkins-slave-"$1" prod-cicd-jenkins-slave "$cmd"
+}
+
+export -f k8ns
+export -f k8listns
+export -f k8sh
+export -f jenkins-lg-agent

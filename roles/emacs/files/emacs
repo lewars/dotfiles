@@ -37,6 +37,8 @@
 (add-hook 'text-mode-hook 'text-mode-init)
 (add-hook 'org-mode-hook 'text-mode-init)
 
+(setq-default show-trailing-whitespace t)
+
 (global-set-key "\C-cw" 'whitespace-mode)
 (when (fboundp 'windmove-default-keybindings)
       (windmove-default-keybindings))

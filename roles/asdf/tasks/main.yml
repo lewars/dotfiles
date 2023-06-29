@@ -3,3 +3,11 @@
     repo: https://github.com/asdf-vm/asdf.git
     dest: ~/.asdf
     version: v0.11.3
+- name: Add asdf to PATH
+  lineinfile:
+    path: ~/.bashrc
+    line: |
+      . $HOME/.asdf/asdf.sh
+      . $HOME/.asdf/completions/asdf.bash
+    create: true
+    state: present

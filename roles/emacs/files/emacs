@@ -219,7 +219,7 @@
   (add-hook 'json-mode-hook 'display-line-numbers-mode)
   (add-hook 'json-mode-hook 'display-fill-column-indicator-mode))
 
-  
+
 ;; ======= Language configuration ============
 (add-to-list `auto-mode-alist '("\\.svg\\'" . nxml-mode))
 
@@ -248,7 +248,7 @@
   (add-to-list 'auto-mode-alist '("\.groovy$" . groovy-mode))
   (add-to-list 'auto-mode-alist '("\.gy$" . groovy-mode))
   :config
-  (setf (alist-get "Jenkinsfile$" auto-mode-alist) 'groovy-mode))
+  (setf (alist-get "Jenkinsfile.+$" auto-mode-alist) 'groovy-mode))
 
 (use-package yaml-mode
   :ensure t

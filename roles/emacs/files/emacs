@@ -18,6 +18,15 @@
 (require 'quelpa-use-package)
 
 ;; Misc configs
+(recentf-mode 1)
+(setq recentf-max-menu-items 25)
+(setq recentf-max-saved-items 25)
+(run-at-time nil (* 5 60) 'recentf-save-list)
+
+(global-set-key "\C-x\ \C-r" 'recentf-open-files)
+
+(global-set-key "\C-x\ \C-y" 'find-file-read-only)
+
 (setq-default indent-tabs-mode nil)
 
 (defun my-c-mode-hook ()
@@ -108,8 +117,20 @@
  '(line-number-current-line ((t (:foreground "white"))))
  '(mode-line ((t (:background "#1a2427" :foreground "#8396ac" :box nil))))
  '(mode-line-inactive ((t (:background "#394c55" :foreground "#8396ac" :box nil))))
+ '(org-agenda-dimmed-todo-face ((t (:foreground "dark gray"))))
+ '(org-block-begin-line ((t (:inherit org-block :extend t :background "#222D32" :foreground "SlateGray3"))))
+ '(org-drawer ((t (:foreground "SlateGray3"))))
+ '(org-ellipsis ((t (:foreground "light green" :underline nil))))
  '(org-headline-done ((t (:foreground "gray"))))
- '(org-hide ((t (:foreground "dim gray"))))
+ '(org-hide ((t (:foreground "gray60"))))
+ '(org-meta-line ((t (:foreground "SlateGray3"))))
+ '(org-modern-block-name ((t (:weight semi-light :height 0.8))))
+ '(org-property-value ((t (:foreground "SlateGray3"))) t)
+ '(org-scheduled-today ((t (:foreground "dark gray"))))
+ '(org-special-keyword ((t (:foreground "SlateGray3"))))
+ '(org-tag ((t (:foreground "cyan3" :weight normal))))
+ '(org-time-grid ((t (:foreground "gray80"))))
+ '(org-upcoming-distant-deadline ((t (:foreground "red1"))))
  '(region ((t (:extend t :background "IndianRed4"))))
  '(shadow ((t (:foreground "rosy brown"))))
  '(show-paren-match ((t (:background "dim gray" :foreground "cyan" :weight ultra-bold))))
@@ -464,12 +485,12 @@
  org-tags-column 0
  org-catch-invisible-edits 'show-and-error
  org-special-ctrl-a/e t
- org-insert-heading-respect-content t
+ org-insert-heading-respect-content nil
 
  ;; Org styling, hide markup etc.
  org-hide-emphasis-markers t
  org-pretty-entities t
- org-ellipsis "…"
+ org-ellipsis "▼"
 
  ;; TODO setup
  ;; org-todo-keywords
@@ -490,7 +511,7 @@
  ;;   ("BLOCKED" . org-mode-line-clock-overrun)
  ;;   ("DELEGATE" . org-warning)
  ;;   ("WONT-DO" . org-modern-time-inactive))
- 
+
  ;; Agenda styling
  org-agenda-tags-column 0
  org-agenda-block-separator ?─

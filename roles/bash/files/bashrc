@@ -149,8 +149,11 @@ source "${HOME}/.config/op/plugins.sh"
 
 # shopts
 set +o noclobber
-shopt -u autocd
-shopt -u dirspell
+# if macosx disable autocd and dirspell
+if [[ "$OSTYPE" != "darwin"* ]]; then
+  shopt -s autocd
+  shopt -s dirspell
+fi
 shopt -u histreedit
 shopt -u histverify
 shopt -u lithist
@@ -158,12 +161,13 @@ shopt -u nocaseglob
 shopt -u nocasematch
 
 # aliases
-alias fcd="cd \$(fd --type directory | fzf)"
 alias fpv="fzf --preview 'bat --color=always {}' --preview-window '~3'"
+alias qpv=fpv
 alias fh="fzf --bind 'enter:become(history)'"
 alias fem="fzf --preview 'bat --color=always {}' --preview-window '~3' --bind 'enter:become(emacs {})'"
 alias jf='sudo journalctl --follow'
 alias k=kubectl
+alias fcd=qcd
 
 # completion scripts
 . "$HOME/.asdf/asdf.sh"
@@ -224,7 +228,18 @@ function jenkins-lg-agent() {
     k8sh prod-cicd-jenkins-slave-"$1" prod-cicd-jenkins-slave "$cmd"
 }
 
+## A function that quickly cd's to a directory
+function qcd() {
+    if [ -z "$1" ]; then
+        echo "Usage: qcd <directory>"
+        return 1
+    fi
+
+    cd "$(fd --type directory . "$1" | fzf)" || return 1
+}
+
 export -f k8ns
 export -f k8listns
 export -f k8sh
 export -f jenkins-lg-agent
+export -f qcd

@@ -57,6 +57,12 @@
 (global-set-key (kbd "S-C-<up>") 'enlarge-window)
 (global-set-key (read-kbd-macro "C-x f") 'find-file-at-point)
 
+;; Make windmove work in Org mode:
+(add-hook 'org-shiftup-final-hook 'windmove-up)
+(add-hook 'org-shiftleft-final-hook 'windmove-left)
+(add-hook 'org-shiftdown-final-hook 'windmove-down)
+(add-hook 'org-shiftright-final-hook 'windmove-right)
+
 (setq inhibit-startup-screen t)
 (setq display-time-day-and-date t)
 (display-time-mode t)
@@ -471,6 +477,7 @@
 ;;               ("M-g" . ibuffer-git-filter-by-name)))
 
 (use-package org
+  :init (setq  org-replace-disputed-keys t)
   :ensure t
   :mode (("\\.org$" . org-mode))
   ;; :bind (("s-<down>" . org-shiftdown)
@@ -486,6 +493,9 @@
  org-catch-invisible-edits 'show-and-error
  org-special-ctrl-a/e t
  org-insert-heading-respect-content nil
+ org-startup-indented nil
+ org-adapt-indentation t
+ org-indent-indentation-per-level 0
 
  ;; Org styling, hide markup etc.
  org-hide-emphasis-markers t

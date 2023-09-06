@@ -168,6 +168,9 @@ alias fem="fzf --preview 'bat --color=always {}' --preview-window '~3' --bind 'e
 alias jf='sudo journalctl --follow'
 alias k=kubectl
 alias fcd=qcd
+alias ccbs='cd $HOME/git/cbsi-cbscom'
+alias scbs='qcd $HOME/git/cbsi-cbscom'
+alias fcbs=scbs
 
 # completion scripts
 . "$HOME/.asdf/asdf.sh"

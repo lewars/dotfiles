@@ -57,6 +57,16 @@
 (global-set-key (kbd "S-C-<up>") 'enlarge-window)
 (global-set-key (read-kbd-macro "C-x f") 'find-file-at-point)
 
+;; Setup keybinding for eww
+(defun my-eww-config ()
+    "For use in `eww-mode-hook'."
+    (local-set-key (kbd "^") #'eww-back-url)
+    ;; more here
+    )
+
+(when (fboundp 'eww-mode)
+  (add-hook 'eww-mode-hook 'my-eww-config))
+
 ;; Make windmove work in Org mode:
 (add-hook 'org-shiftup-final-hook 'windmove-up)
 (add-hook 'org-shiftleft-final-hook 'windmove-left)
@@ -91,6 +101,11 @@
 (global-set-key "\M-/" 'hippie-expand)
 (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
 
+;; Configure EAF browser
+;; (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
+;; (require 'eaf)
+;; (require 'eaf-browser)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -115,6 +130,7 @@
  '(cursor ((t (:background "#c792ea"))))
  '(custom-comment ((t (:background "#171F24" :foreground "#EEFFFF"))))
  '(custom-comment-tag ((t (:foreground "dark gray"))))
+ '(doom-themes-treemacs-root-face ((t (:inherit font-lock-string-face :height 0.85))))
  '(font-lock-comment-delimiter-face ((t (:inherit font-lock-comment-face :foreground "light gray"))))
  '(font-lock-comment-face ((t (:foreground "gray"))))
  '(highlight ((t (:background "#c792ea" :foreground "#7d7c8a"))))
@@ -140,12 +156,19 @@
  '(region ((t (:extend t :background "IndianRed4"))))
  '(shadow ((t (:foreground "rosy brown"))))
  '(show-paren-match ((t (:background "dim gray" :foreground "cyan" :weight ultra-bold))))
+ '(treemacs-root-face ((t (:inherit font-lock-string-face :weight bold :height 1.0))))
  '(vertical-border ((t (:background "#1a2427" :foreground "#1a2427")))))
 
 ;; Misc
 (use-package all-the-icons
-  :if (display-graphic-p)
-  :ensure t)
+  :if (display-graphic-p))
+(use-package nerd-icons
+  ;; :custom
+  ;; The Nerd Font you want to use in GUI
+  ;; "Symbols Nerd Font Mono" is the default and is recommended
+  ;; but you can use any other Nerd Font if you want
+  ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
+  )
 
 ;; ========== Developer configurations ===========
 (use-package fzf
@@ -569,7 +592,7 @@
 
     ;; The default width and height of the icons is 22 pixels. If you are
     ;; using a Hi-DPI display, uncomment this to double the icon size.
-    (setq treemacs-resize-icons 22)
+    (setq treemacs-resize-icons 12)
 
     (treemacs-follow-mode t)
     (treemacs-filewatch-mode t)
@@ -705,9 +728,21 @@
 (use-package centaur-tabs
   :demand
   :config
+  (defun my-centaur-tabs-icon-for-ansi-term (original-fn mode &rest args)
+    "Change the face of the icon when MODE is 'ansi-term."
+    (let ((new-args (if (eq mode 'term-mode)
+                        (plist-put args :face 'all-the-icons-purple)
+                      args)))
+      (apply original-fn mode new-args)))
+  (advice-add 'centaur-tabs--icon-for-mode :around #'my-centaur-tabs-icon-for-ansi-term)
+  (setq centaur-tabs-set-modified-marker t
+        centaur-tabs-modified-marker "~"
+        centaur-tabs-set-icons t
+        ;; centaur-tabs-plain-icons t
+        centaur-tabs-gray-out-icons 'buffer
+        centaur-tabs-set-bar 'under)
   (centaur-tabs-mode t)
-  (setq centaur-tabs-set-modified-marker t)
-  (setq centaur-tabs-modified-marker "*")
+
   :bind
   ("s-t" . centaur-tabs--create-new-tab)
   ("s-}" . centaur-tabs-forward)

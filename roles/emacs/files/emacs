@@ -36,7 +36,7 @@
 (setq recentf-max-saved-items 25)
 (run-at-time nil (* 5 60) 'recentf-save-list)
 
-(global-set-key "\C-x\ \C-r" 'recentf-open-files)
+(global-set-key "\C-x\ \C-r" 'fzf-recentf)
 
 (global-set-key "\C-x\ \C-y" 'find-file-read-only)
 
@@ -120,6 +120,9 @@
 (global-set-key "\M-/" 'hippie-expand)
 (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
 
+(add-to-list 'display-buffer-alist
+             '("*Help*" display-buffer-same-window))
+
 ;; Configure EAF browser
 ;; (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
 ;; (require 'eaf)
@@ -136,14 +139,14 @@
  '(frame-background-mode nil)
  '(highlight-indent-guides-method 'bitmap)
  '(imenu-auto-rescan t)
+ '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(package-selected-packages
-   '(centaur-tabs bazel jinja2-mode highlight-symbol org-modern color-theme consult-projectile consult-flycheck direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode org-projectile groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-grammarly flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult elpy doom-themes doom-modeline dockerfile-mode corfu copilot)))
+   '(marginalia centaur-tabs bazel jinja2-mode highlight-symbol org-modern color-theme consult-projectile consult-flycheck direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode org-projectile groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-grammarly flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult elpy doom-themes doom-modeline dockerfile-mode corfu copilot)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- ;; '(default ((t (:height my-default-font-height :foundry "ADBO" :family "Source Code Pro"))))
  '(ansi-color-bright-black ((t (:background "#222D32" :foreground "dark gray"))))
  '(copilot-overlay-face ((t (:foreground "pale violet red"))))
  '(cursor ((t (:background "#c792ea"))))
@@ -192,15 +195,15 @@
 ;; ========== Developer configurations ===========
 (use-package fzf
   :bind
-    ;; Don't forget to set keybinds!
+    ;; TODO(slams): set keybinds
   :config
   (setq fzf/args "-x --print-query --margin=1,0 --no-hscroll"
         fzf/executable "fzf"
         fzf/git-grep-args "-i --line-number %s"
         ;; command used for `fzf-grep-*` functions
         ;; example usage for ripgrep:
-        ;; fzf/grep-command "rg --no-heading -nH"
-        fzf/grep-command "grep -nrH"
+        fzf/grep-command "rg --no-heading -nH"
+        ;; fzf/grep-command "grep -nrH"
         ;; If nil, the fzf buffer will appear at the top of the window
         fzf/position-bottom t
         fzf/window-height 15))
@@ -506,7 +509,7 @@
         (name . "\\*\\(Echo\\|Minibuf\\)"))))))
   (ibuffer-show-empty-filter-groups nil)
   (ibuffer-shrink-to-minimum-size t t)
-  (ibuffer-use-other-window t)
+  (ibuffer-use-other-window nil)
   :init
   (add-hook 'ibuffer-mode-hook
             #'(lambda ()
@@ -594,7 +597,17 @@
   :ensure t)
 
 (use-package magit
-    :ensure t
+  :ensure t
+  :config
+  (defun magit-display-buffer-pop-up-frame (buffer)
+    (if (with-current-buffer buffer (eq major-mode 'magit-status-mode))
+        (display-buffer buffer
+                        '((display-buffer-reuse-window
+                           display-buffer-below-selected)
+                          (reusable-frames . t)))
+      (magit-display-buffer-traditional buffer)))
+
+  (setq magit-display-buffer-function #'magit-display-buffer-pop-up-frame)
 )
 
 (use-package treemacs
@@ -687,14 +700,29 @@
   ;; (setq vertico-scroll-margin 0)
 
   ;; Show more candidates
-  (setq vertico-count 20)
+  (setq vertico-count 10)
 
   ;; Grow and shrink the Vertico minibuffer
-  ;; (setq vertico-resize t)
+  ;; (setq vertico-resize nil)
 
   ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
   (setq vertico-cycle t)
   )
+
+(require 'vertico-posframe)
+(vertico-posframe-mode 1)
+(setq vertico-posframe-parameters
+      '((left-fringe . 8)
+        (right-fringe . 8)))
+
+;; Enable vertico-multiform
+;; (vertico-multiform-mode)
+;; (setq vertico-multiform-commands
+;;       '((consult-imenu buffer indexed)
+;;         (execute-extended-command unobtrusive)))
+;; (setq vertico-multiform-categories
+;;       '((file grid)
+;;         (consult-grep buffer)))
 
 ;; Persist history over Emacs restarts. Vertico sorts by history position.
 (use-package savehist
@@ -766,4 +794,19 @@
   ("s-t" . centaur-tabs--create-new-tab)
   ("s-}" . centaur-tabs-forward)
   ("s-{" . centaur-tabs-backward))
+
+(use-package marginalia
+  ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
+  ;; available in the *Completions* buffer, add it to the
+  ;; `completion-list-mode-map'.
+  :bind (:map minibuffer-local-map
+         ("M-A" . marginalia-cycle))
+
+  ;; The :init section is always executed.
+  :init
+
+  ;; Marginalia must be activated in the :init section of use-package such that
+  ;; the mode gets enabled right away. Note that this forces loading the
+  ;; package.
+  (marginalia-mode))
 ;;; .emacs ends here

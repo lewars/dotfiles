@@ -161,16 +161,17 @@ shopt -u nocaseglob
 shopt -u nocasematch
 
 # aliases
-alias fpv="fzf --preview 'bat --color=always {}' --preview-window '~3'"
-alias qpv=fpv
-alias fh="fzf --bind 'enter:become(history)'"
+alias ccbs='cd $HOME/git/cbsi-cbscom'
+alias fcbs=scbs
+alias fcd=qcd
 alias fem="fzf --preview 'bat --color=always {}' --preview-window '~3' --bind 'enter:become(emacs {})'"
+alias fh="fzf --bind 'enter:become(history)'"
+alias fpv="fzf --preview 'bat --color=always {}' --preview-window '~3'"
+alias g=gcloud
 alias jf='sudo journalctl --follow'
 alias k=kubectl
-alias fcd=qcd
-alias ccbs='cd $HOME/git/cbsi-cbscom'
+alias qpv=fpv
 alias scbs='qcd $HOME/git/cbsi-cbscom'
-alias fcbs=scbs
 
 # completion scripts
 . "$HOME/.asdf/asdf.sh"

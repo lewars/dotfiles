@@ -4,11 +4,22 @@
 
 # Get the aliases and functions
 if [ -f ~/.bashrc ]; then
-    . ~/.bashrc
+     # shellcheck disable=SC1090
+     . ~/.bashrc
 fi
+{% set default_path = '$HOME/bin:$HOME/.local/bin' %}
 
-export GOBIN=$(go env GOPATH)/bin
+{% if ansible_os_family == 'RedHat' %}
+GOBIN=$(go env GOPATH)/bin
+export GOBIN
 export PATH=$HOME/bin:$HOME/.local/bin:$GOBIN:/usr/local/google-cloud-sdk/bin:$PATH
+{% elif ansible_os_family == 'Darwin' %}
+GOBIN=$(go env GOPATH)/bin
+export GOBIN
+export PATH=$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:/usr/local/opt/grep/libexec/gnubin:{{ default_path }}:$GOBIN:/usr/local/google-cloud-sdk/bin:$PATH
+{% else %}
+export PATH={{ default_path }}
+{% endif %}
 export PAGER=less
 export LESS=-iXMr
 export EDITOR=emacs
@@ -19,9 +30,9 @@ export CLOUDSDK_PYTHON=/usr/local/bin/python3.7
 
 # create tmp dir if not present
 export TMPDIR=$HOME/tmp
-[ ! -d $TMPDIR ] && mkdir -p $TMPDIR
+[ ! -d "$TMPDIR" ] && mkdir -p "$TMPDIR"
 
 # The next line enables shell command completion for gcloud.
-if [ -f '${HOME}/bin/google-cloud-sdk/completion.bash.inc' ]; then . '${HOME}/bin/google-cloud-sdk/completion.bash.inc'; fi
+if [ -f "${HOME}/bin/google-cloud-sdk/completion.bash.inc" ]; then . "${HOME}/bin/google-cloud-sdk/completion.bash.inc"; fi
 
 test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"

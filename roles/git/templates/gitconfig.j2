@@ -1,7 +1,5 @@
 [init]
         defaultBranch = main
-# [hub]
-#         protocol = https
 [user]
         name = {{ full_name }}
         email = {{ git_email }}
@@ -46,27 +44,49 @@
 
         remote-branches = "!f() { git ls-remote --heads ${1:origin} | sed 's?.*refs/heads/??'; }; f "
 
-        pre = !sh -c 'git push origin +master:precommit_$(git config --get user.email | sed s,@.*,,)'
-        dbranch = "!f() { test -n \"$1\" && r=\"$1\" || r=origin; \
-              basename \"$(git rev-parse --abbrev-ref \"$r\"/HEAD)\"; }; f"
+	pre = !sh -c 'git push origin +master:precommit_$(git config --get user.email | sed s,@.*,,)'
 [color]
         diff = auto
         status = auto
         branch = auto
         ui = true
 [core]
-        editor = /usr/bin/emacs
+	editor = emacs -nw
         excludesfile = ~/.gitignore_global
+        editor = vim
+[status]
+        short = true
+
 [apply]
         whitespace = warn
-[difftool]
-        prompt = false
+# [mergetool]
+#         keepBackup = false
+# [difftool]
+#         prompt = false
 [push]
-        default = current
+        default = simple
         followTags = true
 [github]
         user = {{ git_user }}
+{% if ansible_os_family == 'RedHat' %}
 [credential "https://github.com"]
-        helper = !/usr/bin/op plugin run -- gh auth git-credential
+	helper = !/usr/bin/op plugin run -- /usr/local/bin/gh auth git-credential
 [credential "https://gist.github.com"]
-        helper = !/usr/bin/op plugin run -- gh auth git-credential
+	helper = !/usr/bin/op plugin run -- /usr/local/bin/gh auth git-credential
+{% elif ansible_os_family == 'Darwin' %}
+[credential "https://github.com"]
+	helper = !/usr/local/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = !/usr/local/bin/gh auth git-credential
+{% endif %}
+[filter "lfs"]
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+{% if ansible_os_family == 'Darwin' %}
+[safe]
+        directory = /Users/yalewa0104/git/cbsi-cbscom/cbssre-jenkins-agent
+{% endif %}
+[hub]
+        protocol = https

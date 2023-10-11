@@ -172,13 +172,29 @@ alias jf='sudo journalctl --follow'
 alias k=kubectl
 alias qpv=fpv
 alias scbs='qcd $HOME/git/cbsi-cbscom'
-
+alias fcbs=scbs
+alias jcli=jenkins-cli
 # completion scripts
 . "$HOME/.asdf/asdf.sh"
 . "$HOME/.asdf/completions/asdf.bash"
 
 # functions
-## A function that changes the k8 context and namespace
+## A function that changes the k8 namespace
+function k8cluster() {
+    if [ -z "$1" ]; then
+        kubectx -c
+        return 0
+    fi
+
+    kubectx "$1"
+}
+
+## A function that list the current namespace
+function k8listcluster() {
+    kubectx
+}
+
+## A function that changes the k8 namespace
 function k8ns() {
     if [ -z "$1" ]; then
         kubectl get namespaces
@@ -215,11 +231,14 @@ function k8sh() {
     kubectl exec -it "$1" -c "$2" -- sh -c $"$cmd"
 }
 
-## A function that obtains a shell on a legacy jenkins agent
-function jenkins-lg-agent() {
+## A generic function that obtains a shell on a jenkins agent
+function jenkins-agent() {
+    # setup namespace
+    k8ns prod-cicd
+
     # Select jenkins agent by number
     if [ -z "$1" ]; then
-        echo "Usage: jenkins-lg-agent <agent_number> [cmd]"
+        echo "Usage: jenkins-can-agent <agent_number> [cmd]"
         return 1
     fi
 
@@ -230,6 +249,19 @@ function jenkins-lg-agent() {
     fi
 
     k8sh prod-cicd-jenkins-slave-"$1" prod-cicd-jenkins-slave "$cmd"
+}
+
+## A function that obtains a shell on a jenkins-ui agent
+function jenkins-ui-agent() {
+    k8cluster gke_i-cbscom-dev_us-central1_pplus-tools-cluster
+    jenkins-agent "$1"
+}
+
+## A function that obtains a shell on a jenkins can agent
+function jenkins-can-agent() {
+    # switch to can cluster
+    k8cluster gke_i-can-dev_us-central1_can-tools-cluster
+    jenkins-agent "$1"
 }
 
 ## A function that quickly cd's to a directory
@@ -245,5 +277,10 @@ function qcd() {
 export -f k8ns
 export -f k8listns
 export -f k8sh
-export -f jenkins-lg-agent
+export -f k8cluster
+export -f k8listcluster
+export -f jenkins-ui-agent
+export -f jenkins-can-agent
 export -f qcd
+. $HOME/.asdf/asdf.sh
+. $HOME/.asdf/completions/asdf.bash

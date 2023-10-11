@@ -1,4 +1,4 @@
-;;; .emacs --- Emacs initalization file
+;;; .emacs --- Emacs initalization file -*- mode: emacs-lisp; lexical-binding: t; -*-
 
 ;; Copyright (C) 1996-2023 Alistair Y. Lewars
 
@@ -37,7 +37,6 @@
 (run-at-time nil (* 5 60) 'recentf-save-list)
 
 (global-set-key "\C-x\ \C-r" 'fzf-recentf)
-
 (global-set-key "\C-x\ \C-y" 'find-file-read-only)
 
 (setq-default indent-tabs-mode nil)
@@ -318,6 +317,7 @@
   :ensure t
   :init
   (add-to-list 'auto-mode-alist '("\.groovy$" . groovy-mode))
+  (add-to-list 'auto-mode-alist '("\.gvy$" . groovy-mode))
   (add-to-list 'auto-mode-alist '("\.gy$" . groovy-mode))
   :config
   (setf (alist-get "Jenkinsfile.+$" auto-mode-alist) 'groovy-mode))
@@ -398,7 +398,7 @@
                    :repo "zerolfx/copilot.el"
                    :branch "main"
                    :files ("dist" "*.el")
-                   :config (setq copilot-idle-delay 1))
+                   :config (setq copilot-idle-delay 6))
   :ensure t
 ;;  :hook (prog-mode . copilot-mode)
   :bind (("M-\\" . copilot-complete)
@@ -487,7 +487,9 @@
       ("Groovy"
        (or
         (mode . groovy-mode)
-        (name . "^\\.groovy")))
+        (name . "^\\.groovy")
+        (name . "^\\.gy")
+        (name . "^\\.gvy")))
       ("Yaml"
        (or
         (mode . yaml-mode)
@@ -539,7 +541,7 @@
  org-special-ctrl-a/e t
  org-insert-heading-respect-content nil
  org-startup-indented nil
- org-adapt-indentation t
+ org-adapt-indentation nil
  org-indent-indentation-per-level 0
 
  ;; Org styling, hide markup etc.

@@ -160,6 +160,12 @@ shopt -u lithist
 shopt -u nocaseglob
 shopt -u nocasematch
 
+# unalias oh-my-bash stuff
+unalias s
+unalias g
+unalias p
+unalias d
+
 # aliases
 alias ccbs='cd $HOME/git/cbsi-cbscom'
 alias fcbs=scbs
@@ -174,6 +180,7 @@ alias qpv=fpv
 alias scbs='qcd $HOME/git/cbsi-cbscom'
 alias fcbs=scbs
 alias jcli=jenkins-cli
+
 # completion scripts
 . "$HOME/.asdf/asdf.sh"
 . "$HOME/.asdf/completions/asdf.bash"

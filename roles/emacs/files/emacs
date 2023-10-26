@@ -17,6 +17,10 @@
 (when (string-equal system-type "gnu/linux")
   (setq ispell-program-name "aspell"))
 
+(setq ispell-dictionary "english")
+(setq ispell-silently-savep t)
+(setq ispell-personal-dictionary (expand-file-name "~/.ispell_english"))
+
 (if (string-equal system-type "gnu/linux")
     (setq my-default-font-height 100)
     (setq my-default-font-height 125))
@@ -32,8 +36,8 @@
 
 ;; Misc configs
 (recentf-mode 1)
-(setq recentf-max-menu-items 25)
-(setq recentf-max-saved-items 25)
+(setq recentf-max-menu-items 50)
+(setq recentf-max-saved-items 50)
 (run-at-time nil (* 5 60) 'recentf-save-list)
 
 (global-set-key "\C-x\ \C-r" 'fzf-recentf)
@@ -140,7 +144,7 @@
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(package-selected-packages
-   '(consult-dir lsp-python-ms lsp-ui lsp-mode marginalia centaur-tabs bazel jinja2-mode highlight-symbol org-modern color-theme consult-projectile consult-flycheck direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode org-projectile groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-grammarly flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult elpy doom-themes doom-modeline dockerfile-mode corfu copilot)))
+   '(nerd-icons-corfu expand-region consult-dir lsp-python-ms lsp-ui lsp-mode marginalia centaur-tabs bazel jinja2-mode highlight-symbol org-modern color-theme consult-projectile consult-flycheck direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode org-projectile groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-grammarly flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult elpy doom-themes doom-modeline dockerfile-mode corfu copilot)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -184,12 +188,13 @@
 ;; Misc
 (use-package all-the-icons
   :if (display-graphic-p))
+
 (use-package nerd-icons
   ;; :custom
   ;; The Nerd Font you want to use in GUI
   ;; "Symbols Nerd Font Mono" is the default and is recommended
   ;; but you can use any other Nerd Font if you want
-  ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
+  ;; (nerd-icons-font-family "FiraCode Nerd Font")
   )
 
 ;; ========== Developer configurations ===========
@@ -234,12 +239,15 @@
   :bind (("M-s" . highlight-symbol-at-point)
          ("M-S" . highlight-symbol-remove-all)))
 
+(use-package expand-region
+  :bind ("C-=" . er/expand-region))
+
 (use-package multiple-cursors
   :ensure t
-  :bind (("C->" . mc/mark-next-like-this)
-         ("C-<" . mc/mark-previous-like-this)
-	 ("C-c C-<" . mc/mark-all-like-this)
-         ("C-c C-/" . mc/mark-all-dwim)))
+  :bind (("C->" . mc/mark-next-like-this-symbol)
+         ("C-<" . mc/mark-previous-like-this-symbol)
+	 ("C-c C->" . mc/mark-all-symbols-like-this)
+         ("C-c C-?" . mc/mark-all-dwim)))
 
 (use-package imenu-list
   :ensure t
@@ -248,10 +256,9 @@
   (setq imenu-list-focus-after-activation nil))
 (global-set-key (kbd "C-'") #'imenu-list-smart-toggle)
 
-
-(use-package imenu-anywhere
-  :ensure t
-  :bind (("C-." . ido-imenu-anywhere)))
+;; (use-package imenu-anywhere
+;;   :ensure t
+;;   :bind (("C-." . ido-imenu-anywhere)))
 
 (use-package bicycle
   :after outline
@@ -365,8 +372,7 @@
   (add-hook 'markdown-mode-hook 'outline-minor-mode)
   (add-hook 'markdown-mode-hook 'highlight-indent-guides-mode)
   (add-hook 'markdown-mode-hook 'hs-minor-mode)
-  (add-hook 'markdown-mode-hook 'display-line-numbers-mode)
-  (add-hook 'markdown-mode-hook 'display-fill-column-indicator-mode))
+  (add-hook 'markdown-mode-hook 'display-line-numbers-mode))
 
 
 ;; Linters
@@ -377,7 +383,7 @@
 
 (with-eval-after-load 'flycheck
   (flycheck-grammarly-setup))
-(setq flycheck-grammarly-check-time 0.8)
+(setq flycheck-grammarly-check-time 1.0)
 
 (use-package flycheck
   :ensure t
@@ -402,7 +408,8 @@
                    :files ("dist" "*.el")
                    :config (setq copilot-idle-delay 6))
   :ensure t
-;;  :hook (prog-mode . copilot-mode)
+  ;;  :hook (prog-mode . copilot-mode)
+  :hook (post-command-hook . copilot-clear-overlay)
   :bind (("M-\\" . copilot-complete)
          :map copilot-completion-map
          ("C-g" . copilot-clear-overlay)
@@ -411,8 +418,6 @@
          ("C-n" . copilot-next-completion)
          ("<tab>" . copilot-accept-completion)
          ("[tab]" . copilot-accept-completion)
-         ("RET" . copilot-accept-completion)
-         ("SPC" . copilot-accept-completion)
          ("C-w" . copilot-accept-completion-by-word)
          ("C-l" . copilot-accept-completion-by-line)))
 
@@ -550,6 +555,11 @@
  org-hide-emphasis-markers t
  org-pretty-entities t
  org-ellipsis "▼"
+
+ ;; Fonts
+ ;; (set-face-attribute 'default nil :family "Iosevka")
+ ;; (set-face-attribute 'variable-pitch nil :family "Iosevka Aile")
+ ;; (set-face-attribute 'org-modern-symbol nil :family "Iosevka")
 
  ;; TODO setup
  ;; org-todo-keywords
@@ -814,12 +824,20 @@
   ;; package.
   (marginalia-mode))
 
+
+
 ;; (use-package lsp-mode
 ;;   :init
 ;;   set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
 ;;   (setq lsp-keymap-prefix "C-c l")
 ;;   :hook ((python-mode . lsp-deferred))
 ;;   :commands (lsp lsp-deferred))
+
+;; (use-package lsp-grammarly
+;;   :ensure t
+;;   :hook (text-mode . (lambda ()
+;;                        (require 'lsp-grammarly)
+;;                        (lsp))))  ; or lsp-deferred
 
 ;; ;; optionally
 ;; (use-package lsp-ui :commands lsp-ui-mode)

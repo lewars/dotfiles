@@ -142,6 +142,8 @@ export LANG=en_US.UTF-8
 
 # Personal Configuration
 
+export LSP_USE_PLISTS=true
+
 # Tooling
 source "${HOME}/.asdf/asdf.sh"
 source <(op completion bash)
@@ -167,9 +169,8 @@ unalias p
 unalias d
 
 # aliases
-alias ccbs='cd $HOME/git/cbsi-cbscom'
-alias fcbs=scbs
 alias fcd=qcd
+
 alias fem="fzf --preview 'bat --color=always {}' --preview-window '~3' --bind 'enter:become(emacs {})'"
 alias fh="fzf --bind 'enter:become(history)'"
 alias fpv="fzf --preview 'bat --color=always {}' --preview-window '~3'"
@@ -177,9 +178,17 @@ alias g=gcloud
 alias jf='sudo journalctl --follow'
 alias k=kubectl
 alias qpv=fpv
+alias jcli=jenkins-cli
+
+# watcher aliases
+alias ccbs='cd $HOME/git/cbsi-cbscom'
 alias scbs='qcd $HOME/git/cbsi-cbscom'
 alias fcbs=scbs
-alias jcli=jenkins-cli
+
+# ?
+alias cans='cd $HOME/git/ansi-anscom'
+alias sans='qcd $HOME/git/ansi-anscom'
+alias fans=sans
 
 # completion scripts
 . "$HOME/.asdf/asdf.sh"

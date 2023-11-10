@@ -566,16 +566,16 @@
 ;;               ("M-g" . ibuffer-git-filter-by-name)))
 
 ;;  org mode html publish post command
- (defun my-org-publish-to-html (plist filename pub-dir)
+(defun my-org-publish-to-html (plist filename pub-dir)
   "Publish an org file to HTML, then run git commit."
   (org-html-publish-to-html plist filename pub-dir)
   (let ((commit-cmd (format "cd %s && git add %s && git commit -m 'Update %s'"
                             (shell-quote-argument pub-dir)
                             (shell-quote-argument (file-relative-name filename pub-dir))
-                            (shell-quote-argument (file-relative-name filename pub-dir)))))
-  (let ((mkdir-p-cmd (format "mkdir -p %s"
-                            (shell-quote-argument pub-dir)))))
-  (shell-command mkdir-p-cmd)
+                            (shell-quote-argument (file-relative-name filename pub-dir))))
+        (mkdir-cmd (format "mkdir -p %s"
+                           (shell-quote-argument pub-dir))))
+  (shell-command mkdir-cmd)
   (shell-command commit-cmd)))
 
 (use-package org
@@ -588,6 +588,7 @@
   ;;        ("s-<right>" . org-shiftright))
   )
 
+(require 'ox-publish)
 ;; Other org-mode setup
 (setq
  ;; Edit settings
@@ -640,33 +641,39 @@
  org-agenda-current-time-string
  "⭠ now ─────────────────────────────────────────────────"
 
-org-publish-project-alist
-'(("learn-org"
+org-publish-project-alist '(("learn-org"
    :base-directory "~/git/learn-org/"
    :publishing-function org-html-publish-to-html
    :publishing-directory "~/git/learn-html"
    :section-numbers nil
    :with-toc t
    :recursive t
-   ;; :html-head "<link rel=\"stylesheet\"
-   ;;                  href=\"../other/mystyle.css\"
-   ;;                  type=\"text/css\"/>"
- 
   )
-  ;; ("project-org"
- 
- ;;  :base-directory "~/git/projects-org"
-  ;;  :publishing-function my-org-publish-to-html
-  ;;  :publishing-directory "~/git/project-html"
-  ;;  :section-numbers nil
-  ;;  :with-toc t
-  ;;  :recursive t
-  ;;  ;; :html-head "<link rel=\"stylesheet\"
-  ;;  ;;                  href=\"../other/mystyle.css\"
-  ;;  ;;                  type=\"text/css\"/>"
-  ;;  ))
-  )
-)
+  ("projects-org"
+  :base-directory "~/git/projects-org"
+   :publishing-function my-org-publish-to-html
+   :publishing-directory "~/git/projects-html"
+   :section-numbers nil
+   :with-toc t
+   :recursive t
+   )
+  ("kb-org"
+  :base-directory "~/git/kb-org"
+   :publishing-function my-org-publish-to-html
+   :publishing-directory "~/git/kb-html"
+   :section-numbers nil
+   :with-toc t
+   :recursive t
+   )
+  ("work-org"
+  :base-directory "~/git/work-org"
+   :publishing-function my-org-publish-to-html
+   :publishing-directory "~/git/work-html"
+   :section-numbers nil
+   :with-toc t
+   :recursive t
+   )
+  ))
 
 (with-eval-after-load 'org (global-org-modern-mode))
 

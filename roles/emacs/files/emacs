@@ -565,6 +565,19 @@
 ;;   :bind (:map ibuffer-mode-map
 ;;               ("M-g" . ibuffer-git-filter-by-name)))
 
+;;  org mode html publish post command
+ (defun my-org-publish-to-html (plist filename pub-dir)
+  "Publish an org file to HTML, then run git commit."
+  (org-html-publish-to-html plist filename pub-dir)
+  (let ((commit-cmd (format "cd %s && git add %s && git commit -m 'Update %s'"
+                            (shell-quote-argument pub-dir)
+                            (shell-quote-argument (file-relative-name filename pub-dir))
+                            (shell-quote-argument (file-relative-name filename pub-dir)))))
+  (let ((mkdir-p-cmd (format "mkdir -p %s"
+                            (shell-quote-argument pub-dir)))))
+  (shell-command mkdir-p-cmd)
+  (shell-command commit-cmd)))
+
 (use-package org
   :init (setq  org-replace-disputed-keys t)
   :ensure t
@@ -638,7 +651,21 @@ org-publish-project-alist
    ;; :html-head "<link rel=\"stylesheet\"
    ;;                  href=\"../other/mystyle.css\"
    ;;                  type=\"text/css\"/>"
-   ))
+ 
+  )
+  ;; ("project-org"
+ 
+ ;;  :base-directory "~/git/projects-org"
+  ;;  :publishing-function my-org-publish-to-html
+  ;;  :publishing-directory "~/git/project-html"
+  ;;  :section-numbers nil
+  ;;  :with-toc t
+  ;;  :recursive t
+  ;;  ;; :html-head "<link rel=\"stylesheet\"
+  ;;  ;;                  href=\"../other/mystyle.css\"
+  ;;  ;;                  type=\"text/css\"/>"
+  ;;  ))
+  )
 )
 
 (with-eval-after-load 'org (global-org-modern-mode))

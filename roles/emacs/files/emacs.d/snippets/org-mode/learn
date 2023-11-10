@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: learn
+# key: ;learn
+# --
+#+title: ${1:title}
+#+date: @today
+
+* Topics
+** Topic ${2:topic}
+- ${3:fact}

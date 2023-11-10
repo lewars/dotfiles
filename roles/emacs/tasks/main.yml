@@ -4,16 +4,16 @@
   become: false
 - name: Back up .emacs configuration
   command: mv ~/.emacs ~/.emacs.bak.{{ ansible_date_time.iso8601 }}
-  when: emacsconfig_stat.stat.exists
+  when: emacsconfig_stat.stat.isreg
   become: false
-- name: Copy .emacs to home folder
+- name: Create a symbolic link of .emacs in home folder
   file:
     src: '{{ dotfiles_home }}/roles/emacs/files/emacs'
     dest: '{{ dotfiles_user_home }}/.emacs'
     owner: '{{ user }}'
-    state: hard
+    state: link
   become: false
-- name: create a symbolic link of a directory
+- name: Create a symbolic link of a directory
   file:
     src: '{{ dotfiles_home }}/roles/emacs/files/emacs.d/snippets'
     dest: '{{ dotfiles_user_home }}/.emacs.d/snippets'

@@ -15,14 +15,30 @@
   (setq image-types (cons 'svg image-types)))
 
 (when (string-equal system-type "gnu/linux")
-  (setq ispell-program-name "aspell"))
+  (defvar ispell-program-name "aspell"))
+
+(defun monitor-name-is-eDP-1 ()
+  "Return t if any monitor is named 'eDP-1'."
+  (seq-some (lambda (monitor)
+              (equal (cdr (assoc 'name monitor)) "eDP-1"))
+            (display-monitor-attributes-list)))
+
+(defun first-monitor-larger-than-3840x2400 ()
+  "Check if the first monitor's geometry has a resolution greater than 3840x2400."
+  (let* ((monitor-attrs (car (display-monitor-attributes-list)))
+         (geometry (cdr (assoc 'geometry monitor-attrs)))
+         (width (nth 2 geometry))
+         (height (nth 3 geometry)))
+    (and (> width 3840) (> height 2400))))
 
 (setq ispell-dictionary "english")
 (setq ispell-silently-savep t)
 (setq ispell-personal-dictionary (expand-file-name "~/.ispell_english"))
 
 (if (string-equal system-type "gnu/linux")
-    (setq my-default-font-height 100)
+    (if (monitor-name-is-eDP-1)
+        (setq my-default-font-height 150)
+      (setq my-default-font-height 100))
     (setq my-default-font-height 125))
 
 (set-face-attribute 'default nil :height my-default-font-height :foundry "ADBO" :family "Source Code Pro")
@@ -44,6 +60,10 @@
 (global-set-key "\C-x\ \C-y" 'find-file-read-only)
 
 (setq-default indent-tabs-mode nil)
+
+(setq explicit-shell-file-name "/bin/bash")
+(eval-after-load "term"
+  '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
 
 (defun my-c-mode-hook ()
   "This hook define hooks for 'c-mode'."
@@ -112,13 +132,13 @@
 (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
 (add-hook 'prod-mode-hook (lambda () (setq-local hl-line-mode t)))
 
-(require 'yasnippet)
-(setq yas-snippet-dirs '("~/.emacs.d/snippets"))
-(setq yas-wrap-around-region t)
+;; (require 'yasnippet)
+;; (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+;; (setq yas-wrap-around-region t)
 
 (yas-global-mode 1)
-;; (yas-reload-all)
-;; (add-hook 'prog-mode-hook #'yas-minor-mode)
+(yas-reload-all)
+(add-hook 'prog-mode-hook #'yas-minor-mode)
 
 (global-set-key "\M-/" 'hippie-expand)
 (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
@@ -130,6 +150,15 @@
 ;; (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
 ;; (require 'eaf)
 ;; (require 'eaf-browser)
+
+(defun my-find-file-symlink-target ()
+  "Follow symlinks for specific files, avoiding the VC prompt."
+  (let ((filename (file-name-nondirectory (buffer-file-name))))
+    (when (or (equal filename ".emacs")
+              (equal filename ".bashrc"))
+      (setq vc-follow-symlinks t))))
+
+(add-hook 'find-file-hook 'my-find-file-symlink-target)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -144,7 +173,8 @@
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(package-selected-packages
-   '(nerd-icons-corfu expand-region consult-dir lsp-python-ms lsp-ui lsp-mode marginalia centaur-tabs bazel jinja2-mode highlight-symbol org-modern color-theme consult-projectile consult-flycheck direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode org-projectile groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-grammarly flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult elpy doom-themes doom-modeline dockerfile-mode corfu copilot)))
+   '(nerd-icons-corfu expand-region lsp-python-ms lsp-mode company-quickhelp tree-sitter-langs tree-sitter ansible-vault ansible-doc ansible consult-yasnippet yasnippet-snippets lsp-treemacs lsp-pyright lsp-ui consult-dir marginalia centaur-tabs bazel jinja2-mode highlight-symbol org-modern color-theme consult-projectile consult-flycheck direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode org-projectile groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-grammarly flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult doom-themes doom-modeline dockerfile-mode corfu copilot))
+ '(warning-suppress-types '((comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -390,7 +420,8 @@
   :init (global-flycheck-mode)
   :bind (("M-n" . flycheck-next-error)
          ("M-p" . flycheck-previous-error))
-  :config (setq-default flycheck-disabled-checkers '(emacs-lisp)))
+  :config (setq-default flycheck-checker-error-threshold 2048))
+;;  :config (setq-default flycheck-disabled-checkers '(emacs-lisp)))
 
 ;; (use-package flycheck-posframe
 ;;   :ensure t
@@ -540,6 +571,7 @@
   ;;        ("s-<right>" . org-shiftright))
   )
 
+;; Other org-mode setup
 (setq
  ;; Edit settings
  org-auto-align-tags nil
@@ -589,7 +621,21 @@
    (800 1000 1200 1400 1600 1800 2000)
    " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
  org-agenda-current-time-string
- "⭠ now ─────────────────────────────────────────────────")
+ "⭠ now ─────────────────────────────────────────────────"
+
+org-publish-project-alist
+'(("learn-org"
+   :base-directory "~/git/learn-org/"
+   :publishing-function org-html-publish-to-html
+   :publishing-directory "~/git/learn-html"
+   :section-numbers nil
+   :with-toc t
+   :recursive t
+   ;; :html-head "<link rel=\"stylesheet\"
+   ;;                  href=\"../other/mystyle.css\"
+   ;;                  type=\"text/css\"/>"
+   ))
+)
 
 (with-eval-after-load 'org (global-org-modern-mode))
 
@@ -776,6 +822,9 @@
   (completion-styles '(partial-completion substring initials flex orderless basic))
   (orderless-component-separator "[ //]+"))
 
+;; (use-package consult-lsp
+;;  :ensure t)
+
 (use-package consult
   :hook (completion-list-mode . consult-preview-at-point-mode)
   :init
@@ -824,38 +873,55 @@
   ;; package.
   (marginalia-mode))
 
+(use-package company
+  :config (setq company-minimum-prefix-length 1
+                company-idle-delay 0.0))
 
+;; Set company mode for all modes exect for a few modes listed below
+(setq company-global-modes '(not text-mode))
 
-;; (use-package lsp-mode
-;;   :init
-;;   set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
-;;   (setq lsp-keymap-prefix "C-c l")
-;;   :hook ((python-mode . lsp-deferred))
-;;   :commands (lsp lsp-deferred))
+(use-package company-box
+  :hook (company-mode . company-box-mode)
+  :config (setq company-box-doc-enable t))
 
-;; (use-package lsp-grammarly
-;;   :ensure t
-;;   :hook (text-mode . (lambda ()
-;;                        (require 'lsp-grammarly)
-;;                        (lsp))))  ; or lsp-deferred
+(company-quickhelp-mode)
 
-;; ;; optionally
-;; (use-package lsp-ui :commands lsp-ui-mode)
-;; ;; if you are helm user
-;; ;; (use-package helm-lsp :commands helm-lsp-workspace-symbol)
-;; ;; if you are ivy user
-;; ;; (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
-;; ;; (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+(require 'tree-sitter)
+(require 'tree-sitter-langs)
 
-;; ;; optionally if you want to use debugger
-;; ;; (use-package dap-mode)
-;; ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+(use-package lsp-mode
+  :ensure t
+  :hook ((terraform-mode . lsp-deferred))
+  :config (setq lsp-enable-links t
+                read-process-output-max (* 4096 4096)
+                gc-cons-threshold 100000000
+                lsp-use-plists t
+                lsp-log-io nil
+                lsp-terraform-ls-enable-show-reference t
+                lsp-semantic-tokens-enable t
+                lsp-semantic-tokens-honor-refresh-requests t
+                lsp-terraform-ls-prefill-required-fields t
+                lsp-ansible-add-on t)
+  :commands (lsp lsp-deferred))
 
-;; ;; LSP servers
-;; (use-package lsp-pyright
-;;   :ensure t
-;;   :hook (python-mode . (lambda ()
-;;                           (require 'lsp-pyright)
-;;                           (lsp))))  ; or lsp-deferred
+(use-package lsp-ui
+  :commands lsp-ui-mode
+  :ensure t
+  :config (setq lsp-ui-sideline-show-diagnostics t
+                lsp-ui-sideline-show-hover t
+                lsp-ui-sideline-show-code-actions t
+                lsp-ui-sideline-update-mode 'line
+                lsp-ui-peek-enable t
+                lsp-ui-peek-show-directory t
+                lsp-ui-doc-enable t
+                lsp-ui-doc-delay 2
+                lsp-ui-doc-show-with-cursor t
+                lsp-ui-doc-position 'top))
+
+(use-package lsp-pyright
+  :ensure t
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-pyright)
+                          (lsp-defferred))))
 
 ;;; .emacs ends here

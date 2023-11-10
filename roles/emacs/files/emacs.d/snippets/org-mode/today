@@ -2,4 +2,4 @@
 # name: today
 # key: @today
 # --
-`(format-time-string "%m-%d-%Y")` $0
+`(format-time-string "%m-%d-%Y")`$0

@@ -2,9 +2,10 @@
 # name: tshoot
 # key: ;tshoot
 # --
-#+title: TSHOOT: ${1:title}
-#+author: ${2:name}
-#+date: ${3:date}
+#+title: ${1:title}
+#+author: @me
+#+date: @today
+#+time: @now
 #+ticket: ${4:ticket}
 
 * Problem

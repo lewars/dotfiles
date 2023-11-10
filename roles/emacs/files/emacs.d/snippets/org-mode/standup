@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: standup
+# key: ;standup
+# --
+#+title: ${1:title}
+#+date: ${2:date}
+
+#+kanban: [[https://paramount.atlassian.net/jira/software/c/projects/PLDSO/boards/3837?assignee=6234a65362dc1e006803ed91][kanban URL]]
+#+sprint: [[https://paramount.atlassian.net/jira/software/c/projects/PLDSO/boards/3836?assignee=6234a65362dc1e006803ed91][Sprint]]
+
+* Status

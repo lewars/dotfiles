@@ -1,0 +1,14 @@
+#+title: foo
+#+date: 
+
+* URLs
+** [[https://paramount.atlassian.net/jira/software/c/projects/PLDSO/boards/3837?assignee=6234a65362dc1e006803ed91][kanban URL]]
+** [[https://paramount.atlassian.net/jira/software/c/projects/PLDSO/boards/3836?assignee=6234a65362dc1e006803ed91][Sprint]]
+
+* Retro
+** Good
+- Making progress on Jenkins migration
+- Group effort
+** Bad
+- Technology not working (when it should) especially around attaching and mounting k8s snapshots volumns and even PersistentVolume in prod
+- Thourough experimentation with novel ways of doing things with our stack before thinking it was done

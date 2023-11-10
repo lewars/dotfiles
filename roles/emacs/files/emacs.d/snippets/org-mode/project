@@ -1,0 +1,24 @@
+# -*- mode: snippet -*-
+# name: project
+# key: ;project
+# --
+#+title: ${1:title}
+#+start: `(format-time-string "%m-%d-%Y")` `(format-time-string "%H:%M:%S")`
+#+due: `(format-time-string "%m-%d-%Y")`$4
+
+#+ticket: ${5:ticket}
+#+repos: ${6:repos}
+#+jenkins: ${7:jenkins_url}
+#+misc: ${8:misc_urls}
+
+* Description
+${9:description}
+
+* Design
+
+* Work
+** TODO $0
+
+* Log
+
+

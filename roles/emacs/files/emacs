@@ -673,6 +673,14 @@ org-publish-project-alist '(("learn-org"
    :with-toc t
    :recursive t
    )
+  ("tshoot-org"
+  :base-directory "~/git/tshoot-org"
+   :publishing-function my-org-publish-to-html
+   :publishing-directory "~/git/tshoot-html"
+   :section-numbers nil
+   :with-toc t
+   :recursive t
+   )
   ))
 
 (with-eval-after-load 'org (global-org-modern-mode))

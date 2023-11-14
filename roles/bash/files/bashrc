@@ -5,6 +5,9 @@ case $- in
     *) return;;
 esac
 
+. $HOME/.asdf/asdf.sh
+. $HOME/.asdf/completions/asdf.bash
+
 # Path to your oh-my-bash installation.
 export OSH="${HOME}/.dotfiles/oh-my-bash"
 
@@ -300,3 +303,4 @@ export -f jenkins-can-agent
 export -f qcd
 . $HOME/.asdf/asdf.sh
 . $HOME/.asdf/completions/asdf.bash
+

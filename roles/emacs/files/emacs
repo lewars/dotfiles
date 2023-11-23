@@ -86,7 +86,12 @@
 
 (defun my-whitespace-mode-hook ()
   "This hook define hooks for text and prog modes."
- (setq show-trailing-whitespace t))
+  (setq show-trailing-whitespace t
+        whitespace-style '(face
+    tabs spaces trailing lines space-before-tab newline
+    indentation empty space-after-tab
+    space-mark tab-mark
+    missing-newline-at-eof)))
 (add-hook 'prog-mode-hook 'my-whitespace-mode-hook)
 (add-hook 'text-mode-hook 'my-whitespace-mode-hook)
 
@@ -174,10 +179,9 @@
  '(highlight-indent-guides-method 'bitmap)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
- '(org-agenda-files
-   '("~/git/project-org/pldso-869-update-jenkins-tools-options-ignore-test-directory-warning/notes.org"))
+ '(org-agenda-files nil)
  '(package-selected-packages
-   '(nerd-icons-corfu expand-region lsp-python-ms lsp-mode company-quickhelp tree-sitter-langs tree-sitter ansible-vault ansible-doc ansible consult-yasnippet yasnippet-snippets lsp-treemacs lsp-pyright lsp-ui consult-dir marginalia centaur-tabs bazel jinja2-mode highlight-symbol org-modern color-theme consult-projectile consult-flycheck direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode org-projectile groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-grammarly flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult doom-themes doom-modeline dockerfile-mode corfu copilot))
+   '(which-key idle-highlight-mode consult company-box lsp-pyright lsp-ui lsp-mode dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region lsp-python-ms company-quickhelp tree-sitter-langs tree-sitter ansible-vault ansible-doc ansible consult-yasnippet yasnippet-snippets lsp-treemacs consult-dir marginalia centaur-tabs bazel jinja2-mode highlight-symbol org-modern color-theme consult-projectile consult-flycheck direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode org-projectile groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-grammarly flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult doom-themes doom-modeline dockerfile-mode corfu copilot))
  '(warning-suppress-types '((comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -267,11 +271,16 @@
 
 (use-package highlight-symbol
   :ensure t
-  :hook (prog-mode . highlight-symbol-mode)
+  ;; :hook (prog-mode . highlight-symbol-mode)
   :config
   (setf highlight-symbol-idle-delay 0)
   :bind (("M-s" . highlight-symbol-at-point)
          ("M-S" . highlight-symbol-remove-all)))
+
+(use-package idle-highlight-mode
+  :config (setq idle-highlight-idle-time 1)
+
+  :hook (prog-mode . idle-highlight-mode))
 
 (use-package expand-region
   :bind ("C-=" . er/expand-region))
@@ -338,7 +347,9 @@
 (add-to-list `auto-mode-alist '("\\.svg\\'" . nxml-mode))
 
 (use-package python-mode
-  :ensure t)
+  :ensure t
+  :config
+  (setq display-fill-column-indicator-column 88))
 
 (use-package pyvenv-auto
   :hook ((python-mode . pyvenv-auto-run)))
@@ -351,7 +362,8 @@
   ;; Set correct Python interpreter
   (setq pyvenv-post-activate-hooks
         (list (lambda ()
-                (setq python-shell-interpreter (concat pyvenv-virtual-env "bin/python3")))))
+                (setq python-shell-interpreter
+                      (concat pyvenv-virtual-env "bin/python3")))))
   (setq pyvenv-post-deactivate-hooks
         (list (lambda ()
                 (setq python-shell-interpreter "python3")))))
@@ -440,8 +452,7 @@
   :quelpa (copilot :fetcher github
                    :repo "zerolfx/copilot.el"
                    :branch "main"
-                   :files ("dist" "*.el")
-                   :config (setq copilot-idle-delay 6))
+                   :files ("dist" "*.el"))
   :ensure t
   ;;  :hook (prog-mode . copilot-mode)
   :hook (post-command-hook . copilot-clear-overlay)
@@ -454,7 +465,8 @@
          ("<tab>" . copilot-accept-completion)
          ("[tab]" . copilot-accept-completion)
          ("C-w" . copilot-accept-completion-by-word)
-         ("C-l" . copilot-accept-completion-by-line)))
+         ("C-l" . copilot-accept-completion-by-line))
+  :config (setq copilot-idle-delay 1.5))
 
 ;; ibuffer
 (use-package ibuffer
@@ -947,7 +959,12 @@ org-publish-project-alist '(("learn-org"
                 lsp-semantic-tokens-enable t
                 lsp-semantic-tokens-honor-refresh-requests t
                 lsp-terraform-ls-prefill-required-fields t
-                lsp-ansible-add-on t)
+                lsp-ansible-add-on t
+                lsp-enable-symbol-highlighting t
+                lsp-groovy-server-file
+                (concat (getenv "HOME") "/.emacs.d/.cache/lsp/groovy-language-server-all.jar")
+                lsp-groovy-classpath
+                (concat (getenv "HOME") "/groovy-language-server/build/libs"))
   :commands (lsp lsp-deferred))
 
 (use-package lsp-ui
@@ -969,5 +986,15 @@ org-publish-project-alist '(("learn-org"
   :hook (python-mode . (lambda ()
                           (require 'lsp-pyright)
                           (lsp-defferred))))
+
+(use-package dashboard
+  :ensure t
+  :config (dashboard-setup-startup-hook)
+          (setq dashboard-display-icons-p t
+                dashboard-icon-type 'nerd-icons
+                dashboard-startup-banner 'logo))
+
+(use-package which-key
+  :ensure t)
 
 ;;; .emacs ends here

@@ -304,3 +304,4 @@ export -f qcd
 . $HOME/.asdf/asdf.sh
 . $HOME/.asdf/completions/asdf.bash
 
+export JAVA_HOME=/usr/local/opt/openjdk

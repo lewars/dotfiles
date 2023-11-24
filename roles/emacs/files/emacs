@@ -74,8 +74,12 @@
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 
+;; Start emacs server
 (if (display-graphic-p)
     '(server-mode t))
+(require 'server)
+(unless (server-running-p)
+  (server-start))
 
 (defun text-mode-init ()
   "This hook define hooks for 'text-mode'."
@@ -995,6 +999,11 @@ org-publish-project-alist '(("learn-org"
                 dashboard-startup-banner 'logo))
 
 (use-package which-key
-  :ensure t)
+  :ensure t
+  :init (which-key-mode)
+  :diminish which-key-mode
+  :config
+  (setq which-key-idle-delay 0.5))
+
 
 ;;; .emacs ends here

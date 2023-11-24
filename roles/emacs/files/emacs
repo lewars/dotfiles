@@ -9,6 +9,17 @@
 
 ;;; Code:
 
+(setq gc-cons-threshold 100000000)
+
+;; Profile emacs startup
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (message "*** Emacs loaded in %s with %d garbage collections."
+                     (format "%.2f seconds"
+                             (float-time
+                              (time-subtract after-init-time before-init-time)))
+                     gcs-done)))
+
 (when (string-equal system-type "darwin")
   ;; TODO(lewars): This is needed to overcome a bug with Emacs <29,
   ;; running on MacOs >=13. Remove when upgrading Emacs 29.
@@ -44,7 +55,9 @@
 (set-face-attribute 'default nil :height my-default-font-height :foundry "ADBO" :family "Source Code Pro")
 
 (require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(add-to-list 'package-archives '(("melpa" . "https://melpa.org/packages/")
+                                 ("org" . "https://orgmode.org/elpa/")
+                                 ("elpa" . "https://elpa.gnu.org/packages/")) t)
 (package-initialize)
 
 (require 'use-package)
@@ -73,6 +86,7 @@
 (set-scroll-bar-mode nil)
 (tool-bar-mode -1)
 (menu-bar-mode -1)
+(setq use-dialog-box nil)
 
 ;; Start emacs server
 (if (display-graphic-p)
@@ -127,7 +141,7 @@
 (setq inhibit-startup-screen t)
 (setq display-time-day-and-date t)
 (display-time-mode t)
-(setq fill-column 79)
+(setq fill-column 80)
 (setq auto-fill-mode t)
 
 (setq mouse-wheel-scroll-amount '(0.01))
@@ -171,6 +185,11 @@
 
 (add-hook 'find-file-hook 'my-find-file-symlink-target)
 
+;; Revert Dired and other buffers
+(setq global-auto-revert-non-file-buffers t)
+;; Revert buffers when the underlying file has changed
+(global-auto-revert-mode 1)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -185,7 +204,7 @@
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files nil)
  '(package-selected-packages
-   '(which-key idle-highlight-mode consult company-box lsp-pyright lsp-ui lsp-mode dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region lsp-python-ms company-quickhelp tree-sitter-langs tree-sitter ansible-vault ansible-doc ansible consult-yasnippet yasnippet-snippets lsp-treemacs consult-dir marginalia centaur-tabs bazel jinja2-mode highlight-symbol org-modern color-theme consult-projectile consult-flycheck direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode org-projectile groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-grammarly flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult doom-themes doom-modeline dockerfile-mode corfu copilot))
+   '(visual-fill-column super-save emojify which-key idle-highlight-mode consult company-box lsp-pyright lsp-ui lsp-mode dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter-langs tree-sitter ansible-vault ansible-doc ansible consult-yasnippet yasnippet-snippets lsp-treemacs consult-dir marginalia centaur-tabs lsp-pyright lsp-ui bazel jinja2-mode highlight-symbol org-modern color-theme consult-projectile consult-flycheck direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode org-projectile groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-grammarly flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult doom-themes doom-modeline dockerfile-mode corfu copilot))
  '(warning-suppress-types '((comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -287,6 +306,7 @@
   :hook (prog-mode . idle-highlight-mode))
 
 (use-package expand-region
+  :ensure t
   :bind ("C-=" . er/expand-region))
 
 (use-package multiple-cursors
@@ -437,7 +457,7 @@
 
 (use-package flycheck
   :ensure t
-  :init (global-flycheck-mode)
+  ;; :init (global-flycheck-mode)
   :bind (("M-n" . flycheck-next-error)
          ("M-p" . flycheck-previous-error))
   :config (setq-default flycheck-checker-error-threshold 2048))
@@ -594,9 +614,17 @@
   (shell-command mkdir-cmd)
   (shell-command commit-cmd)))
 
+(defun al/org-mode-setup ()
+  (org-indent-mode)
+  (variable-pitch-mode 1)
+  (auto-fill-mode 0)
+  (visual-line-mode 1)
+  (diminish org-indent-mode))
+
 (use-package org
-  :init (setq  org-replace-disputed-keys t)
   :ensure t
+  :init (setq  org-replace-disputed-keys t)
+  :hook (org-mode . al/org-mode-visual-fill)
   :mode (("\\.org$" . org-mode))
   ;; :bind (("s-<down>" . org-shiftdown)
   ;;        ("s-<up>" . org-shiftup)
@@ -606,6 +634,7 @@
 
 (require 'ox-publish)
 ;; Other org-mode setup
+;; TODO(alewars): study daviwil org setup
 (setq
  ;; Edit settings
  org-auto-align-tags nil
@@ -616,6 +645,9 @@
  org-startup-indented nil
  org-adapt-indentation nil
  org-indent-indentation-per-level 0
+ org-src-fontify-natively t
+ org-fontify-quote-and-verse-blocks t
+ org-src-tab-acts-natively t
 
  ;; Org styling, hide markup etc.
  org-hide-emphasis-markers t
@@ -956,7 +988,6 @@ org-publish-project-alist '(("learn-org"
   :hook ((terraform-mode . lsp-deferred))
   :config (setq lsp-enable-links t
                 read-process-output-max (* 4096 4096)
-                gc-cons-threshold 100000000
                 lsp-use-plists t
                 lsp-log-io nil
                 lsp-terraform-ls-enable-show-reference t
@@ -1005,5 +1036,26 @@ org-publish-project-alist '(("learn-org"
   :config
   (setq which-key-idle-delay 0.5))
 
+(use-package emojify
+  :ensure t
+  :hook (after-init . global-emojify-mode))
+
+(use-package super-save
+  :ensure t
+  :defer 1
+  :diminish super-save-mode
+  :config
+  (super-save-mode +1)
+  (setq super-save-auto-save-when-idle t))
+
+(defun al/org-mode-visual-fill ()
+  (setq visual-fill-column-width 145
+        visual-fill-column-center-text t)
+  (visual-fill-column-mode 1))
+
+(use-package visual-fill-column
+  :ensure t
+  :defer t
+  :hook (org-mode . al/org-mode-visual-fill))
 
 ;;; .emacs ends here

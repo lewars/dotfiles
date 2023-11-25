@@ -34,7 +34,7 @@
               (equal (cdr (assoc 'name monitor)) "eDP-1"))
             (display-monitor-attributes-list)))
 
-(defun first-monitor-larger-than-3840x2400 ()
+(defun le/first-monitor-larger-than-3840x2400 ()
   "Check if the first monitor's geometry has a resolution greater than 3840x2400."
   (let* ((monitor-attrs (car (display-monitor-attributes-list)))
          (geometry (cdr (assoc 'geometry monitor-attrs)))
@@ -79,11 +79,11 @@
 (eval-after-load "term"
   '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
 
-(defun my-c-mode-hook ()
+(defun le/my-c-mode-hook ()
   "This hook define hooks for 'c-mode'."
   (setq indent-tabs-mode nil))
 
-(add-hook 'c-mode-hook 'my-c-mode-hook)
+(add-hook 'c-mode-hook 'le/my-c-mode-hook)
 (set-scroll-bar-mode nil)
 (tool-bar-mode -1)
 (menu-bar-mode -1)
@@ -96,14 +96,14 @@
 (unless (server-running-p)
   (server-start))
 
-(defun text-mode-init ()
+(defun le/text-mode-init ()
   "This hook define hooks for 'text-mode'."
   (visual-line-mode 1)
   (toggle-word-wrap 1))
-(add-hook 'text-mode-hook 'text-mode-init)
-(add-hook 'org-mode-hook 'text-mode-init)
+(add-hook 'text-mode-hook 'le/text-mode-init)
+(add-hook 'org-mode-hook 'le/text-mode-init)
 
-(defun my-whitespace-mode-hook ()
+(defun le/my-whitespace-mode-hook ()
   "This hook define hooks for text and prog modes."
   (setq show-trailing-whitespace t
         whitespace-style '(face
@@ -111,8 +111,8 @@
     indentation empty space-after-tab
     space-mark tab-mark
     missing-newline-at-eof)))
-(add-hook 'prog-mode-hook 'my-whitespace-mode-hook)
-(add-hook 'text-mode-hook 'my-whitespace-mode-hook)
+(add-hook 'prog-mode-hook 'le/my-whitespace-mode-hook)
+(add-hook 'text-mode-hook 'le/my-whitespace-mode-hook)
 
 (global-set-key "\C-cw" 'whitespace-mode)
 (when (fboundp 'windmove-default-keybindings)
@@ -124,14 +124,14 @@
 (global-set-key (read-kbd-macro "C-x f") 'find-file-at-point)
 
 ;; Setup keybinding for eww
-(defun my-eww-config ()
+(defun le/my-eww-config ()
     "For use in `eww-mode-hook'."
     (local-set-key (kbd "^") #'eww-back-url)
     ;; more here
     )
 
 (when (fboundp 'eww-mode)
-  (add-hook 'eww-mode-hook 'my-eww-config))
+  (add-hook 'eww-mode-hook 'le/my-eww-config))
 
 ;; Make windmove work in Org mode:
 (add-hook 'org-shiftup-final-hook 'windmove-up)
@@ -180,14 +180,14 @@
 ;; (require 'eaf)
 ;; (require 'eaf-browser)
 
-(defun my-find-file-symlink-target ()
+(defun le/my-find-file-symlink-target ()
   "Follow symlinks for specific files, avoiding the VC prompt."
   (let ((filename (file-name-nondirectory (buffer-file-name))))
     (when (or (equal filename ".emacs")
               (equal filename ".bashrc"))
       (setq vc-follow-symlinks t))))
 
-(add-hook 'find-file-hook 'my-find-file-symlink-target)
+(add-hook 'find-file-hook 'le/my-find-file-symlink-target)
 
 ;; Revert Dired and other buffers
 (setq global-auto-revert-non-file-buffers t)
@@ -606,7 +606,7 @@
 ;;               ("M-g" . ibuffer-git-filter-by-name)))
 
 ;;  org mode html publish post command
-(defun my-org-publish-to-html (plist filename pub-dir)
+(defun le/my-org-publish-to-html (plist filename pub-dir)
   "Publish an org file to HTML, then run git commit."
   (org-html-publish-to-html plist filename pub-dir)
   (let ((commit-cmd (format "cd %s && git add %s && git commit -m 'Update %s'"
@@ -618,7 +618,7 @@
   (shell-command mkdir-cmd)
   (shell-command commit-cmd)))
 
-(defun al/org-mode-setup ()
+(defun le/org-mode-setup ()
   (org-indent-mode)
   (variable-pitch-mode 1)
   (auto-fill-mode 0)
@@ -628,7 +628,7 @@
 (use-package org
   :ensure t
   :init (setq  org-replace-disputed-keys t)
-  :hook (org-mode . al/org-mode-visual-fill)
+  :hook (org-mode . le/org-mode-visual-fill)
   :mode (("\\.org$" . org-mode))
   ;; :bind (("s-<down>" . org-shiftdown)
   ;;        ("s-<up>" . org-shiftup)
@@ -703,7 +703,7 @@ org-publish-project-alist '(("learn-org"
   )
   ("projects-org"
   :base-directory "~/git/projects-org"
-   :publishing-function my-org-publish-to-html
+   :publishing-function le/my-org-publish-to-html
    :publishing-directory "~/git/projects-html"
    :section-numbers nil
    :with-toc t
@@ -711,7 +711,7 @@ org-publish-project-alist '(("learn-org"
    )
   ("kb-org"
   :base-directory "~/git/kb-org"
-   :publishing-function my-org-publish-to-html
+   :publishing-function le/my-org-publish-to-html
    :publishing-directory "~/git/kb-html"
    :section-numbers nil
    :with-toc t
@@ -719,7 +719,7 @@ org-publish-project-alist '(("learn-org"
    )
   ("work-org"
   :base-directory "~/git/work-org"
-   :publishing-function my-org-publish-to-html
+   :publishing-function le/my-org-publish-to-html
    :publishing-directory "~/git/work-html"
    :section-numbers nil
    :with-toc t
@@ -727,7 +727,7 @@ org-publish-project-alist '(("learn-org"
    )
   ("tshoot-org"
   :base-directory "~/git/tshoot-org"
-   :publishing-function my-org-publish-to-html
+   :publishing-function le/my-org-publish-to-html
    :publishing-directory "~/git/tshoot-html"
    :section-numbers nil
    :with-toc t
@@ -811,7 +811,9 @@ org-publish-project-alist '(("learn-org"
 ;; UI
 ;; Configure doom-modeline
 (use-package doom-modeline
+  :ensure t
   :init (setq doom-modeline-support-imenu t)
+  :after eshell
   :config (setq doom-modeline-icon t
                 doom-modeline-major-mode-icon t
                 doom-modeline-major-mode-color-icon t
@@ -822,10 +824,8 @@ org-publish-project-alist '(("learn-org"
                 doom-modeline-github t
                 doom-modeline-modal t
                 doom-modeline-modal-icon t
-                doom-modeline-github t
                 doom-modeline-vcs-max-length 24
                 doom-modeline-buffer-file-name-style 'truncate-with-project)
-  :ensure t
   :hook (after-init . doom-modeline-mode))
 (add-hook 'after-init-hook #'doom-modeline-mode)
 
@@ -858,7 +858,7 @@ org-publish-project-alist '(("learn-org"
   ;; (setq vertico-scroll-margin 0)
 
   ;; Show more candidates
-  (setq vertico-count 10)
+  (setq vertico-count 15)
 
   ;; Grow and shrink the Vertico minibuffer
   ;; (setq vertico-resize nil)
@@ -951,13 +951,13 @@ org-publish-project-alist '(("learn-org"
 (use-package centaur-tabs
   :demand
   :config
-  (defun my-centaur-tabs-icon-for-ansi-term (original-fn mode &rest args)
+  (defun le/my-centaur-tabs-icon-for-ansi-term (original-fn mode &rest args)
     "Change the face of the icon when MODE is 'ansi-term."
     (let ((new-args (if (eq mode 'term-mode)
                         (plist-put args :face 'all-the-icons-purple)
                       args)))
       (apply original-fn mode new-args)))
-  (advice-add 'centaur-tabs--icon-for-mode :around #'my-centaur-tabs-icon-for-ansi-term)
+  (advice-add 'centaur-tabs--icon-for-mode :around #'le/my-centaur-tabs-icon-for-ansi-term)
   (setq centaur-tabs-set-modified-marker t
         centaur-tabs-modified-marker "~"
         centaur-tabs-set-icons t
@@ -1067,7 +1067,7 @@ org-publish-project-alist '(("learn-org"
   (super-save-mode +1)
   (setq super-save-auto-save-when-idle t))
 
-(defun al/org-mode-visual-fill ()
+(defun le/org-mode-visual-fill ()
   (setq visual-fill-column-width 145
         visual-fill-column-center-text t)
   (visual-fill-column-mode 1))

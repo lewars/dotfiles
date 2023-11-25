@@ -871,13 +871,28 @@ org-publish-project-alist '(("learn-org"
         (right-fringe . 8)))
 
 ;; Enable vertico-multiform
-;; (vertico-multiform-mode)
-;; (setq vertico-multiform-commands
-;;       '((consult-imenu buffer indexed)
-;;         (execute-extended-command unobtrusive)))
-;; (setq vertico-multiform-categories
-;;       '((file grid)
-;;         (consult-grep buffer)))
+(setq vertico-multiform-commands
+      '((consult-line
+         posframe
+         (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
+         (vertico-posframe-border-width . 5)
+         (vertico-posframe-fallback-mode . vertico-buffer-mode))
+        (consult-grep
+         posframe
+         (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
+         (vertico-posframe-border-width . 5)
+         (vertico-posframe-fallback-mode . vertico-buffer-mode))
+        (consult-imenu
+         posframe
+         (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
+         (vertico-posframe-border-width . 5)
+         (vertico-posframe-fallback-mode . vertico-buffer-mode))
+        (t posframe)
+        (execute-extended-command unobtrusive)))
+(setq vertico-multiform-categories
+      '((file grid)))
+
+(vertico-multiform-mode 1)
 
 ;; Persist history over Emacs restarts. Vertico sorts by history position.
 (use-package savehist

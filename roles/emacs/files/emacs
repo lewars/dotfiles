@@ -22,7 +22,7 @@
 
 (when (string-equal system-type "darwin")
   ;; TODO(lewars): This is needed to overcome a bug with Emacs <29,
-  ;; running on MacOs >=13. Remove when upgrading Emacs 29.
+  ;; running on MacOs >=13. Remove when upgrading Emacs to 29.
   (setq image-types (cons 'svg image-types)))
 
 (when (string-equal system-type "gnu/linux")
@@ -153,7 +153,10 @@
 (add-hook 'prog-mode-hook 'outline-minor-mode)
 (add-hook 'prog-mode-hook 'hs-minor-mode)
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-(add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
+(dolist (mode '(text-mode-hook
+                prog-mode-hook
+                conf-mode-hook))
+  (add-hook mode (lambda () (display-fill-column-indicator-mode 1))))
 (add-hook 'prod-mode-hook (lambda () (setq-local hl-line-mode t)))
 
 (require 'yasnippet)
@@ -205,7 +208,7 @@
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files nil)
  '(package-selected-packages
-   '(visual-fill-column super-save emojify which-key idle-highlight-mode consult company-box lsp-pyright lsp-ui lsp-mode dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter-langs tree-sitter ansible-vault ansible-doc ansible consult-yasnippet yasnippet-snippets lsp-treemacs consult-dir marginalia centaur-tabs lsp-pyright lsp-ui bazel jinja2-mode highlight-symbol org-modern color-theme consult-projectile consult-flycheck direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode org-projectile groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-grammarly flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult doom-themes doom-modeline dockerfile-mode corfu copilot))
+   '(origami visual-fill-column super-save emojify which-key idle-highlight-mode consult company-box lsp-pyright lsp-ui lsp-mode dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter-langs tree-sitter ansible-vault ansible-doc ansible consult-yasnippet yasnippet-snippets lsp-treemacs consult-dir marginalia centaur-tabs lsp-pyright lsp-ui bazel jinja2-mode highlight-symbol org-modern color-theme consult-projectile consult-flycheck direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode org-projectile groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult doom-themes doom-modeline dockerfile-mode corfu copilot))
  '(warning-suppress-types '((comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -302,8 +305,8 @@
          ("M-S" . highlight-symbol-remove-all)))
 
 (use-package idle-highlight-mode
+  :ensure t
   :config (setq idle-highlight-idle-time 1)
-
   :hook (prog-mode . idle-highlight-mode))
 
 (use-package expand-region
@@ -1072,6 +1075,10 @@ org-publish-project-alist '(("learn-org"
 (use-package visual-fill-column
   :ensure t
   :defer t
-  :hook (org-mode . al/org-mode-visual-fill))
+  :hook (org-mode . le/org-mode-visual-fill))
+
+(use-package origami
+  :ensure t
+  :hook (yaml-mode . origami-mode))
 
 ;;; .emacs ends here

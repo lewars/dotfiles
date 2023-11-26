@@ -56,7 +56,6 @@
 
 (require 'package)
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")
                          ("elpa" . "https://elpa.gnu.org/packages/")))
 
 (package-initialize)
@@ -96,12 +95,14 @@
 (unless (server-running-p)
   (server-start))
 
+;; set toggle-word-wrap to default to nil
+;; (setq-default toggle-word-wrap nil)
+
 (defun le/text-mode-init ()
   "This hook define hooks for 'text-mode'."
-  (visual-line-mode 1)
-  (toggle-word-wrap 1))
+  (toggle-word-wrap 1)
+  (visual-line-mode 1))
 (add-hook 'text-mode-hook 'le/text-mode-init)
-(add-hook 'org-mode-hook 'le/text-mode-init)
 
 (defun le/my-whitespace-mode-hook ()
   "This hook define hooks for text and prog modes."
@@ -156,7 +157,7 @@
 (dolist (mode '(text-mode-hook
                 prog-mode-hook
                 conf-mode-hook))
-  (add-hook mode (lambda () (display-fill-column-indicator-mode 1))))
+  (add-hook mode (lambda () (display-fill-column-indicator-mode 120))))
 (add-hook 'prod-mode-hook (lambda () (setq-local hl-line-mode t)))
 
 (require 'yasnippet)
@@ -174,6 +175,15 @@
 
 (add-to-list 'display-buffer-alist
              '("*Help*" display-buffer-same-window))
+
+;;  TODO: look into shakeles (https://depp.brause.cc/shackle/)
+(add-to-list 'display-buffer-alist
+             `(,(rx bos "*Flycheck errors*" eos)
+              (display-buffer-reuse-window
+               display-buffer-in-side-window)
+              (side            . bottom)
+              (reusable-frames . visible)
+              (window-height   . 0.128)))
 
 ;; Configure EAF browser
 ;; (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
@@ -194,6 +204,12 @@
 ;; Revert buffers when the underlying file has changed
 (global-auto-revert-mode 1)
 
+;; Setup Dired Git integration
+(add-hook 'dired-mode-hook 'dired-git-mode)
+
+;; Setup dired-single
+(require 'dired-single)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -206,9 +222,8 @@
  '(highlight-indent-guides-method 'bitmap)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
- '(org-agenda-files nil)
  '(package-selected-packages
-   '(origami visual-fill-column super-save emojify which-key idle-highlight-mode consult company-box lsp-pyright lsp-ui lsp-mode dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter-langs tree-sitter ansible-vault ansible-doc ansible consult-yasnippet yasnippet-snippets lsp-treemacs consult-dir marginalia centaur-tabs lsp-pyright lsp-ui bazel jinja2-mode highlight-symbol org-modern color-theme consult-projectile consult-flycheck direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode org-projectile groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult doom-themes doom-modeline dockerfile-mode corfu copilot))
+   '(org-modern consult-lsp helpful org-make-toc diminish nerd-icons-dired dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode consult company-box lsp-pyright lsp-ui lsp-mode dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible consult-yasnippet yasnippet-snippets lsp-treemacs consult-dir marginalia centaur-tabs lsp-pyright lsp-ui bazel jinja2-mode highlight-symbol color-theme consult-projectile consult-flycheck direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult doom-themes doom-modeline dockerfile-mode corfu copilot))
  '(warning-suppress-types '((comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -223,6 +238,7 @@
  '(doom-themes-treemacs-root-face ((t (:inherit font-lock-string-face :height 0.85))))
  '(font-lock-comment-delimiter-face ((t (:inherit font-lock-comment-face :foreground "light gray"))))
  '(font-lock-comment-face ((t (:foreground "gray"))))
+ '(fringe ((t (:inherit default :foreground "medium aquamarine"))))
  '(highlight ((t (:background "#c792ea" :foreground "#7d7c8a"))))
  '(highlight-symbol-face ((t (:background "#5a5400"))))
  '(ido-only-match ((t (:foreground "SpringGreen3"))))
@@ -349,17 +365,6 @@
   :after (treemacs projectile)
   :ensure t)
 
-(use-package org-projectile
-  :bind (("C-c n p" . org-projectile-project-todo-completing-read)
-         ("C-c c" . org-capture))
-  :config
-  (progn
-    (setq org-projectile-projects-file
-          (expand-file-name "~/git/projects-org"))
-    (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
-    (push (org-projectile-project-todo-entry) org-capture-templates))
-  :ensure t)
-
 (use-package json
   :ensure t
   :config
@@ -368,7 +373,7 @@
   (add-hook 'json-mode-hook 'highlight-indent-guides-mode)
   (add-hook 'json-mode-hook 'hs-minor-mode)
   (add-hook 'json-mode-hook 'display-line-numbers-mode)
-  (add-hook 'json-mode-hook 'display-fill-column-indicator-mode))
+  (add-hook 'json-mode-hook (lambda () (display-fill-column-indicator-mode 120))))
 
 
 ;; ======= Language configuration ============
@@ -376,8 +381,7 @@
 
 (use-package python-mode
   :ensure t
-  :config
-  (setq display-fill-column-indicator-column 88))
+  :hook (python-mode . (lambda () (display-fill-column-indicator-mode 88))))
 
 (use-package pyvenv-auto
   :hook ((python-mode . pyvenv-auto-run)))
@@ -418,7 +422,7 @@
   (add-hook 'yaml-mode-hook 'outline-minor-mode)
   (add-hook 'yaml-mode-hook 'hs-minor-mode)
   (add-hook 'yaml-mode-hook 'display-line-numbers-mode)
-  (add-hook 'yaml-mode-hook 'display-fill-column-indicator-mode))
+  (add-hook 'yaml-mode-hook (lambda () (display-fill-column-indicator-mode 120))))
 
 (use-package terraform-mode
   :ensure t
@@ -433,7 +437,7 @@
   (add-hook 'terraform-mode-hook 'highlight-indent-guides-mode)
   (add-hook 'terraform-mode-hook 'hs-minor-mode)
   (add-hook 'terraform-mode-hook 'display-line-numbers-mode)
-  (add-hook 'terraform-mode-hook 'display-fill-column-indicator-mode))
+  (add-hook 'terraform-mode-hook (lambda () (display-fill-column-indicator-mode 120))))
 
 (use-package markdown-mode
   :ensure t
@@ -465,6 +469,7 @@
   :bind (("M-n" . flycheck-next-error)
          ("M-p" . flycheck-previous-error))
   :config (setq-default flycheck-checker-error-threshold 2048))
+
 ;;  :config (setq-default flycheck-disabled-checkers '(emacs-lisp)))
 
 ;; (use-package flycheck-posframe
@@ -482,7 +487,6 @@
                    :branch "main"
                    :files ("dist" "*.el"))
   :ensure t
-  ;;  :hook (prog-mode . copilot-mode)
   :hook (post-command-hook . copilot-clear-overlay)
   :bind (("M-\\" . copilot-complete)
          :map copilot-completion-map
@@ -618,126 +622,182 @@
   (shell-command mkdir-cmd)
   (shell-command commit-cmd)))
 
+(defun le/org-mode-visual-fill ()
+  (setq visual-fill-column-width 110
+        visual-fill-column-center-text t)
+  (visual-fill-column-mode 1))
+
+(use-package visual-fill-column
+  :ensure t
+  :defer t
+  :hook (org-mode . le/org-mode-visual-fill))
+
+(add-hook 'visual-line-mode-hook #'visual-fill-column-mode)
+
 (defun le/org-mode-setup ()
   (org-indent-mode)
   (variable-pitch-mode 1)
   (auto-fill-mode 0)
   (visual-line-mode 1)
-  (diminish org-indent-mode))
+  (diminish org-indent-mode)
+  )
 
 (use-package org
-  :ensure t
+  :defer t
   :init (setq  org-replace-disputed-keys t)
-  :hook (org-mode . le/org-mode-visual-fill)
+  :hook (org-mode . le/org-mode-setup)
   :mode (("\\.org$" . org-mode))
-  ;; :bind (("s-<down>" . org-shiftdown)
-  ;;        ("s-<up>" . org-shiftup)
-  ;;        ("s-<left>" . org-shiftleft)
-  ;;        ("s-<right>" . org-shiftright))
-  )
+  :config
+  (setq
+   ;; Edit settings
+   org-auto-align-tags nil
+   org-catch-invisible-edits 'show-and-error
+   org-cycle-separator-lines 2
+   org-edit-src-content-indentation 2
+   org-fontify-quote-and-verse-blocks t
+   org-hide-block-startup nil
+   org-indent-indentation-per-level 0
+   org-insert-heading-respect-content nil
+   org-special-ctrl-a/e t
+   org-src-fontify-natively t
+   org-src-preserve-indentation nil
+   org-src-tab-acts-natively t
+   org-startup-folded 'content
+   org-startup-indented nil
+   org-tags-column 0
+
+   ;; Org styling, hide markup etc.
+   org-hide-emphasis-markers t
+   org-pretty-entities t
+   org-ellipsis "▼"
+
+   ;; TODO setup
+   ;; org-todo-keywords
+   ;; '((sequence "TODO(t)" "IN-PROGRESS(p)" "IN-REVIEW(r)" "WAITING(w)" "BLOCKED(b)" "|" "DONE(d)" "DELEGATE(D)"))
+   org-todo-keywords
+   '((sequence "TODO" "IN-PROGRESS" "IN-REVIEW" "WAITING" "BLOCKED" "|" "DONE" "DELEGATE" "WONT-DO"))
+
+   org-modern-todo-faces
+   '(("IN-PROGRESS" . (:forground "blue" :weight bold))
+     ("IN-REVIEW" . org-verbatim)
+     ("WAITING" . org-warning)
+     ("BLOCKED" . org-mode-line-clock-overrun)
+     ("DELEGATE" . org-warning)
+     ("WONT-DO" . org-modern-time-inactive))
+
+   ;; Agenda styling
+   org-agenda-tags-column 0
+   org-agenda-block-separator ?─
+   org-agenda-time-grid
+   '((daily today require-timed)
+     (800 1000 1200 1400 1600 1800 2000)
+     " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+   org-agenda-current-time-string
+   "⭠ now ─────────────────────────────────────────────────"
+   org-agenda-files (list "~/git/projects-org/project.org"
+                          "~/git/work-org/general/gtd.org"
+                          "~/git/learn-org/gtd.org")
+   org-publish-project-alist
+   '(("learn-org"
+      :base-directory "~/git/learn-org/"
+      :publishing-function org-html-publish-to-html
+      :publishing-directory "~/git/learn-html"
+      :section-numbers nil
+      :with-toc t
+      :recursive t
+      )
+     ("projects-org"
+      :base-directory "~/git/projects-org"
+      :publishing-function le/my-org-publish-to-html
+      :publishing-directory "~/git/projects-html"
+      :section-numbers nil
+      :with-toc t
+      :recursive t
+      )
+     ("kb-org"
+      :base-directory "~/git/kb-org"
+      :publishing-function le/my-org-publish-to-html
+      :publishing-directory "~/git/kb-html"
+      :section-numbers nil
+      :with-toc t
+      :recursive t
+      )
+     ("work-org"
+      :base-directory "~/git/work-org"
+      :publishing-function le/my-org-publish-to-html
+      :publishing-directory "~/git/work-html"
+      :section-numbers nil
+      :with-toc t
+      :recursive t
+      )
+     ("tshoot-org"
+      :base-directory "~/git/tshoot-org"
+      :publishing-function le/my-org-publish-to-html
+      :publishing-directory "~/git/tshoot-html"
+      :section-numbers nil
+      :with-toc t
+      :recursive t)))
+
+(setq org-modules
+        '(org-habit
+          org-bookmark
+          org-eshell))
+
+  (setq org-refile-targets '((nil :maxlevel . 1)
+                             (org-agenda-files :maxlevel . 1)))
+
+  (setq org-outline-path-complete-in-steps nil)
+  (setq org-refile-use-outline-path t)
+
+  (org-babel-do-load-languages
+    'org-babel-load-languages
+    '((emacs-lisp . t)
+      (python . t)
+      (makefile . t)
+      (css . t)
+      (eshell . t)
+      (dot . t)
+      (java . t)
+      (js . t)
+      (perl . t)
+      (processing . t)
+      (sql . t)
+      (sqlite . t)
+      (org . t)
+      (shell . t)
+      (C . t)
+      (sed . t)))
+  (push '("conf-unix" . conf-unix) org-src-lang-modes))
+
+;; Show hidden emphasis markers
+;; (use-package org-appear
+;;   :hook (org-mode . org-appear-mode))
 
 (require 'ox-publish)
 ;; Other org-mode setup
 ;; TODO(alewars): study daviwil org setup
-(setq
- ;; Edit settings
- org-auto-align-tags nil
- org-tags-column 0
- org-catch-invisible-edits 'show-and-error
- org-special-ctrl-a/e t
- org-insert-heading-respect-content nil
- org-startup-indented nil
- org-adapt-indentation nil
- org-indent-indentation-per-level 0
- org-src-fontify-natively t
- org-fontify-quote-and-verse-blocks t
- org-src-tab-acts-natively t
 
- ;; Org styling, hide markup etc.
- org-hide-emphasis-markers t
- org-pretty-entities t
- org-ellipsis "▼"
+;; (use-package org-modern
+;;  :ensure t)
 
- ;; Fonts
- ;; (set-face-attribute 'default nil :family "Iosevka")
- ;; (set-face-attribute 'variable-pitch nil :family "Iosevka Aile")
- ;; (set-face-attribute 'org-modern-symbol nil :family "Iosevka")
+;; (with-eval-after-load 'org (global-org-modern-mode))
 
- ;; TODO setup
- ;; org-todo-keywords
- ;; '((sequence "TODO(t)" "IN-PROGRESS(p)" "IN-REVIEW(r)" "WAITING(w)" "BLOCKED(b)" "|" "DONE(d)" "DELEGATE(D)"))
- org-todo-keywords
- '((sequence "TODO" "IN-PROGRESS" "IN-REVIEW" "WAITING" "BLOCKED" "|" "DONE" "DELEGATE" "WONT-DO"))
+;; (global-org-modern-mode)
 
- org-modern-todo-faces
- '(("IN-PROGRESS" . (:forground "blue" :weight bold))
-   ("IN-REVIEW" . org-verbatim)
-   ("WAITING" . org-warning)
-   ("BLOCKED" . org-mode-line-clock-overrun)
-   ("DELEGATE" . org-warning)
-   ("WONT-DO" . org-modern-time-inactive))
- ;; '(("IN-PROGRESS" . org-clock-overlay)
- ;;   ("IN-REVIEW" . org-verbatim)
- ;;   ("WAITING" . org-warning)
- ;;   ("BLOCKED" . org-mode-line-clock-overrun)
- ;;   ("DELEGATE" . org-warning)
- ;;   ("WONT-DO" . org-modern-time-inactive))
+(use-package org-superstar
+  :ensure t
+  :after org
+  :hook (org-mode . org-superstar-mode)
+  :custom
+  (org-superstar-remove-leading-stars t)
+  (org-superstar-headline-bullets-list '("◉" "○" "●" "○" "●" "○" "●")))
 
- ;; Agenda styling
- org-agenda-tags-column 0
- org-agenda-block-separator ?─
- org-agenda-time-grid
- '((daily today require-timed)
-   (800 1000 1200 1400 1600 1800 2000)
-   " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
- org-agenda-current-time-string
- "⭠ now ─────────────────────────────────────────────────"
+;; Org font settings
+;; (set-face-attribute 'org-default nil :font "Iosevka Aile" :weight 'bold :height 1.5)
 
-org-publish-project-alist '(("learn-org"
-   :base-directory "~/git/learn-org/"
-   :publishing-function org-html-publish-to-html
-   :publishing-directory "~/git/learn-html"
-   :section-numbers nil
-   :with-toc t
-   :recursive t
-  )
-  ("projects-org"
-  :base-directory "~/git/projects-org"
-   :publishing-function le/my-org-publish-to-html
-   :publishing-directory "~/git/projects-html"
-   :section-numbers nil
-   :with-toc t
-   :recursive t
-   )
-  ("kb-org"
-  :base-directory "~/git/kb-org"
-   :publishing-function le/my-org-publish-to-html
-   :publishing-directory "~/git/kb-html"
-   :section-numbers nil
-   :with-toc t
-   :recursive t
-   )
-  ("work-org"
-  :base-directory "~/git/work-org"
-   :publishing-function le/my-org-publish-to-html
-   :publishing-directory "~/git/work-html"
-   :section-numbers nil
-   :with-toc t
-   :recursive t
-   )
-  ("tshoot-org"
-  :base-directory "~/git/tshoot-org"
-   :publishing-function le/my-org-publish-to-html
-   :publishing-directory "~/git/tshoot-html"
-   :section-numbers nil
-   :with-toc t
-   :recursive t
-   )
-  ))
-
-(with-eval-after-load 'org (global-org-modern-mode))
-
-(global-org-modern-mode)
+(use-package org-make-toc
+  :ensure t
+  :hook (org-mode . org-make-toc-mode))
 
 (require 'ox-md)
 
@@ -749,10 +809,11 @@ org-publish-project-alist '(("learn-org"
          ("C-c c" . org-capture))
   :config
   (progn
-    (setq org-projectile-projects-file (concat (getenv "HOME") "/git/proj.orgs"))
+    (setq org-projectile-projects-file
+          (expand-file-name "~/git/projects-org/project.org"))
     (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
-    (push (org-projectile-project-todo-entry) org-capture-templates))
-  :ensure t)
+    (push (org-projectile-project-todo-entry) org-capture-templates)))
+
 
 (use-package magit
   :ensure t
@@ -827,7 +888,7 @@ org-publish-project-alist '(("learn-org"
                 doom-modeline-vcs-max-length 24
                 doom-modeline-buffer-file-name-style 'truncate-with-project)
   :hook (after-init . doom-modeline-mode))
-(add-hook 'after-init-hook #'doom-modeline-mode)
+;; (add-hook 'after-init-hook #'doom-modeline-mode)
 
 (use-package jinja2-mode
   :ensure t)
@@ -999,8 +1060,8 @@ org-publish-project-alist '(("learn-org"
 
 (company-quickhelp-mode)
 
-(require 'tree-sitter)
-(require 'tree-sitter-langs)
+;; (require 'tree-sitter)
+;; (require 'tree-sitter-langs)
 
 (use-package lsp-mode
   :ensure t
@@ -1059,26 +1120,24 @@ org-publish-project-alist '(("learn-org"
   :ensure t
   :hook (after-init . global-emojify-mode))
 
-(use-package super-save
-  :ensure t
-  :defer 1
-  :diminish super-save-mode
-  :config
-  (super-save-mode +1)
-  (setq super-save-auto-save-when-idle t))
-
-(defun le/org-mode-visual-fill ()
-  (setq visual-fill-column-width 145
-        visual-fill-column-center-text t)
-  (visual-fill-column-mode 1))
-
-(use-package visual-fill-column
-  :ensure t
-  :defer t
-  :hook (org-mode . le/org-mode-visual-fill))
-
 (use-package origami
   :ensure t
   :hook (yaml-mode . origami-mode))
+
+(use-package nerd-icons-dired
+  :hook
+  (dired-mode . nerd-icons-dired-mode))
+
+(use-package helpful
+  :ensure t
+  :custom
+  (counsel-describe-function-function #'helpful-callable)
+  (counsel-describe-variable-function #'helpful-variable)
+  :bind
+  ([remap describe-function] . helpful-function)
+  ([remap describe-symbol] . helpful-symbol)
+  ([remap describe-variable] . helpful-variable)
+  ([remap describe-command] . helpful-command)
+  ([remap describe-key] . helpful-key))
 
 ;;; .emacs ends here

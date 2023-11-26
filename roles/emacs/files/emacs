@@ -253,11 +253,11 @@
  '(org-headline-done ((t (:foreground "gray"))))
  '(org-hide ((t (:foreground "gray60"))))
  '(org-meta-line ((t (:foreground "SlateGray3"))))
- '(org-modern-block-name ((t (:weight semi-light :height 0.8))))
+;; '(org-modern-block-name ((t (:weight semi-light :height 0.8))))
  '(org-property-value ((t (:foreground "SlateGray3"))) t)
  '(org-scheduled-today ((t (:foreground "dark gray"))))
  '(org-special-keyword ((t (:foreground "SlateGray3"))))
- '(org-tag ((t (:foreground "cyan3" :weight normal))))
+;; '(org-tag ((t (:foreground "cyan3" :weight normal))))
  '(org-time-grid ((t (:foreground "gray80"))))
  '(org-upcoming-distant-deadline ((t (:foreground "red1"))))
  '(region ((t (:extend t :background "IndianRed4"))))
@@ -645,7 +645,7 @@
 (use-package org
   :defer t
   :init (setq  org-replace-disputed-keys t)
-  :hook (org-mode . le/org-mode-setup)
+;;  :hook (org-mode . le/org-mode-setup)
   :mode (("\\.org$" . org-mode))
   :config
   (setq
@@ -777,8 +777,8 @@
 ;; Other org-mode setup
 ;; TODO(alewars): study daviwil org setup
 
-;; (use-package org-modern
-;;  :ensure t)
+(use-package org-modern
+ :ensure t)
 
 ;; (with-eval-after-load 'org (global-org-modern-mode))
 

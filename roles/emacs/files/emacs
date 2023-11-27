@@ -775,7 +775,6 @@
 
 (require 'ox-publish)
 ;; Other org-mode setup
-;; TODO(alewars): study daviwil org setup
 
 (use-package org-modern
  :ensure t)

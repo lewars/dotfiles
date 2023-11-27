@@ -248,6 +248,7 @@
  '(doom-themes-treemacs-root-face ((t (:inherit font-lock-string-face :height 0.85))))
  '(font-lock-comment-delimiter-face ((t (:inherit font-lock-comment-face :foreground "light gray"))))
  '(font-lock-comment-face ((t (:foreground "gray"))))
+ '(font-lock-doc-face ((t (:inherit font-lock-comment-face :foreground "gray"))))
  '(fringe ((t (:inherit default :foreground "medium aquamarine"))))
  '(highlight ((t (:background "#c792ea" :foreground "#7d7c8a"))))
  '(highlight-symbol-face ((t (:background "#5a5400"))))

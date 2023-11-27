@@ -704,9 +704,9 @@
      " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
    org-agenda-current-time-string
    "⭠ now ─────────────────────────────────────────────────"
-   org-agenda-files (list "~/git/projects-org/project.org"
-                          "~/git/work-org/general/gtd.org"
-                          "~/git/learn-org/gtd.org")
+   ;; org-agenda-files (list "~/git/projects-org/project.org"
+   ;;                        "~/git/work-org/general/gtd.org"
+   ;;                        "~/git/learn-org/gtd.org")
    org-publish-project-alist
    '(("learn-org"
       :base-directory "~/git/learn-org/"
@@ -789,9 +789,9 @@
 (use-package org-modern
  :ensure t)
 
-;; (with-eval-after-load 'org (global-org-modern-mode))
+(with-eval-after-load 'org (global-org-modern-mode))
 
-;; (global-org-modern-mode)
+(global-org-modern-mode)
 
 (use-package org-superstar
   :ensure t

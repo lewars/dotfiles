@@ -9,5 +9,5 @@ JENKINS_URL=${JENKINS_URL:-"https://jenkins.tools.paramountplus.com"}
 JENKINSFILE=${1:-"Jenkinsfile"}
 
 # validate the jenkinsfile with API key
-curl -v -u "$(cat "${JENKINS_API_KEY}")" -F "jenkinsfile=<${JENKINSFILE}" \
+curl -u "$(cat "${JENKINS_API_KEY}")" -F "jenkinsfile=<${JENKINSFILE}" \
      "${JENKINS_URL}/pipeline-model-converter/validate"

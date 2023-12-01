@@ -1,0 +1,13 @@
+- name: Create a home bin directory
+  file:
+    path: '{{ dotfiles_user_home }}/bin'
+    state: directory
+- name: Link all personal scripts into ~/bin
+  file:
+    src: '{{ dotfiles_home }}/roles/commands/files/{{ item }}'
+    dest: '{{ dotfiles_user_home }}/bin/{{ item }}'
+    state: link
+  with_items:
+    - jenkins.sh
+    - jenkins-lint
+    - ghx

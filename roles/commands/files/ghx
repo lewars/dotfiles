@@ -1,0 +1,54 @@
+#!/usr/local/bin/bash
+
+# This script manages git repos for a given org
+# Usage: ghx <update|clone> <org>
+# Example: ghx update scope-folder
+
+set -x
+set -e
+set -o pipefail
+set -u
+
+declare -a repos
+
+if [[ ! -d ~/git/${2} ]]; then
+    mkdir -p "${HOME}/git/${2}"
+fi
+if [[ "$1" = 'update' ]]; then
+    mapfile -t repos < <(gh api "orgs/${2}/repos" --paginate --jq '.[].html_url')
+    for r in "${repos[@]}";do
+        url=$r
+        r=$(basename "$url")
+        if [[ ! -d "${HOME}/git/${2}/${r}" ]]; then
+            git -C "${HOME}/git/$2" clone --depth 256 "$url"
+        else
+            branch=$(git -C "${HOME}/git/$2/$r" remote show origin | awk '/HEAD branch/ {print $NF}')
+
+            # check workspace is clean
+            if [[ $(git -C "${HOME}/git/$2/$r" status --porcelain) ]]; then
+               echo "Workspace is dirty for $r, exiting..."
+               exit 1
+            fi
+
+            # check if branch exists
+            if [[ $(git -C "${HOME}/git/$2/$r" branch -a | grep -c "$branch") -eq 0 ]]; then
+                echo "Branch $branch does not exist for $r"
+                # if branch is '(unkown)' then skip
+                if [[ "$branch" = '(unknown)' ]]; then
+                    continue
+                fi
+
+                # check if branch is remote
+                if [[ $(git -C "${HOME}/git/$2/$r" branch -r | grep -c "$branch") -eq 0 ]]; then
+                    echo "Branch $branch does not exist for $r"
+                else
+                    echo "Branch $branch exists for $r, but is not local"
+                    git -C "${HOME}/git/$2/$r" checkout -t -b "$branch" "origin/$branch"
+                fi
+            fi
+
+            git -C "${HOME}/git/${2}/$r" checkout "$branch"
+            git -C "${HOME}/git/${2}/$r" pull -q --ff-only
+        fi
+    done
+fi

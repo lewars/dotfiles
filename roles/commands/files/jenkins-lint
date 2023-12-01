@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# jenkins-lint - validate a Jenkinsfile's syntax
+
+set -o errexit -o nounset -o pipefail
+
+JENKINS_API_KEY=${JENKINS_API_KEY:-"${HOME}/.jenkins-api-key"}
+JENKINS_URL=${JENKINS_URL:-"https://jenkins.tools.paramountplus.com"}
+JENKINSFILE=${1:-"Jenkinsfile"}
+
+# validate the jenkinsfile with API key
+curl -v -u "$(cat "${JENKINS_API_KEY}")" -F "jenkinsfile=<${JENKINSFILE}" \
+     "${JENKINS_URL}/pipeline-model-converter/validate"

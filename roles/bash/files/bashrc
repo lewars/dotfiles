@@ -286,11 +286,12 @@ function jenkins-can-agent() {
 ## A function that quickly cd's to a directory
 function qcd() {
     if [ -z "$1" ]; then
-        echo "Usage: qcd <directory>"
-        return 1
+        start_dir=.
+    else
+        start_dir="$1"
     fi
 
-    cd "$(fd --type directory . "$1" | fzf)" || return 1
+    cd "$(fd --type directory . "$start_dir" | fzf)" || return 1
 }
 
 export -f k8ns

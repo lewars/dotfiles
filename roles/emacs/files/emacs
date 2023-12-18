@@ -1139,7 +1139,7 @@
   :init (which-key-mode)
   :diminish which-key-mode
   :config
-  (setq which-key-idle-delay 2000))
+  (setq which-key-idle-delay 2))
 
 (use-package emojify
   :ensure t

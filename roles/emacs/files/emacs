@@ -234,6 +234,8 @@
  '(highlight-indent-guides-method 'bitmap)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
+ '(org-agenda-files
+   '("/home/slams/git/work-org/general/gtd.org" "/home/slams/git/learn-org/gtd.org"))
  '(package-selected-packages
    '(all-the-icons bats bats-mode lsp-pyright lsp-ui lsp-mode dired-git-mode async org-modern consult-lsp helpful org-make-toc diminish nerd-icons-dired dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode consult company-box dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible consult-yasnippet yasnippet-snippets lsp-treemacs consult-dir marginalia centaur-tabs bazel jinja2-mode highlight-symbol color-theme consult-projectile consult-flycheck direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult doom-themes doom-modeline dockerfile-mode corfu copilot))
  '(warning-suppress-types '((comp))))
@@ -336,8 +338,7 @@
 
 (use-package idle-highlight-mode
   :ensure t
-  :config (setq idle-highlight-idle-time 1)
-  :hook (prog-mode . idle-highlight-mode))
+  :config (setq idle-highlight-idle-time 1))
 
 (use-package expand-region
   :ensure t
@@ -506,7 +507,7 @@
   :bind (("M-\\" . copilot-complete)
          :map copilot-completion-map
          ("C-g" . copilot-clear-overlay)
-         ("esc" . copilot-clear-overlay)
+         ("<ESC>" . copilot-clear-overlay)
          ("C-p" . copilot-previous-completion)
          ("C-n" . copilot-next-completion)
          ("<tab>" . copilot-accept-completion)
@@ -650,36 +651,36 @@
 (add-hook 'visual-line-mode-hook #'visual-fill-column-mode)
 
 (defun le/org-mode-setup ()
-  (org-indent-mode)
-  (variable-pitch-mode 1)
+  (org-indent-mode t)
+  (variable-pitch-mode 0)
   (auto-fill-mode 0)
-  (visual-line-mode 1)
-  (diminish org-indent-mode)
-  )
+  (visual-line-mode t)
+  (diminish org-indent-mode t))
 
 (use-package org
   :defer t
   :init (setq  org-replace-disputed-keys t)
-;;  :hook (org-mode . le/org-mode-setup)
+  :hook (org-mode . le/org-mode-setup)
   :mode (("\\.org$" . org-mode))
   :config
   (setq
    ;; Edit settings
-   org-auto-align-tags nil
+   ;; org-auto-align-tags t
    org-catch-invisible-edits 'show-and-error
-   org-cycle-separator-lines 2
-   org-edit-src-content-indentation 2
+   ;; org-cycle-separator-lines 2
+   ;; org-edit-src-content-indentation 0
    org-fontify-quote-and-verse-blocks t
-   org-hide-block-startup nil
-   org-indent-indentation-per-level 0
-   org-insert-heading-respect-content nil
-   org-special-ctrl-a/e t
-   org-src-fontify-natively t
-   org-src-preserve-indentation nil
-   org-src-tab-acts-natively t
-   org-startup-folded 'content
-   org-startup-indented nil
-   org-tags-column 0
+   ;; org-hide-block-startup nil
+   ;; org-indent-indentation-per-level 0
+   ;; org-insert-heading-respect-content nil
+   ;; org-special-ctrl-a/e nil
+   ;; org-src-fontify-natively t
+   ;; org-src-preserve-indentation nil
+   ;; org-src-tab-acts-natively t
+   ;; org-startup-folded 'content
+   ;; org-startup-indented nil
+   ;; org-tags-column 0
+   ;; org-support-shift-select 'always
 
    ;; Org styling, hide markup etc.
    org-hide-emphasis-markers t
@@ -687,10 +688,16 @@
    org-ellipsis "▼"
 
    ;; TODO setup
-   ;; org-todo-keywords
-   ;; '((sequence "TODO(t)" "IN-PROGRESS(p)" "IN-REVIEW(r)" "WAITING(w)" "BLOCKED(b)" "|" "DONE(d)" "DELEGATE(D)"))
    org-todo-keywords
-   '((sequence "TODO" "IN-PROGRESS" "IN-REVIEW" "WAITING" "BLOCKED" "|" "DONE" "DELEGATE" "WONT-DO"))
+   '((sequence "TODO(t)" "IN-PROGRESS(p)" "IN-REVIEW(r)" "WAITING(w)" "BLOCKED(b)" "|" "DONE(d)" "DELEGATE(D)"))
+
+   org-modern-todo-faces
+   '(("IN-PROGRESS" . (:forground "blue" :weight bold))
+     ("IN-REVIEW" . org-verbatim)
+     ("WAITING" . org-warning)
+     ("BLOCKED" . org-mode-line-clock-overrun)
+     ("DELEGATE" . org-warning)
+     ("WONT-DO" . org-modern-time-inactive))
 
    org-modern-todo-faces
    '(("IN-PROGRESS" . (:forground "blue" :weight bold))
@@ -704,7 +711,7 @@
       '(("pin" . (:forground "red" :weight bold)))
 
    ;; Agenda styling
-   org-agenda-tags-column 0
+   org-agenda-tags-column -80
    org-agenda-block-separator ?─
    org-agenda-time-grid
    '((daily today require-timed)
@@ -785,7 +792,7 @@
       (shell . t)
       (C . t)
       (sed . t)))
-  (push '("conf-unix" . conf-unix) org-src-lang-modes))
+  (push '("conf-unix" . conf-unix) org-src-lang-modes)) ;; end of "use-package org" mode section
 
 ;; Show hidden emphasis markers
 ;; (use-package org-appear

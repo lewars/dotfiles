@@ -654,13 +654,12 @@
   (org-indent-mode t)
   (variable-pitch-mode 0)
   (auto-fill-mode 0)
-  (visual-line-mode t)
-  (diminish org-indent-mode t))
+  (visual-line-mode t))
 
 (use-package org
   :defer t
   :init (setq  org-replace-disputed-keys t)
-  :hook (org-mode . le/org-mode-setup)
+  ;; :hook (org-mode . le/org-mode-setup)
   :mode (("\\.org$" . org-mode))
   :config
   (setq

@@ -827,18 +827,18 @@
 
 (require 'ox-md)
 
-(use-package org-projectile
-  :ensure t
-  :bind (("C-c n p" . org-projectile-project-todo-completing-read)
-         ("C-c l" . org-store-link)
-         ("C-c a" . org-agenda)
-         ("C-c c" . org-capture))
-  :config
-  (progn
-    (setq org-projectile-projects-file
-          (expand-file-name "~/git/projects-org/project.org"))
-    (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
-    (push (org-projectile-project-todo-entry) org-capture-templates)))
+;; (use-package org-projectile
+;;  :ensure t
+;;  :bind (("C-c n p" . org-projectile-project-todo-completing-read)
+;;         ("C-c l" . org-store-link)
+;;         ("C-c a" . org-agenda)
+;;         ("C-c c" . org-capture))
+;;  :config
+;;  (progn
+;;    (setq org-projectile-projects-file
+;;          (expand-file-name "~/git/projects-org/project.org"))
+;;    (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
+;;    (push (org-projectile-project-todo-entry) org-capture-templates)))
 
 
 (use-package magit

@@ -20,10 +20,6 @@
 		<true/>
 		<key>alfred.action.movereplace</key>
 		<true/>
-		<key>alfred.action.openterminalhere</key>
-		<true/>
-		<key>alfred.action.recent</key>
-		<true/>
 		<key>alfred.action.revealinfinder</key>
 		<true/>
 		<key>alfred.action.showaslargetype</key>
@@ -35,7 +31,18 @@
 	</dict>
 	<key>escapeCopiedPath</key>
 	<true/>
-	<key>showWithRightArrow</key>
+	<key>finderSelectionHotkey</key>
+	<dict>
+		<key>key</key>
+		<integer>-1</integer>
+		<key>mod</key>
+		<integer>-1</integer>
+		<key>string</key>
+		<string></string>
+	</dict>
+	<key>showWithCtrl</key>
+	<false/>
+	<key>showWithFn</key>
 	<false/>
 </dict>
 </plist>

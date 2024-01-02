@@ -243,6 +243,17 @@
 			<key>url</key>
 			<string>https://github.com/cbsi-cbscom</string>
 		</dict>
+		<key>C424726F-0E28-47EA-8A1E-9B69D0D22041</key>
+		<dict>
+			<key>enabled</key>
+			<true/>
+			<key>keyword</key>
+			<string>jtoolss</string>
+			<key>text</key>
+			<string>Jenkins Tools Search</string>
+			<key>url</key>
+			<string>https://jenkins.tools.paramountplus.com/search/?q={query}</string>
+		</dict>
 		<key>C4326B7E-C979-4D2F-9072-CBE055A8C3A6</key>
 		<dict>
 			<key>enabled</key>

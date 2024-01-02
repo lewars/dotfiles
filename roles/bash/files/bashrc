@@ -149,8 +149,8 @@ export LSP_USE_PLISTS=true
 
 # Tooling
 source "${HOME}/.asdf/asdf.sh"
-source <(op completion bash)
-source "${HOME}/.config/op/plugins.sh"
+# source <(op completion bash)
+# source "${HOME}/.config/op/plugins.sh"
 
 # shopts
 set +o noclobber
@@ -305,5 +305,14 @@ export -f qcd
 . $HOME/.asdf/asdf.sh
 . $HOME/.asdf/completions/asdf.bash
 
-export JAVA_HOME=/usr/local/opt/openjdk
+# If Macosx set JAVA_HOME
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    export JAVA_HOME=/usr/local/opt/openjdk
+fi
+
+# if Linux set JAVA_HOME
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-17.0.8.0.7-1.fc37.x86_64/
+fi
+
 source "${HOME}/.config/op/plugins.sh"

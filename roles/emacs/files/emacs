@@ -238,7 +238,7 @@
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files nil)
  '(package-selected-packages
-   '(ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir consult-flycheck consult-projectile consult-yasnippet consult all-the-icons bats bats-mode lsp-pyright lsp-ui lsp-mode dired-git-mode async org-modern consult-lsp helpful org-make-toc diminish nerd-icons-dired dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode company-box dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs marginalia centaur-tabs bazel jinja2-mode highlight-symbol color-theme direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project doom-themes doom-modeline dockerfile-mode corfu copilot))
+   '(edit-server ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet consult all-the-icons bats bats-mode lsp-pyright lsp-ui lsp-mode dired-git-mode async org-modern consult-lsp helpful org-make-toc diminish nerd-icons-dired dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode company-box dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs marginalia centaur-tabs bazel jinja2-mode highlight-symbol color-theme direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project doom-themes doom-modeline dockerfile-mode corfu copilot))
  '(warning-suppress-types '((comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -264,10 +264,15 @@
  '(mode-line-inactive ((t (:background "#394c55" :foreground "#8396ac" :box nil))))
  '(org-agenda-dimmed-todo-face ((t (:foreground "dark gray"))))
  '(org-block-begin-line ((t (:inherit org-block :extend t :background "#222D32" :foreground "SlateGray3"))))
- '(org-drawer ((t (:foreground "SlateGray3"))))
+  '(org-drawer ((t (:foreground "SlateGray3"))))
  '(org-ellipsis ((t (:foreground "light green" :underline nil))))
  '(org-headline-done ((t (:foreground "gray"))))
  '(org-hide ((t (:foreground "gray60"))))
+ '(org-level-1 ((t (:inherit outline-1 :weight extrabold :height 1.7))))
+ '(org-level-2 ((t (:inherit outline-2 :weight extrabold :height 1.5))))
+ '(org-level-3 ((t (:inherit outline-3 :weight extrabold :height 1.5))))
+ '(org-level-4 ((t (:inherit outline-4 :weight extrabold :height 1.2))))
+ '(org-level-5 ((t (:inherit outline-5 :weight extrabold :height 1.128))))
  '(org-meta-line ((t (:foreground "SlateGray3"))))
  '(org-modern-block-name ((t (:weight semi-light :height 0.8))))
  '(org-property-value ((t (:foreground "SlateGray3"))) t)
@@ -653,12 +658,22 @@
 
 (add-hook 'visual-line-mode-hook #'visual-fill-column-mode)
 
+(defun le/what-face (pos)
+  "Show the face at the current point in the minibuffer."
+  (interactive "d")
+  (let ((face (or (get-char-property pos 'read-face-name)
+                  (get-char-property pos 'face))))
+    (if face
+        (message "Face: %s" face)
+      (message "No face at %d" pos))))
+
 (defun le/org-mode-setup ()
   (org-indent-mode t)
   (variable-pitch-mode 0)
   (auto-fill-mode 0)
   (visual-line-mode t))
 
+;; start of "use-package org" for org-mode section
 (use-package org
   :defer t
   :init (setq  org-replace-disputed-keys t)
@@ -691,7 +706,7 @@
 
    ;; TODO setup
    org-todo-keywords
-   '((sequence "TODO(t)" "IN-PROGRESS(p)" "IN-REVIEW(r)" "WAITING(w)" "BLOCKED(b)" "|" "DONE(d)" "DELEGATE(D)"))
+   '((sequence "TODO" "IN-PROGRESS" "IN-REVIEW" "WAITING" "BLOCKED" "WONT-DO" "|" "DONE" "DELEGATE"))
 
    org-modern-todo-faces
    '(("IN-PROGRESS" . (:forground "blue" :weight bold))
@@ -701,13 +716,13 @@
      ("DELEGATE" . org-warning)
      ("WONT-DO" . org-modern-time-inactive))
 
-   org-modern-todo-faces
-   '(("IN-PROGRESS" . (:forground "blue" :weight bold))
-     ("IN-REVIEW" . org-verbatim)
-     ("WAITING" . org-warning)
-     ("BLOCKED" . org-mode-line-clock-overrun)
-     ("DELEGATE" . org-warning)
-     ("WONT-DO" . org-modern-time-inactive))
+   ;; org-modern-todo-faces
+   ;; '(("IN-PROGRESS" . (:forground "blue" :weight bold))
+   ;;   ("IN-REVIEW" . org-verbatim)
+   ;;   ("WAITING" . org-warning)
+   ;;   ("BLOCKED" . org-mode-line-clock-overrun)
+   ;;   ("DELEGATE" . org-warning)
+   ;;   ("WONT-DO" . org-modern-time-inactive))
 
    org-tag-faces
       '(("pin" . (:forground "red" :weight bold)))
@@ -794,6 +809,22 @@
       (shell . t)
       (C . t)
       (sed . t)))
+
+  (custom-set-faces
+  '(org-level-1 ((t (:inherit outline-1 :weight extrabold :height 1.3))))
+  '(org-level-2 ((t (:inherit outline-2 :weight extrabold :height 1.15))))
+  '(org-level-3 ((t (:inherit outline-3 :weight extrabold :height 1.15))))
+  '(org-level-4 ((t (:inherit outline-4 :weight extrabold :height 1.0))))
+  '(org-level-5 ((t (:inherit outline-5 :weight extrabold :height 1.0))))
+  '(org-document-title ((t (:foreground "#82aaff" :weight extra-bold :height 1.4)))))
+
+  (setq org-blank-before-new-entry
+        '((heading . nil)
+          (plain-list-item . nil)))
+  (setq org-cycle-separator-lines 1)
+
+  (setq org-hidden-keywords '(author date title))
+
   (push '("conf-unix" . conf-unix) org-src-lang-modes)) ;; end of "use-package org" mode section
 
 ;; Show hidden emphasis markers
@@ -1165,5 +1196,22 @@
 
 (use-package bats-mode
   :ensure t)
+
+(use-package edit-server
+  :ensure t
+  :commands edit-server-start
+  :init (if after-init-time
+              (edit-server-start)
+            (add-hook 'after-init-hook
+                      #'(lambda() (edit-server-start))))
+  :config (setq edit-server-new-frame-alist
+                '((name . "Edit with Emacs FRAME")
+                  (top . 200)
+                  (left . 200)
+                  (width . 80)
+                  (height . 25)
+                  (minibuffer . t)
+                  (menu-bar-lines . t)
+                  (window-system . x))))
 
 ;;; .emacs ends here

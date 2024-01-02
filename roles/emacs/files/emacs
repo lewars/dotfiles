@@ -95,6 +95,8 @@
 (unless (server-running-p)
   (server-start))
 
+(setq fill-column 80)
+
 ;; set toggle-word-wrap to default to nil
 ;; (setq-default toggle-word-wrap nil)
 
@@ -234,10 +236,9 @@
  '(highlight-indent-guides-method 'bitmap)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
- '(org-agenda-files
-   '("/home/slams/git/work-org/general/gtd.org" "/home/slams/git/learn-org/gtd.org"))
+ '(org-agenda-files nil)
  '(package-selected-packages
-   '(all-the-icons bats bats-mode lsp-pyright lsp-ui lsp-mode dired-git-mode async org-modern consult-lsp helpful org-make-toc diminish nerd-icons-dired dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode consult company-box dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible consult-yasnippet yasnippet-snippets lsp-treemacs consult-dir marginalia centaur-tabs bazel jinja2-mode highlight-symbol color-theme consult-projectile consult-flycheck direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project embark-consult doom-themes doom-modeline dockerfile-mode corfu copilot))
+   '(ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir consult-flycheck consult-projectile consult-yasnippet consult all-the-icons bats bats-mode lsp-pyright lsp-ui lsp-mode dired-git-mode async org-modern consult-lsp helpful org-make-toc diminish nerd-icons-dired dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode company-box dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs marginalia centaur-tabs bazel jinja2-mode highlight-symbol color-theme direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project doom-themes doom-modeline dockerfile-mode corfu copilot))
  '(warning-suppress-types '((comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -374,7 +375,9 @@
   (projectile-mode +1)
   :bind (:map projectile-mode-map
               ("s-p" . projectile-command-map)
-              ("C-c p" . projectile-command-map)))
+              ("C-c p" . projectile-command-map))
+  :config
+  (setq projectile-project-search-path '("~/git")))
 
 (use-package treemacs-projectile
   :after (treemacs projectile)

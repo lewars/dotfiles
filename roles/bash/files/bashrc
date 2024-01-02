@@ -306,3 +306,4 @@ export -f qcd
 . $HOME/.asdf/completions/asdf.bash
 
 export JAVA_HOME=/usr/local/opt/openjdk
+source "${HOME}/.config/op/plugins.sh"

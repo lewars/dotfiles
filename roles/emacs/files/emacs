@@ -702,7 +702,7 @@
    ;; Org styling, hide markup etc.
    org-hide-emphasis-markers t
    org-pretty-entities t
-   org-ellipsis "▼"
+   org-ellipsis " ▼"
 
    ;; TODO setup
    org-todo-keywords

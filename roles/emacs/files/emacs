@@ -677,7 +677,7 @@
 (use-package org
   :defer t
   :init (setq  org-replace-disputed-keys t)
-  ;; :hook (org-mode . le/org-mode-setup)
+  :hook (org-mode . le/org-mode-setup)
   :mode (("\\.org$" . org-mode))
   :config
   (setq
@@ -689,7 +689,7 @@
    org-fontify-quote-and-verse-blocks t
    ;; org-hide-block-startup nil
    ;; org-indent-indentation-per-level 0
-   ;; org-insert-heading-respect-content nil
+   org-insert-heading-respect-content nil
    ;; org-special-ctrl-a/e nil
    ;; org-src-fontify-natively t
    ;; org-src-preserve-indentation nil
@@ -698,6 +698,7 @@
    ;; org-startup-indented nil
    ;; org-tags-column 0
    ;; org-support-shift-select 'always
+   org-list-indent-offset 2
 
    ;; Org styling, hide markup etc.
    org-hide-emphasis-markers t

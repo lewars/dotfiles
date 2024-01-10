@@ -715,7 +715,7 @@
    ;; org-hide-block-startup nil
    ;; org-indent-indentation-per-level 0
    org-insert-heading-respect-content nil
-   ;; org-special-ctrl-a/e nil
+   org-special-ctrl-a/e nil
    ;; org-src-fontify-natively t
    ;; org-src-preserve-indentation nil
    ;; org-src-tab-acts-natively t

@@ -681,9 +681,9 @@
         (org-insert-item t))
        ((string-match "^ *\\(\\-\\|\\+\\|\\*\\) " line-start) ; Unordered list items
         (org-insert-item))
-       ((string-match "^\\([0-9]+\\)\\(\\.\\|)\\) " line-start) ; Ordered list items
+       ((string-match "^ *\\([0-9]+\\)\\(\\.\\|)\\) " line-start) ; Ordered list items
         (org-insert-item nil))
-       ((string-match "^\\(\\-\\|\\+\\|\\*\\) .* :: " line-start) ; Term/Description
+       ((string-match "^ *\\(\\-\\|\\+\\|\\*\\) .* :: " line-start) ; Term/Description
         (org-insert-item))
        (t
         (org-return))))))
@@ -1249,3 +1249,4 @@
                   (window-system . x))))
 
 ;;; .emacs ends here
+(put 'narrow-to-region 'disabled nil)

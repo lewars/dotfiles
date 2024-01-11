@@ -1211,6 +1211,9 @@
   (add-hook 'after-init-hook 'le/emojify-setup)
   :config (setq emojify-display-style 'unicode))
 
+(use-package company-emoji
+  :ensure t)
+
 (use-package origami
   :ensure t
   :hook (yaml-mode . origami-mode))

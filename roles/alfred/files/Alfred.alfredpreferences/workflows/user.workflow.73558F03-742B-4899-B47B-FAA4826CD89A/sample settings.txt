@@ -12,13 +12,13 @@
 #
 # -------------------------------------------------
 
-# Menu search can have individual settings per app for even more fine grained 
+# Menu search can have individual settings per app for even more fine grained
 # control over how menu items are fetched and displayed for that app
 
 # The configuration is specified using one or more `appFilters` blocks
 
-# Any app specific filter will override the workflow's environment 
-# related settings 
+# Any app specific filter will override the workflow's environment
+# related settings
 
 # Format of an appFilters section
 #
@@ -26,22 +26,22 @@
 #
 # this is the app name, the same name as in the cache folder
 #
-#   app: "Safari" 
+#   app: "Safari"
 #
-# this controls whether menu items that 
+# this controls whether menu items that
 # are disabled should be included in the listing
 # false by default
 #
-#   showDisabledMenuItems: true     
+#   showDisabledMenuItems: true
 #
 #
 # controls if the apple menu items should be included
 # false by default
-#   showAppleMenu: true             
+#   showAppleMenu: true
 #
 # if you wish to disable menu search completely, include this
 #
-#   disabled: true     
+#   disabled: true
 #
 #
 # specifies the cache timeout duration of menu items in seconds
@@ -56,13 +56,13 @@
 #
 #   The following will ignore all items under "File" and "Edit > Modify" menus
 #   You can specify multiple ignoreMenuPaths sections
-#   
+#
 #   ignoreMenuPaths {
-#       path: "File"   
+#       path: "File"
 #   }
 #   ignoreMenuPaths {
 #       path: "Edit"
-#       path: "Modify"   
+#       path: "Modify"
 #   }
 #
 # }
@@ -92,4 +92,3 @@ appFilters {
     app: "Google Chrome"
     disabled: true
 }
-

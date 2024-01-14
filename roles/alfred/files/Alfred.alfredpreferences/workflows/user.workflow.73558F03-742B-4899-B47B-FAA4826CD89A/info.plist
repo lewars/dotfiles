@@ -309,7 +309,7 @@ E.g
 			<key>colorindex</key>
 			<integer>4</integer>
 			<key>note</key>
-			<string>Thanks for downloading! 
+			<string>Thanks for downloading!
 
 I highly recommend you set a hotkey for this so that it's even easier to trigger it.
 
@@ -362,7 +362,7 @@ I personally set it to double-tapping the ⌘ (command) key.</string>
 				<true/>
 			</dict>
 			<key>description</key>
-			<string>This configuration controls how many menu items should be loaded at every level of the menu hierarchy. 
+			<string>This configuration controls how many menu items should be loaded at every level of the menu hierarchy.
 
 Limiting this will speed up getting results, but you can tweak this in case you need to fetch more results.
 

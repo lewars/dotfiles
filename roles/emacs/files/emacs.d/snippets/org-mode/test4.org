@@ -1,5 +1,5 @@
 #+title: foo
-#+date: 
+#+date:
 
 * URLs
 ** [[https://paramount.atlassian.net/jira/software/c/projects/PLDSO/boards/3837?assignee=6234a65362dc1e006803ed91][kanban URL]]

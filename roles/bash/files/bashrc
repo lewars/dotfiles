@@ -314,3 +314,11 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 fi
 
 # source "${HOME}/.config/op/plugins.sh"
+
+
+# >>> talisman >>>
+# Below environment variables should not be modified unless you know what you are doing
+export TALISMAN_HOME=/home/slams/.talisman/bin
+alias talisman=$TALISMAN_HOME/talisman_linux_amd64
+export TALISMAN_INTERACTIVE=false
+# <<< talisman <<<

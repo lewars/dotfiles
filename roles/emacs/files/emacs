@@ -92,6 +92,14 @@
 (menu-bar-mode -1)
 (setq use-dialog-box nil)
 
+(defun le/run-command-on-save (command)
+  "Run a specified COMMAND every time the current buffer is saved."
+  (interactive "sEnter command to run on save: ")
+  (add-hook 'after-save-hook
+            (lambda ()
+              (shell-command command))
+            nil t))
+
 ;; Start emacs server
 (if (display-graphic-p)
     '(server-mode t))
@@ -99,15 +107,14 @@
 (unless (server-running-p)
   (server-start))
 
-(setq fill-column 80)
-
 ;; set toggle-word-wrap to default to nil
 ;; (setq-default toggle-word-wrap nil)
 
 (defun le/text-mode-init ()
   "This hook define hooks for 'text-mode'."
   (toggle-word-wrap 1)
-  (visual-line-mode 1))
+  (visual-line-mode 1)
+  (auto-fill-mode 1))
 (add-hook 'text-mode-hook 'le/text-mode-init)
 
 (defun le/my-whitespace-mode-hook ()
@@ -143,8 +150,6 @@
 (setq inhibit-startup-screen t)
 (setq display-time-day-and-date t)
 (display-time-mode t)
-(setq fill-column 80)
-(setq auto-fill-mode t)
 
 (setq mouse-wheel-scroll-amount '(0.01))
 (setq read-buffer-completion-ignore-case t)
@@ -157,7 +162,7 @@
 (dolist (mode '(text-mode-hook
                 prog-mode-hook
                 conf-mode-hook))
-  (add-hook mode (lambda () (display-fill-column-indicator-mode 120))))
+  (add-hook mode (lambda () (display-fill-column-indicator-mode 80))))
 (add-hook 'prod-mode-hook (lambda () (setq-local hl-line-mode t)))
 
 (use-package yasnippet
@@ -230,13 +235,14 @@
  '(blink-matching-paren t)
  '(column-number-mode 1)
  '(display-fill-column-indicator-column 120)
+ '(fill-column 80)
  '(frame-background-mode nil)
  '(highlight-indent-guides-method 'bitmap)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files '("~/git/org/todo/gtd.org"))
  '(package-selected-packages
-   '(company-emoji edit-server ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet consult all-the-icons bats bats-mode lsp-pyright lsp-ui lsp-mode dired-git-mode async org-modern consult-lsp helpful org-make-toc diminish nerd-icons-dired dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode company-box dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs marginalia centaur-tabs bazel jinja2-mode highlight-symbol color-theme direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project doom-themes doom-modeline dockerfile-mode corfu copilot))
+   '(xterm-color company-emoji edit-server ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet consult all-the-icons bats bats-mode lsp-pyright lsp-ui lsp-mode dired-git-mode async org-modern consult-lsp helpful org-make-toc diminish nerd-icons-dired dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode company-box dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs marginalia centaur-tabs bazel jinja2-mode highlight-symbol color-theme direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project doom-themes doom-modeline dockerfile-mode corfu copilot))
  '(warning-suppress-types '((comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -384,7 +390,7 @@
               ("s-p" . projectile-command-map)
               ("C-c p" . projectile-command-map))
   :config
-  (setq projectile-project-search-path '("~/git")))
+  (setq projectile-project-search-path '(("~/git" . 1))))
 
 (use-package treemacs-projectile
   :after (treemacs projectile)
@@ -398,7 +404,7 @@
   (add-hook 'json-mode-hook 'highlight-indent-guides-mode)
   (add-hook 'json-mode-hook 'hs-minor-mode)
   (add-hook 'json-mode-hook 'display-line-numbers-mode)
-  (add-hook 'json-mode-hook (lambda () (display-fill-column-indicator-mode 120))))
+  (add-hook 'json-mode-hook (lambda () (display-fill-column-indicator-column 120))))
 
 
 ;; ======= Language configuration ============
@@ -406,7 +412,7 @@
 
 (use-package python-mode
   :ensure t
-  :hook (python-mode . (lambda () (display-fill-column-indicator-mode 88))))
+  :hook (python-mode . (lambda () (display-fill-column-indicator-column 88))))
 
 (use-package pyvenv-auto
   :hook ((python-mode . pyvenv-auto-run)))
@@ -448,7 +454,7 @@
   (add-hook 'yaml-mode-hook 'outline-minor-mode)
   (add-hook 'yaml-mode-hook 'hs-minor-mode)
   (add-hook 'yaml-mode-hook 'display-line-numbers-mode)
-  (add-hook 'yaml-mode-hook (lambda () (display-fill-column-indicator-mode 120))))
+  (add-hook 'yaml-mode-hook (lambda () (display-fill-column-indicator-column 120))))
 
 (use-package terraform-mode
   :ensure t
@@ -463,7 +469,7 @@
   (add-hook 'terraform-mode-hook 'highlight-indent-guides-mode)
   (add-hook 'terraform-mode-hook 'hs-minor-mode)
   (add-hook 'terraform-mode-hook 'display-line-numbers-mode)
-  (add-hook 'terraform-mode-hook (lambda () (display-fill-column-indicator-mode 120))))
+  (add-hook 'terraform-mode-hook (lambda () (display-fill-column-indicator-column 120))))
 
 (use-package markdown-mode
   :ensure t
@@ -706,7 +712,8 @@
   (add-hook 'org-mode-hook
           (lambda ()
             (setq-local yas/trigger-key [tab])
-            (define-key yas/keymap [tab] 'yas/next-field-or-maybe-expand)))
+            (define-key yas/keymap [tab] 'yas/next-field-or-maybe-expand)
+            (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t)))
   (define-key org-mode-map (kbd "RET")  #'le/org-mode-return)
   (setq
    ;; Edit settings
@@ -731,12 +738,13 @@
    ;; Org styling, hide markup etc.
    org-hide-emphasis-markers t
    org-pretty-entities t
+   org-log-repeat t
    ;; org-ellipsis " ▼"
    org-ellipsis " ⤵"
-
+   org-clock-sound "~/git/org/media/alarm.wav"
    ;; TODO keywords setup
    org-todo-keywords
-   '((sequence "TODO" "IN-PROGRESS" "REPEAT" "IN-REVIEW" "WAITING" "BLOCKED" "WONT-DO" "|" "DELEGATE" "DONE"))
+   '((sequence "TODO" "IN-PROGRESS" "IN-REVIEW" "WAITING" "BLOCKED" "WONT-DO" "REPEAT" "|" "DONE" "DELEGATE"))
 
    ;; ("TODO" . (:background "#c3e88d" :foreground "white" :weight extra-bold))
    ;; TODO face setup;
@@ -749,8 +757,6 @@
      ("WONT-DO" . (:background "black" :foreground "white" :weight extra-bold))
      ("DELEGATE" . (:background "DimGrey" :foreground "white" :weight extra-bold))
      ("DONE" . (:background "DarkGreen" :foreground "white" :weight extra-bold)))
-
-
 
    org-tag-faces
    '(("pin" . (:foreground "red" :weight bold)))
@@ -1030,7 +1036,17 @@
          (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
          (vertico-posframe-border-width . 5)
          (vertico-posframe-fallback-mode . vertico-buffer-mode))
+        (consult-ripgrep
+         posframe
+         (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
+         (vertico-posframe-border-width . 5)
+         (vertico-posframe-fallback-mode . vertico-buffer-mode))
         (consult-imenu
+         posframe
+         (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
+         (vertico-posframe-border-width . 5)
+         (vertico-posframe-fallback-mode . vertico-buffer-mode))
+        (consult-bookmark
          posframe
          (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
          (vertico-posframe-border-width . 5)
@@ -1088,13 +1104,59 @@
   :init
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref)
+  :bind
+  ("M-y" . consult-yank-pop)
   :config
   (consult-customize
    consult-ripgrep consult-git-grep consult-grep)
-  (setq consult-narrow-key "<"))
+  (setq
+   consult-narrow-key "<"))
+   ;;consult-find-args "find . "))
+
+(defun le/centaur-tabs-buffer-groups ()
+  "`centaur-tabs-buffer-groups' control buffers' group rules.
+
+Group centaur-tabs with mode if buffer is derived from `eshell-mode' `emacs-lisp-mode' `dired-mode' `org-mode' `magit-mode'.
+All buffer name start with * will group to \"Emacs\".
+Other buffer group by `centaur-tabs-get-group-name' with project name."
+  (list
+   (cond
+    ((or (string-equal "*" (substring (buffer-name) 0 1))
+         (memq major-mode '(magit-process-mode
+                            magit-status-mode
+                            magit-diff-mode
+                            magit-log-mode
+                            magit-file-mode
+                            magit-blob-mode
+                            magit-blame-mode
+                            )))
+     "Emacs")
+    ((derived-mode-p 'prog-mode)
+     "Editing")
+    ((derived-mode-p 'dired-mode)
+     "Dired")
+    ((memq major-mode '(helpful-mode
+                        help-mode))
+     "Help")
+    ((memq major-mode '(org-mode
+                        org-agenda-clockreport-mode
+                        org-src-mode
+                        org-agenda-mode
+                        org-beamer-mode
+                        org-indent-mode
+                        org-bullets-mode
+                        org-cdlatex-mode
+                        org-agenda-log-mode
+                        diary-mode))
+     "OrgMode")
+    (t
+     (centaur-tabs-get-group-name (current-buffer))))))
 
 (use-package centaur-tabs
+  :ensure t
   :demand
+  :hook
+  (centaur-tabs-mode . le/centaur-tabs-buffer-groups)
   :config
   (defun le/my-centaur-tabs-icon-for-ansi-term (original-fn mode &rest args)
     "Change the face of the icon when MODE is 'ansi-term."
@@ -1108,7 +1170,13 @@
         centaur-tabs-set-icons t
         ;; centaur-tabs-plain-icons t
         centaur-tabs-gray-out-icons 'buffer
-        centaur-tabs-set-bar 'under)
+        centaur-tabs-set-bar 'over
+        x-underline-at-descent-line t
+        centaur-tabs-projectile-buffer-group-calc t
+        centaur-tabs-style "bar"
+        centaur-tabs-height 22
+        centaur-tabs-set-close-button nil
+        centaur-tabs-label-fixed-length 14)
   (centaur-tabs-mode t)
 
   :bind
@@ -1259,6 +1327,11 @@
   :defer 2
   :mode
   ("Dockerfile\\'" . dockerfile-mode))
+
+(use-package vterm
+  :ensure t
+  :hook (vterm-mode-hook eterm-256color-mode))
+
 
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)

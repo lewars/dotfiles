@@ -1,6 +1,6 @@
 ;;; .emacs --- Emacs initalization file -*- mode: emacs-lisp; lexical-binding: t; -*-
 
-;; Copyright (C) 1996-2023 Alistair Y. Lewars
+;; Copyright (C) 1996-2024 Alistair Y. Lewars
 
 ;; Author: Alistair Y. Lewars
 
@@ -163,7 +163,9 @@
                 prog-mode-hook
                 conf-mode-hook))
   (add-hook mode (lambda () (display-fill-column-indicator-mode 80))))
-(add-hook 'prod-mode-hook (lambda () (setq-local hl-line-mode t)))
+(add-hook 'prog-mode-hook (lambda ()
+                            (setq-local hl-line-mode t)
+                            (setq fill-column 160)))
 
 (use-package yasnippet
   :ensure t)
@@ -180,8 +182,34 @@
 (global-set-key "\M-/" 'hippie-expand)
 (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
 
-(add-to-list 'display-buffer-alist
-             '("*Help*" display-buffer-same-window))
+(setq display-buffer-alist
+      '(
+        ("\\*Help\\*"
+         (display-buffer-same-window)
+         (display-buffer-reuse-mode-window
+          display-buffer-below-selected)
+         (window-height . fit-window-to-buffer)
+         (dedicated . t))
+        ("\\*info\\*"
+         (display-buffer-reuse-mode-window
+          display-buffer-below-selected)
+         (window-height . fit-window-to-buffer)
+         (dedicated . t))
+        ("\\*Occur\\*"
+         ;; list of display functions
+         (display-buffer-reuse-mode-window
+          display-buffer-below-selected)
+         ;; parameters
+         (window-height . fit-window-to-buffer)
+         (dedicated . t))
+        ("\\*python-black errors\\*"
+         ;; list of display functions
+         (display-buffer-reuse-mode-window
+          display-buffer-below-selected)
+         ;; parameters
+         (window-height . fit-window-to-buffer)
+         (dedicated . t))
+        ))
 
 ;;  TODO: look into shakeles (https://depp.brause.cc/shackle/)
 (add-to-list 'display-buffer-alist
@@ -257,6 +285,7 @@
  '(custom-comment ((t (:background "#171F24" :foreground "#EEFFFF"))))
  '(custom-comment-tag ((t (:foreground "dark gray"))))
  '(doom-themes-treemacs-root-face ((t (:inherit font-lock-string-face :height 0.85))))
+ '(fixed-pitch ((t (:family "Source Code Pro" :height 180 :weight regular))))
  '(font-lock-comment-delimiter-face ((t (:inherit font-lock-comment-face :foreground "light gray"))))
  '(font-lock-comment-face ((t (:foreground "gray"))))
  '(font-lock-doc-face ((t (:inherit font-lock-comment-face :foreground "gray"))))
@@ -363,8 +392,8 @@
   :ensure t
   :bind (("C->" . mc/mark-next-like-this-symbol)
          ("C-<" . mc/mark-previous-like-this-symbol)
-	 ("C-c C->" . mc/mark-all-symbols-like-this)
-         ("C-c C-?" . mc/mark-all-dwim)))
+         ("C-x m" . mc/mark-all-symbols-like-this)
+         ("C-x S-m" . mc/mark-all-dwim)))
 
 (use-package imenu-list
   :ensure t
@@ -442,22 +471,30 @@
   (setf (alist-get "Jenkinsfile.+$" auto-mode-alist) 'groovy-mode)
   (setq compile 'jenkins-lint))
 
+
 (use-package yaml-mode
   :ensure t
   :hook
-  (after-save . le/frmt-yaml)
-  (yaml-mode . highlight-indent-guides-mode)
-  (yaml-mode . outline-minor-mode)
-  (yaml-mode . hs-minor-mode)
-  (yaml-mode . display-line-numbers-mode)
-  (yaml-mode . (lambda () (display-fill-column-indicator-column 80)
-                      (setq fill-column 160)))
+  ((yaml-mode . outline-minor-mode)
+   (yaml-mode . hs-minor-mode)
+   (yaml-mode . display-line-numbers-mode))
   :config
-  (defun le/frmt-yaml ()
+  (defun le/yaml-frmt ()
     "Reformat YAML file with yq."
     (when (eq major-mode 'yaml-mode)
       (shell-command-to-string (format "yq e -P -i -v %s" buffer-file-name))
-      (auto-revert-mode))))
+      (auto-revert-mode)))
+  (defun le/yaml-mode-setup ()
+    "Setup yaml mode"
+    (setq display-fill-column-indicator-column 80)
+    (setq fill-column 120)
+    (setq hs-minor-mode 1)
+    (auto-fill-mode 0)
+    (display-fill-column-indicator-mode 1))
+  (add-hook 'after-save-hook 'le/yaml-frmt)
+  (add-hook 'yaml-mode-hook 'le/yaml-mode-setup)
+  (add-hook 'yaml-mode-hook 'le/yaml-frmt)
+  (add-hook 'yaml-mode-hook 'highlight-indent-guides-mode))
 
 (use-package terraform-mode
   :ensure t
@@ -522,7 +559,8 @@
                    :branch "main"
                    :files ("dist" "*.el"))
   :ensure t
-  :hook (post-command-hook . copilot-clear-overlay)
+  :hook ((post-command-hook . copilot-clear-overlay)
+         (prog-mode . copilot-mode))
   :bind (("M-\\" . copilot-complete)
          :map copilot-completion-map
          ("C-g" . copilot-clear-overlay)
@@ -533,7 +571,9 @@
          ("[tab]" . copilot-accept-completion)
          ("C-w" . copilot-accept-completion-by-word)
          ("C-l" . copilot-accept-completion-by-line))
-  :config (setq copilot-idle-delay .5))
+  :config
+  (setq copilot-idle-delay .5)
+  (setq copilot-max-chars 1000000))
 
 ;; ibuffer
 (use-package ibuffer
@@ -599,8 +639,8 @@
       ("Terraform"
        (or
         (mode . terraform-mode)
-	(name . "^\\.tf")
-	(name . "^\\.tfvars")))
+        (name . "^\\.tf")
+        (name . "^\\.tfvars")))
       ("Go"
        (or
         (mode . go-mode)
@@ -728,7 +768,7 @@
    ;; org-hide-block-startup nil
    ;; org-indent-indentation-per-level 0
    org-insert-heading-respect-content nil
-   org-special-ctrl-a/e nil
+   org-special-ctrl-a/e t
    ;; org-src-fontify-natively t
    ;; org-src-preserve-indentation nil
    ;; org-src-tab-acts-natively t

@@ -5,9 +5,6 @@ case $- in
     *) return;;
 esac
 
-. $HOME/.asdf/asdf.sh
-. $HOME/.asdf/completions/asdf.bash
-
 # Path to your oh-my-bash installation.
 export OSH="${HOME}/.dotfiles/oh-my-bash"
 
@@ -147,8 +144,6 @@ export LANG=en_US.UTF-8
 
 export LSP_USE_PLISTS=true
 
-# Tooling
-source "${HOME}/.asdf/asdf.sh"
 # source <(op completion bash)
 # source "${HOME}/.config/op/plugins.sh"
 
@@ -192,10 +187,6 @@ alias fcbs=scbs
 alias cans='cd $HOME/git/ansi-anscom'
 alias sans='qcd $HOME/git/ansi-anscom'
 alias fans=sans
-
-# completion scripts
-. "$HOME/.asdf/asdf.sh"
-. "$HOME/.asdf/completions/asdf.bash"
 
 # functions
 ## A function that changes the k8 namespace
@@ -322,11 +313,13 @@ export -f k8listcluster
 export -f jenkins-ui-agent
 export -f jenkins-can-agent
 export -f qcd
+
 . $HOME/.asdf/asdf.sh
 . $HOME/.asdf/completions/asdf.bash
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    export JAVA_HOME=/usr/local/opt/openjdk
+    export JAVA_HOME=/usr/local/opt/openjdk@17
+    export CLASSPATH=${HOME}/git/cbsi-cbscom/cbssre-jenkins-migration-tools/scripts/integration/libs/jenkins-core-2.319.jar
 fi
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then

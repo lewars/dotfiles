@@ -243,8 +243,8 @@
  '(org-agenda-files
    '("~/git/org/project-org/general/gtd.org" "~/git/org/todo/gtd.org"))
  '(package-selected-packages
-   '(xterm-color company-emoji edit-server ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet consult all-the-icons bats bats-mode lsp-pyright lsp-ui lsp-mode dired-git-mode async org-modern consult-lsp helpful org-make-toc diminish nerd-icons-dired dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode company-box dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs marginalia centaur-tabs bazel jinja2-mode highlight-symbol color-theme direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project doom-themes doom-modeline dockerfile-mode corfu copilot))
- '(warning-suppress-types '((comp))))
+   '(npm-mode xterm-color company-emoji edit-server ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet consult all-the-icons bats bats-mode lsp-pyright lsp-ui lsp-mode dired-git-mode async org-modern consult-lsp helpful org-make-toc diminish nerd-icons-dired dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode company-box dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs marginalia centaur-tabs bazel jinja2-mode highlight-symbol color-theme direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project doom-themes doom-modeline dockerfile-mode corfu copilot))
+ '(warning-suppress-types '((lsp-mode) (comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -444,18 +444,20 @@
 
 (use-package yaml-mode
   :ensure t
+  :hook
+  (after-save . le/frmt-yaml)
+  (yaml-mode . highlight-indent-guides-mode)
+  (yaml-mode . outline-minor-mode)
+  (yaml-mode . hs-minor-mode)
+  (yaml-mode . display-line-numbers-mode)
+  (yaml-mode . (lambda () (display-fill-column-indicator-column 80)
+                      (setq fill-column 160)))
   :config
-  (defun frmt-yaml ()
+  (defun le/frmt-yaml ()
     "Reformat YAML file with yq."
     (when (eq major-mode 'yaml-mode)
       (shell-command-to-string (format "yq e -P -i -v %s" buffer-file-name))
-      (auto-revert-mode)))
-  (add-hook 'after-save-hook 'frmt-yaml)
-  (add-hook 'yaml-mode-hook 'highlight-indent-guides-mode)
-  (add-hook 'yaml-mode-hook 'outline-minor-mode)
-  (add-hook 'yaml-mode-hook 'hs-minor-mode)
-  (add-hook 'yaml-mode-hook 'display-line-numbers-mode)
-  (add-hook 'yaml-mode-hook (lambda () (display-fill-column-indicator-column 120))))
+      (auto-revert-mode))))
 
 (use-package terraform-mode
   :ensure t
@@ -531,7 +533,7 @@
          ("[tab]" . copilot-accept-completion)
          ("C-w" . copilot-accept-completion-by-word)
          ("C-l" . copilot-accept-completion-by-line))
-  :config (setq copilot-idle-delay 1))
+  :config (setq copilot-idle-delay .5))
 
 ;; ibuffer
 (use-package ibuffer
@@ -1027,7 +1029,12 @@
 
 ;; Enable vertico-multiform
 (setq vertico-multiform-commands
-      '((consult-line
+      '((consult-projectile
+         posframe
+         (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
+         (vertico-posframe-border-width . 7)
+         (vertico-posframe-fallback-mode . vertico-buffer-mode))
+        (consult-line
          posframe
          (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
          (vertico-posframe-border-width . 5)

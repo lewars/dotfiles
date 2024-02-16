@@ -185,41 +185,25 @@
 
 (setq display-buffer-alist
       '(
-        ("\\*Help\\*"
-         (display-buffer-same-window)
-         (display-buffer-reuse-mode-window
-          display-buffer-below-selected)
-         (window-height . fit-window-to-buffer)
-         (dedicated . t))
-        ("\\*info\\*"
-         (display-buffer-reuse-mode-window
-          display-buffer-below-selected)
-         (window-height . fit-window-to-buffer)
-         (dedicated . t))
-        ("\\*Occur\\*"
-         ;; list of display functions
-         (display-buffer-reuse-mode-window
-          display-buffer-below-selected)
-         ;; parameters
-         (window-height . fit-window-to-buffer)
-         (dedicated . t))
-        ("\\*python-black errors\\*"
-         ;; list of display functions
-         (display-buffer-reuse-mode-window
-          display-buffer-below-selected)
-         ;; parameters
-         (window-height . fit-window-to-buffer)
-         (dedicated . t))
+        ("\\*vterm\\*"
+         (display-buffer-in-side-window)
+         (window-height . 0.2)
+         (side . bottom)
+         (slot . -1))
+        ("\\*\\([Hh]elp.*\\|[Ii]nfo\\|.*[Ff]inder.*\\)\\*"
+         ;; todo - have matched buffers use the same window
+         (display-buffer-reuse-window
+          display-buffer-in-direction)
+         (mode . '(help-mode Info-mode))
+         (window . root)
+         (direction . right)
+         (window-width . 0.4))
+        ("\\*\\(Flycheck errors\\|python-black errors\\|Backtrace\\)\\*"
+         (display-buffer-in-side-window)
+         (window-height . 0.2)
+         (side . bottom)
+         (slot . 0))
         ))
-
-;;  TODO: look into shakeles (https://depp.brause.cc/shackle/)
-(add-to-list 'display-buffer-alist
-             `(,(rx bos "*Flycheck errors*" eos)
-              (display-buffer-reuse-window
-               display-buffer-in-side-window)
-              (side            . bottom)
-              (reusable-frames . visible)
-              (window-height   . 0.128)))
 
 ;; Configure EAF browser
 ;; (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")

@@ -190,14 +190,14 @@
          (window-height . 0.2)
          (side . bottom)
          (slot . -1))
-        ("\\*\\([Hh]elp.*\\|[Ii]nfo\\|.*[Ff]inder.*\\)\\*"
+        ("\\*\\([Hh]elp.*\\|[Ii]nfo\\|.*[Ff]inder.*\\|Apropos\\)\\*"
          ;; todo - have matched buffers use the same window
          (display-buffer-reuse-window
           display-buffer-in-direction)
          (mode . '(help-mode Info-mode))
          (window . root)
          (direction . right)
-         (window-width . 0.4))
+         (window-width . 0.48))
         ("\\*\\(Flycheck errors\\|python-black errors\\|Backtrace\\)\\*"
          (display-buffer-in-side-window)
          (window-height . 0.2)
@@ -733,7 +733,10 @@
 (use-package org
   :defer t
   :init (setq org-replace-disputed-keys t)
-  :hook (org-mode . le/org-mode-setup)
+  :hook
+  (org-mode . le/org-mode-setup)
+  (post-command-hook . le/org-move-before-ellipsis)
+
   :mode (("\\.org$" . org-mode))
   :config
   (add-hook 'org-mode-hook
@@ -766,8 +769,8 @@
    org-hide-emphasis-markers t
    org-pretty-entities t
    org-log-repeat t
-   ;; org-ellipsis " ▼"
-   org-ellipsis " ⤵"
+   org-ellipsis "▼"
+   ;; org-ellipsis " ⤵"
    org-clock-sound "~/git/org/media/alarm.wav"
    ;; TODO keywords setup
    org-todo-keywords

@@ -960,7 +960,8 @@
   (progn
     (setq treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
           treemacs-directory-name-transformer      #'identity
-          treemacs-display-in-side-window          t)
+          treemacs-display-in-side-window          t
+          treemacs-width-is-initially-locked       nil)
 
     ;; The default width and height of the icons is 22 pixels. If you are
     ;; using a Hi-DPI display, uncomment this to double the icon size.

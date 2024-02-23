@@ -250,7 +250,6 @@
  '(display-fill-column-indicator-column 120)
  '(fill-column 80)
  '(frame-background-mode nil)
- '(highlight-indent-guides-method 'bitmap)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files '("~/git/org/todo/gtd.org"))
@@ -348,9 +347,11 @@
 
 (use-package highlight-indent-guides
   :ensure t
+  :hook  (prog-mode . highlight-indent-guides-mode)
   :config
-  (setq highlight-indent-guides-mode t)
-  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
+  (setq highlight-indent-guides-mode t
+        highlight-indent-guides-method 'bitmap
+        highlight-indent-guides-bitmap-function 'highlight-indent-guides--bitmap-line))
 
 (use-package text-mode
   :config
@@ -961,6 +962,9 @@
     (setq treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
           treemacs-directory-name-transformer      #'identity
           treemacs-display-in-side-window          t
+          treemacs-indentation                     1
+          treemacs-indentation-guide-mode          t
+          treemacs-indentation-guide-style         'line
           treemacs-width-is-initially-locked       nil)
 
     ;; The default width and height of the icons is 22 pixels. If you are

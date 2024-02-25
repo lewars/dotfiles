@@ -728,7 +728,8 @@
   "Perform some org-mode setup at hook execution."
   (variable-pitch-mode 0)
   (auto-fill-mode 0)
-  (visual-line-mode t))
+  (visual-line-mode t)
+  (setq hl-line-mode nil))
 
 ;; start of "use-package org" for the main org-mode section
 (use-package org
@@ -780,7 +781,7 @@
    ;; ("TODO" . (:background "#c3e88d" :foreground "white" :weight extra-bold))
    ;; TODO face setup;
    org-modern-todo-faces
-   '(("IN-PROGRESS" . (:background "gold4" :foreground "white" :weight extra-bold))
+   '(("IN-PROGRESS" . (:background "orange" :foreground "black" :weight extra-bold))
      ("REPEAT" . (:background "DarkViolet" :foreground "white" :weight extra-bold))
      ("IN-REVIEW" . (:background "RoyalBlue" :foreground "white" :weight extra-bold))
      ("WAITING" . (:background "DarkOrange3" :foreground "white" :weight extra-bold))

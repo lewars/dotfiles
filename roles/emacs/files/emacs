@@ -354,8 +354,8 @@
         highlight-indent-guides-bitmap-function 'highlight-indent-guides--bitmap-line))
 
 (use-package text-mode
-  :config
-  (add-hook 'text-mode-hook #'hl-line-mode))
+  :config (setq-local show-trailing-whitespace nil))
+
 
 (use-package highlight-symbol
   :ensure t

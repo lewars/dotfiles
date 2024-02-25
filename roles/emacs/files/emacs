@@ -83,6 +83,11 @@
 (eval-after-load "term"
   '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
 
+;; Only vailable in emacs 29.1
+;; (setq auto-save-visited-predicate
+;;       (lambda () (eq major-mode 'org-mode)
+;;         auto-save-visited-interval 5))
+
 (defun le/my-c-mode-hook ()
   "This hook define hooks for 'c-mode'."
   (setq indent-tabs-mode nil))
@@ -737,8 +742,6 @@
   :init (setq org-replace-disputed-keys t)
   :hook
   (org-mode . le/org-mode-setup)
-  (post-command-hook . le/org-move-before-ellipsis)
-
   :mode (("\\.org$" . org-mode))
   :config
   (add-hook 'org-mode-hook

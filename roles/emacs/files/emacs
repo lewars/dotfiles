@@ -734,7 +734,8 @@
   (variable-pitch-mode 0)
   (auto-fill-mode 0)
   (visual-line-mode t)
-  (setq hl-line-mode nil))
+  (setq-local show-trailing-whitespace nil)
+  (setq-local hl-line-mode nil))
 
 ;; start of "use-package org" for the main org-mode section
 (use-package org
@@ -784,12 +785,12 @@
    ;; ("TODO" . (:background "#c3e88d" :foreground "white" :weight extra-bold))
    ;; TODO face setup;
    org-modern-todo-faces
-   '(("IN-PROGRESS" . (:background "orange" :foreground "black" :weight extra-bold))
+   '(("IN-PROGRESS" . (:background "DarkOrange" :foreground "white" :weight extra-bold))
      ("REPEAT" . (:background "DarkViolet" :foreground "white" :weight extra-bold))
      ("IN-REVIEW" . (:background "RoyalBlue" :foreground "white" :weight extra-bold))
      ("WAITING" . (:background "DarkOrange3" :foreground "white" :weight extra-bold))
      ("BLOCKED" . (:background "red" :foreground "white" :weight extra-bold))
-     ("WONT-DO" . (:background "black" :foreground "white" :weight extra-bold))
+     ("WONT-DO" . (:background "plum" :foreground "black" :weight extra-bold))
      ("DELEGATE" . (:background "DimGrey" :foreground "white" :weight extra-bold))
      ("DONE" . (:background "DarkGreen" :foreground "white" :weight extra-bold)))
 

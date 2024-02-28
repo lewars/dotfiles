@@ -208,6 +208,9 @@
          (window-height . 0.2)
          (side . bottom)
          (slot . 0))
+        ("\\*\\(Org todo\\)\\*"
+         (display-buffer-at-bottom)
+         (window-height . 0.2))
         ))
 
 ;; Configure EAF browser
@@ -780,7 +783,8 @@
    org-clock-sound "~/git/org/media/alarm.wav"
    ;; TODO keywords setup
    org-todo-keywords
-   '((sequence "TODO" "IN-PROGRESS" "IN-REVIEW" "WAITING" "BLOCKED" "WONT-DO" "REPEAT" "|" "DONE" "DELEGATE"))
+   '((sequence "TODO(t)" "IN-PROGRESS(p)" "IN-REVIEW(r)" "WAITING(w)" "BLOCKED(b)" "WONT-DO(x)" "|" "DONE(d)" "DELEGATE(D)")
+     (sequence "REPEAT(R)" "|" "DONE(d)"))
 
    ;; ("TODO" . (:background "#c3e88d" :foreground "white" :weight extra-bold))
    ;; TODO face setup;

@@ -250,7 +250,7 @@
 			<key>keyword</key>
 			<string>jtoolss</string>
 			<key>text</key>
-			<string>Jenkins Tools Search</string>
+			<string>PPlus Jenkins.tools Search</string>
 			<key>url</key>
 			<string>https://jenkins.tools.paramountplus.com/search/?q={query}</string>
 		</dict>

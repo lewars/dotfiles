@@ -165,8 +165,7 @@
 (add-hook 'prog-mode-hook 'outline-minor-mode)
 (add-hook 'prog-mode-hook 'hs-minor-mode)
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-(dolist (mode '(text-mode-hook
-                prog-mode-hook
+(dolist (mode '(prog-mode-hook
                 conf-mode-hook))
   (add-hook mode (lambda () (display-fill-column-indicator-mode 80))))
 (add-hook 'prog-mode-hook (lambda ()
@@ -210,7 +209,7 @@
          (slot . 0))
         ("\\*\\(Org todo\\)\\*"
          (display-buffer-at-bottom)
-         (window-height . 0.2))
+         (window-height . 0.3))
         ))
 
 ;; Configure EAF browser
@@ -692,7 +691,7 @@
 
 (defun le/org-mode-visual-fill ()
   "Setup visual-fill-mode."
-  (setq visual-fill-column-width 110
+  (setq visual-fill-column-width 130
         visual-fill-column-center-text t)
   (visual-fill-column-mode 1))
 
@@ -758,7 +757,7 @@
    ;; Edit settings
    ;; org-auto-align-tags t
    org-catch-invisible-edits 'show-and-error
-   ;; org-cycle-separator-lines 2
+   org-cycle-separator-lines 2
    ;; org-edit-src-content-indentation 0
    org-fontify-quote-and-verse-blocks t
    ;; org-hide-block-startup nil
@@ -778,6 +777,8 @@
    org-hide-emphasis-markers t
    org-pretty-entities t
    org-log-repeat t
+   org-blank-before-new-entry '((heading . nil) (plain-list-item . nil))
+
    org-ellipsis "▼"
    ;; org-ellipsis " ⤵"
    org-clock-sound "~/git/org/media/alarm.wav"
@@ -891,11 +892,6 @@
    '(org-level-4 ((t (:inherit outline-4 :weight normal :height 1.0))))
    '(org-level-5 ((t (:inherit outline-5 :weight normal :height 1.0))))
    '(org-document-title ((t (:foreground "#82aaff" :weight extra-bold :height 1.3)))))
-
-  (setq org-blank-before-new-entry
-        '((heading . nil)
-          (plain-list-item . nil)))
-  (setq org-cycle-separator-lines 1)
 
   (setq org-hidden-keywords '(author date title))
 
@@ -1087,7 +1083,7 @@
          (vertico-posframe-fallback-mode . vertico-buffer-mode))
         (consult-ripgrep
          posframe
-         (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
+         (vertico-posframe-poshandler . posframe-poshandler-frame-bottom-center)
          (vertico-posframe-border-width . 5)
          (vertico-posframe-fallback-mode . vertico-buffer-mode))
         (consult-imenu
@@ -1273,10 +1269,14 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                 read-process-output-max (* 4096 4096)
                 lsp-use-plists t
                 lsp-log-io nil
-                lsp-terraform-ls-enable-show-reference t
                 lsp-semantic-tokens-enable t
                 lsp-semantic-tokens-honor-refresh-requests t
+                lsp-disabled-clients '(tfls)
+                lsp-terraform-ls-enable-show-reference t
                 lsp-terraform-ls-prefill-required-fields t
+                lsp-enable-links t
+                lsp-semantic-tokens-enable t
+                lsp-semantic-tokens-honor-refresh-requests t
                 lsp-ansible-add-on t
                 lsp-enable-symbol-highlighting t
                 lsp-groovy-server-file

@@ -11,4 +11,4 @@
 - Group effort
 ** Bad
 - Technology not working (when it should) especially around attaching and mounting k8s snapshots volumns and even PersistentVolume in prod
-- Thourough experimentation with novel ways of doing things with our stack before thinking it was done
+- Thorough experimentation with novel ways of doing things with our stack before thinking it was done

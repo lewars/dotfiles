@@ -9,4 +9,5 @@ packages:
   - jq
   - yq
   - make
+  - ShellCheck
 remove_packages: []

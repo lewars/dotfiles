@@ -793,7 +793,7 @@
 
    org-ellipsis "▼"
    ;; org-ellipsis " ⤵"
-   org-clock-sound "~/git/org/media/alarm.wav"
+   org-clock-sound "~/.emacs.d/org/media/alarm.wav"
    ;; TODO keywords setup
    org-todo-keywords
    '((sequence "TODO(t)" "IN-PROGRESS(p)" "IN-REVIEW(r)" "WAITING(w)" "BLOCKED(b)" "WONT-DO(x)" "|" "DONE(d)" "DELEGATE(D)")

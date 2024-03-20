@@ -20,3 +20,15 @@
     owner: '{{ user }}'
     state: link
   become: false
+- name: Make sure org mode media directory exists
+  file:
+    path: '{{ dotfiles_user_home }}/.emacs.d/org/media'
+    state: directory
+    owner: '{{ user }}'
+  become: false
+- name: Copy wav file to org mode media directory
+  copy:
+    src: '{{ dotfiles_home }}/roles/emacs/files/emacs.d/org/media/alarm.wav'
+    dest: '{{ dotfiles_user_home }}/.emacs.d/org/media/alarm.wav'
+    owner: '{{ user }}'
+  become: false

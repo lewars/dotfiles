@@ -83,7 +83,10 @@ OMB_USE_SUDO=true
 # Add wisely, as too many completions slow down shell startup.
 completions=(
   git
-  ssh
+  docker
+  gh
+  makefile
+  kubectl
 )
 
 # Which aliases would you like to load? (aliases can be found in ~/.oh-my-bash/aliases/*)
@@ -336,3 +339,4 @@ alias talisman=$TALISMAN_HOME/talisman_linux_amd64
 export TALISMAN_INTERACTIVE=false
 # <<< talisman <<<
 source /home/slams/.config/op/plugins.sh
+export CLOUDSDK_PYTHON=python3.11

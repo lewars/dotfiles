@@ -183,7 +183,6 @@
 (yas-global-mode 1)
 (yas-reload-all)
 (add-hook 'prog-mode-hook #'yas-minor-mode)
-
 (global-set-key "\M-/" 'hippie-expand)
 (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
 
@@ -207,7 +206,7 @@
          (window-height . 0.2)
          (side . bottom)
          (slot . 0))
-        ("\\*\\(Org todo\\)\\*"
+        ("\\*Org todo\\*"
          (display-buffer-at-bottom)
          (window-height . 0.3))
         ))
@@ -261,7 +260,7 @@
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files '("~/git/org/todo/gtd.org"))
  '(package-selected-packages
-   '(npm-mode xterm-color company-emoji edit-server ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet consult all-the-icons bats bats-mode lsp-pyright lsp-ui lsp-mode dired-git-mode async org-modern consult-lsp helpful org-make-toc diminish nerd-icons-dired dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode company-box dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs marginalia centaur-tabs bazel jinja2-mode highlight-symbol color-theme direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project doom-themes doom-modeline dockerfile-mode corfu copilot))
+   '(k8s-mode helm npm-mode xterm-color company-emoji edit-server ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet consult all-the-icons bats bats-mode lsp-pyright lsp-ui lsp-mode dired-git-mode async org-modern consult-lsp helpful org-make-toc diminish nerd-icons-dired dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode company-box dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs marginalia centaur-tabs bazel jinja2-mode highlight-symbol color-theme direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired treemacs-all-the-icons terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project doom-themes doom-modeline dockerfile-mode corfu copilot))
  '(warning-suppress-types '((lsp-mode) (comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -464,19 +463,33 @@
   (setf (alist-get "Jenkinsfile.+$" auto-mode-alist) 'groovy-mode)
   (setq compile 'jenkins-lint))
 
+(defvar yaml-formatting-enabled t
+  "Whether YAML formatting is currently enabled.")
 
 (use-package yaml-mode
   :ensure t
   :hook
   ((yaml-mode . outline-minor-mode)
    (yaml-mode . hs-minor-mode)
-   (yaml-mode . display-line-numbers-mode))
+   (yaml-mode . display-line-numbers-mode)
+   (yaml-mode . le/yaml-mode-setup)
+   (yaml-mode . highlight-indent-guides-mode)
+   (yaml-mode . (lambda ()
+                  (add-hook 'after-save-hook 'le/yaml-frmt nil t))))
   :config
+  (defvar yaml-formatting-enabled t)
+  (defun toggle-yaml-formatting ()
+    "Toggle the state of YAML formatting."
+    (interactive)
+    (setq yaml-formatting-enabled (not yaml-formatting-enabled))
+    (message "YAML formatting %s" (if yaml-formatting-enabled "enabled" "disabled")))
   (defun le/yaml-frmt ()
-    "Reformat YAML file with yq."
-    (when (eq major-mode 'yaml-mode)
-      (shell-command-to-string (format "yq e -P -i -v %s" buffer-file-name))
-      (auto-revert-mode)))
+    "Conditionally reformat YAML file with yq based on `yaml-formatting-enabled'."
+    (interactive)
+    (when (and yaml-formatting-enabled (eq major-mode 'yaml-mode))
+      (shell-command-to-string (format "yq eval-all -i %s" buffer-file-name))
+      (revert-buffer t t t)
+      (message "YAML file reformatted.")))
   (defun le/yaml-mode-setup ()
     "Setup yaml mode"
     (setq display-fill-column-indicator-column 120)
@@ -484,10 +497,7 @@
     (setq hs-minor-mode 1)
     (auto-fill-mode 0)
     (display-fill-column-indicator-mode 1))
-  (add-hook 'after-save-hook 'le/yaml-frmt)
-  (add-hook 'yaml-mode-hook 'le/yaml-mode-setup)
-  (add-hook 'yaml-mode-hook 'le/yaml-frmt)
-  (add-hook 'yaml-mode-hook 'highlight-indent-guides-mode))
+  )
 
 (use-package terraform-mode
   :ensure t
@@ -553,8 +563,8 @@
                    :branch "main"
                    :files ("dist" "*.el"))
   :ensure t
-  :hook ((post-command-hook . copilot-clear-overlay)
-         (prog-mode . copilot-mode))
+  :hook ((post-command-hook . copilot-clear-overlay))
+         ;;(prog-mode . copilot-mode))
   :bind (("M-\\" . copilot-complete)
          :map copilot-completion-map
          ("C-g" . copilot-clear-overlay)
@@ -1383,6 +1393,10 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :ensure t
   :hook (vterm-mode-hook eterm-256color-mode))
 
+(use-package k8s-mode
+  :ensure t
+  :defer t
+  :commands (k8s-mode))
 
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)

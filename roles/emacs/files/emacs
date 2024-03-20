@@ -703,7 +703,7 @@
 
 (defun le/org-mode-visual-fill ()
   "Setup visual-fill-mode."
-  (setq visual-fill-column-width 160
+  (setq visual-fill-column-width 130
         visual-fill-column-center-text t)
   (visual-fill-column-mode 1))
 

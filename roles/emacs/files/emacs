@@ -120,7 +120,7 @@
   "This hook define hooks for 'text-mode'."
   (toggle-word-wrap 1)
   (visual-line-mode 1)
-  (auto-fill-mode 1))
+  (auto-fill-mode 0))
 (add-hook 'text-mode-hook 'le/text-mode-init)
 
 (defun le/my-whitespace-mode-hook ()
@@ -167,10 +167,10 @@
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (dolist (mode '(prog-mode-hook
                 conf-mode-hook))
-  (add-hook mode (lambda () (display-fill-column-indicator-mode 80))))
+  (add-hook mode (lambda () (display-fill-column-indicator-mode 120))))
 (add-hook 'prog-mode-hook (lambda ()
                             (setq-local hl-line-mode t)
-                            (setq fill-column 160)))
+                            (setq fill-column 120)))
 
 (use-package yasnippet
   :ensure t)
@@ -255,7 +255,7 @@
  '(blink-matching-paren t)
  '(column-number-mode 1)
  '(display-fill-column-indicator-column 120)
- '(fill-column 80)
+ '(fill-column 120)
  '(frame-background-mode nil)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
@@ -434,7 +434,8 @@
 
 (use-package python-mode
   :ensure t
-  :hook (python-mode . (lambda () (display-fill-column-indicator-column 88))))
+  :hook (python-mode . (lambda () ((display-fill-column-indicator-column 88)
+                                   (fill-column 88)))))
 
 (use-package pyvenv-auto
   :hook ((python-mode . pyvenv-auto-run)))
@@ -478,7 +479,7 @@
       (auto-revert-mode)))
   (defun le/yaml-mode-setup ()
     "Setup yaml mode"
-    (setq display-fill-column-indicator-column 80)
+    (setq display-fill-column-indicator-column 120)
     (setq fill-column 120)
     (setq hs-minor-mode 1)
     (auto-fill-mode 0)
@@ -501,7 +502,8 @@
   (add-hook 'terraform-mode-hook 'highlight-indent-guides-mode)
   (add-hook 'terraform-mode-hook 'hs-minor-mode)
   (add-hook 'terraform-mode-hook 'display-line-numbers-mode)
-  (add-hook 'terraform-mode-hook (lambda () (display-fill-column-indicator-column 120))))
+  (add-hook 'terraform-mode-hook (lambda () ((display-fill-column-indicator-column 120)
+                                             (fill-column 120)))))
 
 (use-package markdown-mode
   :ensure t
@@ -691,7 +693,7 @@
 
 (defun le/org-mode-visual-fill ()
   "Setup visual-fill-mode."
-  (setq visual-fill-column-width 130
+  (setq visual-fill-column-width 160
         visual-fill-column-center-text t)
   (visual-fill-column-mode 1))
 

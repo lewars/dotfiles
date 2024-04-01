@@ -459,7 +459,7 @@
   (setf (alist-get "Jenkinsfile.+$" auto-mode-alist) 'groovy-mode)
   (setq compile 'jenkins-lint))
 
-(defvar yaml-formatting-enabled t
+(defvar yaml-formatting-enabled nil
   "Whether YAML formatting is currently enabled.")
 
 (use-package yaml-mode
@@ -489,7 +489,7 @@
   (defun le/yaml-mode-setup ()
     "Setup yaml mode"
     (setq display-fill-column-indicator-column 120)
-    (setq fill-column 120)
+    (setq fill-column 160)
     (setq hs-minor-mode 1)
     (auto-fill-mode 0)
     (display-fill-column-indicator-mode 1))
@@ -960,8 +960,10 @@
                            display-buffer-below-selected)
                           (reusable-frames . t)))
       (magit-display-buffer-traditional buffer)))
-
-  (setq magit-display-buffer-function #'magit-display-buffer-pop-up-frame)
+  (setq magit-define-global-key-bindings t)
+  :bind (("C-x g" . magit-status)
+         ("C-x M-g" . magit-dispatch)
+         ("C-c M-g" . magit-file-dispatch))
 )
 
 (use-package treemacs
@@ -1093,7 +1095,7 @@
          (vertico-posframe-fallback-mode . vertico-buffer-mode))
         (consult-grep
          posframe
-         (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
+         (vertico-posframe-poshandler . posframe-poshandler-frame-bottom-center)
          (vertico-posframe-border-width . 5)
          (vertico-posframe-fallback-mode . vertico-buffer-mode))
         (consult-ripgrep
@@ -1103,12 +1105,12 @@
          (vertico-posframe-fallback-mode . vertico-buffer-mode))
         (consult-imenu
          posframe
-         (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
+         (vertico-posframe-poshandler . posframe-poshandler-frame-bottom-center)
          (vertico-posframe-border-width . 5)
          (vertico-posframe-fallback-mode . vertico-buffer-mode))
         (consult-bookmark
          posframe
-         (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
+         (vertico-posframe-poshandler . posframe-poshandler-frame-bottom-center)
          (vertico-posframe-border-width . 5)
          (vertico-posframe-fallback-mode . vertico-buffer-mode))
         (t posframe)
@@ -1261,8 +1263,15 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package company
   :hook (after-init . global-company-mode)
-  :config (setq company-minimum-prefix-length 1
-                company-idle-delay 0.0))
+  :config
+  (setq company-minimum-prefix-length 1
+        company-idle-delay 0.0)
+  (setq company-global-modes '(not text-mode fundamental-mode))
+  (add-hook 'company-mode-hook
+            (lambda ()
+              (when (derived-mode-p 'org-mode)
+                (company-mode -1))))
+  )
 
 ;; Set company mode for all modes exect for a few modes listed below
 (setq company-global-modes '(not text-mode))
@@ -1342,9 +1351,23 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 (use-package emojify
   :ensure t
   :hook (after-init . le/emojify-setup)
-  :init
-  (add-hook 'after-init-hook 'le/emojify-setup)
+  ;; :init
+  ;; (add-hook 'after-init-hook 'le/emojify-setup)
   :config (setq emojify-display-style 'unicode))
+
+(defun le/enable-company-emoji ()
+  "Add company-emoji backend to company-backends."
+  (interactive)
+  (unless (member 'company-emoji company-backends)
+    (setq company-backends (push 'company-emoji company-backends))
+    (message "company-emoji backend enabled.")))
+
+(defun le/disable-company-emoji ()
+  "Remove company-emoji backend from company-backends."
+  (interactive)
+  (when (member 'company-emoji company-backends)
+    (setq company-backends (remove 'company-emoji company-backends))
+    (message "company-emoji backend disabled.")))
 
 (use-package company-emoji
   :ensure t)

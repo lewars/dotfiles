@@ -330,7 +330,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 fi
 
 # source "${HOME}/.config/op/plugins.sh"
-
+source "$HOME/usr/local/etc/task.bash"
 
 # >>> talisman >>>
 # Below environment variables should not be modified unless you know what you are doing

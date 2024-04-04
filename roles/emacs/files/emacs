@@ -53,7 +53,7 @@
       (setq my-default-font-height 100))
     (setq my-default-font-height 125))
 
-(set-face-attribute 'default nil :height my-default-font-height :foundry "ADBO" :family "Source Code Pro")
+(set-face-attribute 'default nil :height my-default-font-height :family "JetBrainsMonoNL Nerd Font Propo")
 
 (require 'package)
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
@@ -63,6 +63,9 @@
 
 (require 'use-package)
 (require 'quelpa-use-package)
+
+(use-package fixed-pitch
+  :quelpa (fixed-pitch :fetcher github :repo "cstby/fixed-pitch-mode"))
 
 ;; Misc configs
 (recentf-mode 1)
@@ -260,7 +263,7 @@
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files '("~/git/org/todo/gtd.org"))
  '(package-selected-packages
-   '(k8s-mode helm npm-mode xterm-color company-emoji edit-server ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet consult all-the-icons bats bats-mode lsp-pyright lsp-ui lsp-mode dired-git-mode async org-modern consult-lsp helpful org-make-toc diminish nerd-icons-dired dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode company-box dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs marginalia centaur-tabs bazel jinja2-mode highlight-symbol color-theme direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project doom-themes doom-modeline dockerfile-mode corfu copilot))
+   '(fixed-pitch treemacs-nerd-icons nerd-icons-ibuffer nerd-icons-dired doom-modeline k8s-mode helm npm-mode xterm-color company-emoji edit-server ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet consult all-the-icons bats bats-mode lsp-pyright lsp-ui lsp-mode dired-git-mode async org-modern consult-lsp helpful org-make-toc diminish dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode company-box dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs marginalia centaur-tabs bazel jinja2-mode highlight-symbol color-theme direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-magit treemacs-icons-dired terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project doom-themes dockerfile-mode corfu copilot))
  '(warning-suppress-types '((lsp-mode) (comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -274,7 +277,8 @@
  '(custom-comment ((t (:background "#171F24" :foreground "#EEFFFF"))))
  '(custom-comment-tag ((t (:foreground "dark gray"))))
  '(doom-themes-treemacs-root-face ((t (:inherit font-lock-string-face :height 0.85))))
- '(fixed-pitch ((t (:family "Source Code Pro" :height 180 :weight regular))))
+ '(fixed-pitch ((t (:family "Monego" :height 100 :weight regular))))
+ '(variable-pitch ((t (:family "Source Code Pro" :height 110 :weight regular))))
  '(font-lock-comment-delimiter-face ((t (:inherit font-lock-comment-face :foreground "light gray"))))
  '(font-lock-comment-face ((t (:foreground "gray"))))
  '(font-lock-doc-face ((t (:inherit font-lock-comment-face :foreground "gray"))))
@@ -316,11 +320,12 @@
 
 ;; Misc
 (use-package all-the-icons
-  :ensure t
-  :if (display-graphic-p))
+  :ensure t)
 
 (use-package nerd-icons
   :ensure t
+  :config
+  (setq nerd-icons-font-family "Hack Nerd Font")
   )
 
 ;; ========== Developer configurations ===========
@@ -741,7 +746,7 @@
 
 (defun le/org-mode-setup ()
   "Perform some org-mode setup at hook execution."
-  (variable-pitch-mode 0)
+  (variable-pitch-mode 1)
   (auto-fill-mode 0)
   (visual-line-mode t)
   (setq-local show-trailing-whitespace nil)
@@ -1008,9 +1013,9 @@
 
 (use-package treemacs-nerd-icons
   :ensure t
-  :after treemacs
+  :after nerd-icons
   :config
-  (treemacs-load-theme "nerd-icons")
+  (treemacs-load-theme "doom-colors")
   (treemacs-refresh))
 
 ;; UI
@@ -1036,20 +1041,14 @@
 (use-package jinja2-mode
   :ensure t)
 
-;; Configure doom-themes
 (use-package doom-themes
   :ensure t
   :config
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (setq doom-themes-enable-bold t
+        doom-themes-enable-italic t)
   (load-theme 'doom-material t)
-
-  ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
-  ;; Enable custom neotree theme (all-the-icons must be installed!)
-  (doom-themes-neotree-config)
-  ;; or for treemacs users
+  (setq doom-themes-treemacs-theme "doom-colors")
   (doom-themes-treemacs-config)
   (doom-themes-org-config))
 

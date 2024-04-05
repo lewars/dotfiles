@@ -188,7 +188,7 @@
 
 (setq display-buffer-alist
       '(
-        ("\\*vterm\\*"
+        ("\\*\\(vterm\\|[eE]?shell\\)\\*"
          (display-buffer-in-side-window)
          (window-height . 0.2)
          (side . bottom)
@@ -1409,7 +1409,11 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package vterm
   :ensure t
-  :hook (vterm-mode-hook eterm-256color-mode))
+  :hook (vterm-mode-hook eterm-256color-mode)
+  :config
+  (setq vterm-copy-exclude-prompt t
+        vterm-use-vterm-prompt-detection-method t
+        vterm-max-scrollback 10000))
 
 (use-package k8s-mode
   :ensure t

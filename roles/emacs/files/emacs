@@ -10,7 +10,7 @@
 
 ;;; Code:
 
-(setq gc-cons-threshold 100000000)
+(setq gc-cons-threshold 1000000000)
 
 ;; Profile emacs startup
 (add-hook 'emacs-startup-hook
@@ -42,6 +42,55 @@
          (width (nth 2 geometry))
          (height (nth 3 geometry)))
     (and (> width 3840) (> height 2400))))
+
+
+;; Global settings
+(setq fill-column 80)
+
+;; fundamental-mode hook
+(add-hook 'prog-mode-hook 'le/large-file-handle-hook)
+
+;; prog-mode settings and hooks
+(defun my-prog-mode-settings ()
+  (display-line-numbers-mode)
+  (hl-line-mode)
+  (hs-minor-mode)
+  (outline-minor-mode)
+  (highlight-indent-guides-mode)
+  (setq auto-fill-mode 0)
+  (setq toggle-word-wrap 1)
+  (setq fill-column 80)
+  (setq display-fill-column-indicator 1)
+  (setq display-fill-column-indicator-column 80)
+  (setq indent-tabs-mode nil)
+  (setq tab-width 4)
+  (setq show-trailing-whitespace t)
+  (setq whitespace-style '(face
+                         tabs spaces trailing lines space-before-tab newline
+                         indentation empty space-after-tab
+                         space-mark tab-mark
+                         missing-newline-at-eof))
+  (local-set-key (kbd "C-c C-c") 'compile))
+
+(add-hook 'prog-mode-hook 'my-prog-mode-settings)
+(add-hook 'prog-mode-hook 'display-fill-column-indicator-mode t)
+
+;; text-mode settings and hooks
+(defun my-text-mode-settings ()
+  (setq-local show-trailing-whitespace nil)
+  (visual-line-mode)
+  (setq fill-column 80)
+  (setq sentence-end-double-space nil)
+  (flyspell-mode)
+  (setq show-trailing-whitespace t)
+  (setq whitespace-style '(face
+                         tabs spaces trailing lines space-before-tab newline
+                         indentation empty space-after-tab
+                         space-mark tab-mark
+                         missing-newline-at-eof))
+  (local-set-key (kbd "C-c C-w") 'count-words))
+
+(add-hook 'text-mode-hook 'my-text-mode-settings)
 
 (setq ispell-dictionary "english")
 (setq ispell-silently-savep t)
@@ -113,27 +162,6 @@
 (unless (server-running-p)
   (server-start))
 
-;; set toggle-word-wrap to default to nil
-;; (setq-default toggle-word-wrap nil)
-
-(defun le/text-mode-init ()
-  "This hook define hooks for 'text-mode'."
-  (toggle-word-wrap 1)
-  (visual-line-mode 1)
-  (auto-fill-mode 0))
-(add-hook 'text-mode-hook 'le/text-mode-init)
-
-(defun le/my-whitespace-mode-hook ()
-  "This hook define hooks for text and prog modes."
-  (setq show-trailing-whitespace t
-        whitespace-style '(face
-    tabs spaces trailing lines space-before-tab newline
-    indentation empty space-after-tab
-    space-mark tab-mark
-    missing-newline-at-eof)))
-(add-hook 'prog-mode-hook 'le/my-whitespace-mode-hook)
-(add-hook 'text-mode-hook 'le/my-whitespace-mode-hook)
-
 (global-set-key "\C-cw" 'whitespace-mode)
 (when (fboundp 'windmove-default-keybindings)
   (windmove-default-keybindings))
@@ -153,6 +181,89 @@
 (when (fboundp 'eww-mode)
   (add-hook 'eww-mode-hook 'le/my-eww-config))
 
+(defun le/large-file-disable-minor-modes ()
+  "Disable minor modes for large files"
+    (company-quickhelp-mode -1)
+    (company-quickhelp-local-mode -1)
+    (display-time-mode -1)
+    (electric-indent-mode -1)
+    (emojify-mode -1)
+    (font-lock-mode -1)
+    (global-auto-revert-mode -1)
+    (company-mode -1)
+    (company-box -1)
+    (company-qickhelp-mode -1)
+    (company-qickhelp-local-mode -1)
+    (eldoc-mode -1)
+    (global-emojify-mode -1)
+    (global-font-lock-mode -1)
+    (global-git-commit-mode -1)
+    (global-org-modern-mode -1)
+    (line-number-mode -1)
+    (magit-auto-revert-mode -1)
+    (override-global-mode -1)
+    (pyvenv-mode -1)
+    (shell-dirtrack-mode -1)
+    (show-paren-mode -1)
+    (tooltip-mode -1)
+    (transient-mark-mode -1)
+    (yas-minor-mode -1)
+    (yas-global-mode -1)
+    (column-number-mode -1))
+
+(defun le/large-file-enable-minor-modes ()
+  "Enable minor modes for large files"
+    (display-time-mode 1)
+    (electric-indent-mode 1)
+    (font-lock-mode 1)
+    (global-auto-revert-mode 1)
+    (global-font-lock-mode 1)
+    (global-git-commit-mode 1)
+    (line-number-mode 1)
+    (override-global-mode 1)
+    (shell-dirtrack-mode 1)
+    (show-paren-mode 1)
+    (tooltip-mode 1)
+    (transient-mark-mode 1)
+    (yas-minor-mode 1)
+    (yas-global-mode 1)
+    (column-number-mode 1))
+
+(defun le/large-file-read-only-hook ()
+  "If a file is over a given size, make the buffer read only."
+  (when (> (buffer-size) (* 1024 1024))
+    (setq buffer-read-only t)
+    (buffer-disable-undo)
+    (fundamental-mode)
+    ;; disable minor modes
+    (le/large-file-disable-minor-modes)
+    (message "Buffer is set to read-only because it is large.")))
+
+(add-hook 'find-file-hook 'le/large-file-read-only-hook)
+
+(defun le/disable-mode-line ()
+  "Disable the line and character count in Doom Modeline."
+  (setq doom-modeline-mode nil))
+
+(defun le/restore-default-mode-line ()
+  "Restore the default mode-line-format if the file size is below
+the threshold."
+  (when (<= (buffer-size) (* 1024 1024))
+    (setq doom-modeline-mode t)))
+
+(defun le/large-file-handle-hook ()
+  "Disable functionalisty with large file"
+  (if (> (buffer-size) (* 1024 1024))
+      (prog
+       (le/large-file-read-only-hook)
+       (font-lock-mode -1)
+       (turn-off-smartparens-mode)
+       (turn-off-eldoc-mode)
+       (turn-off-flycheck-mode)
+       (turn-off-flyspell-mode)
+       (le/disable-mode-line))
+    (le/restore-default-mode-line)))
+
 (setq inhibit-startup-screen t)
 (setq display-time-day-and-date t)
 (display-time-mode t)
@@ -161,16 +272,6 @@
 (setq read-buffer-completion-ignore-case t)
 (setq read-file-name-completion-ignore-case t)
 (setq completion-cycle-threshold t)
-
-(add-hook 'prog-mode-hook 'outline-minor-mode)
-(add-hook 'prog-mode-hook 'hs-minor-mode)
-(add-hook 'prog-mode-hook 'display-line-numbers-mode)
-(dolist (mode '(prog-mode-hook
-                conf-mode-hook))
-  (add-hook mode (lambda () (display-fill-column-indicator-mode 120))))
-(add-hook 'prog-mode-hook (lambda ()
-                            (setq-local hl-line-mode t)
-                            (setq fill-column 120)))
 
 (use-package yasnippet
   :ensure t)
@@ -182,7 +283,6 @@
 
 (yas-global-mode 1)
 (yas-reload-all)
-(add-hook 'prog-mode-hook #'yas-minor-mode)
 (global-set-key "\M-/" 'hippie-expand)
 (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
 
@@ -253,8 +353,6 @@
  ;; If there is more than one, they won't work right.
  '(blink-matching-paren t)
  '(column-number-mode 1)
- '(display-fill-column-indicator-column 120)
- '(fill-column 120)
  '(frame-background-mode nil)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
@@ -355,10 +453,6 @@
         highlight-indent-guides-method 'bitmap
         highlight-indent-guides-bitmap-function 'highlight-indent-guides--bitmap-line))
 
-(use-package text-mode
-  :config (setq-local show-trailing-whitespace nil))
-
-
 (use-package highlight-symbol
   :ensure t
   ;; :hook (prog-mode . highlight-symbol-mode)
@@ -416,21 +510,19 @@
 (use-package json
   :ensure t
   :config
-  (add-hook 'json-mode-hook 'json-mode)
-  (add-hook 'json-mode-hook 'outline-minor-mode)
-  (add-hook 'json-mode-hook 'highlight-indent-guides-mode)
-  (add-hook 'json-mode-hook 'hs-minor-mode)
-  (add-hook 'json-mode-hook 'display-line-numbers-mode)
-  (add-hook 'json-mode-hook (lambda () (display-fill-column-indicator-column 120))))
-
+  (add-hook 'json-mode-hook 'json-mode))
 
 ;; ======= Language configuration ============
 (add-to-list `auto-mode-alist '("\\.svg\\'" . nxml-mode))
 
 (use-package python-mode
   :ensure t
-  :hook (python-mode . (lambda () ((display-fill-column-indicator-column 88)
-                                   (fill-column 88)))))
+  :hook ((prog-mode . (lambda ()
+                        (setq toggle-word-wrap 0)
+                        (setq fill-column 88)
+                        (setq display-fill-column-indicator 1)
+                        (setq display-fill-column-indicator-column 88)))))
+
 
 (use-package pyvenv-auto
   :hook ((python-mode . pyvenv-auto-run)))
@@ -488,12 +580,7 @@
       (message "YAML file reformatted.")))
   (defun le/yaml-mode-setup ()
     "Setup yaml mode"
-    (setq display-fill-column-indicator-column 120)
-    (setq fill-column 160)
-    (setq hs-minor-mode 1)
-    (auto-fill-mode 0)
-    (display-fill-column-indicator-mode 1))
-  )
+    (setq hs-minor-mode 1)))
 
 (use-package terraform-mode
   :ensure t
@@ -507,9 +594,7 @@
   (add-hook 'terraform-mode-hook 'outline-minor-mode)
   (add-hook 'terraform-mode-hook 'highlight-indent-guides-mode)
   (add-hook 'terraform-mode-hook 'hs-minor-mode)
-  (add-hook 'terraform-mode-hook 'display-line-numbers-mode)
-  (add-hook 'terraform-mode-hook (lambda () ((display-fill-column-indicator-column 120)
-                                             (fill-column 120)))))
+  (add-hook 'terraform-mode-hook 'display-line-numbers-mode))
 
 (use-package markdown-mode
   :ensure t
@@ -705,8 +790,8 @@
 
 (use-package visual-fill-column
   :ensure t
-  :defer t
-  :hook (org-mode . le/org-mode-visual-fill))
+  :defer t)
+;;  :hook (org-mode . le/org-mode-visual-fill))
 
 (add-hook 'visual-line-mode-hook #'visual-fill-column-mode)
 
@@ -753,6 +838,7 @@
   :init (setq org-replace-disputed-keys t)
   :hook
   (org-mode . le/org-mode-setup)
+  (org-mode . le/org-mode-visual-fill)
   :mode (("\\.org$" . org-mode))
   :config
   (add-hook 'org-mode-hook
@@ -949,9 +1035,9 @@
    (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
    (push (org-projectile-project-todo-entry) org-capture-templates)))
 
-
 (use-package magit
   :ensure t
+  :hook (after-save . magit-after-save-refresh-status)
   :config
   (defun magit-display-buffer-pop-up-frame (buffer)
     (if (with-current-buffer buffer (eq major-mode 'magit-status-mode))
@@ -1027,9 +1113,10 @@
                 doom-modeline-indent-info t
                 doom-modeline-env-enable-python t
                 doom-modeline-github t
+                doom-modeline-github-interval (* 30 60)
                 doom-modeline-modal t
                 doom-modeline-modal-icon t
-                doom-modeline-vcs-max-length 24
+                doom-modeline-vcs-max-length 48
                 doom-modeline-buffer-file-name-style 'truncate-with-project)
   :hook (after-init . doom-modeline-mode))
 
@@ -1258,22 +1345,20 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (marginalia-mode))
 
 (use-package company
-  :hook (after-init . global-company-mode)
   :config
   (setq company-minimum-prefix-length 1
         company-idle-delay 0.0)
-  (setq company-global-modes '(not text-mode fundamental-mode))
+  (setq company-global-modes '(not text-mode outline-mode fundamental-mode))
   )
-
-;; Set company mode for all modes exect for a few modes listed below
-(setq company-global-modes '(not text-mode))
 
 (use-package company-box
   :ensure t
   :hook (company-mode . company-box-mode)
   :config (setq company-box-doc-enable t))
 
-(company-quickhelp-mode)
+(use-package company-quickhelp
+  :ensure t
+  :hook (company-mode . company-quickhelp-mode))
 
 ;; (require 'tree-sitter)
 ;; (require 'tree-sitter-langs)

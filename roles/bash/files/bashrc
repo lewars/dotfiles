@@ -148,6 +148,7 @@ export LANG=en_US.UTF-8
 export LSP_USE_PLISTS=true
 export TEMP="${HOME}/tmp/"
 export EDITOR='emacs -nw'
+export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
 # source <(op completion bash)
 # source "${HOME}/.config/op/plugins.sh"
@@ -246,6 +247,27 @@ function k8sh() {
     kubectl exec -it "$1" -c "$2" -- sh -c $"$cmd"
 }
 
+## A function to abstract the obtaining the shell on jenkins{,-stg}.tools
+function jenkins-tools() {
+
+    # setup namespace
+    k8ns prod-cicd
+
+    # Select jenkins by environment
+    environment="$1"
+    if [ -z "$1" ]; then
+        environment="prod"
+    fi
+
+    # Select command to run
+    cmd="$2"
+    if [ -z "$cmd" ]; then
+        cmd="/bin/bash"
+    fi
+
+    k8sh "$environment"-jenkins-0 jenkins "$cmd"
+}
+
 ## A generic function that obtains a shell on a jenkins agent
 function jenkins-agent() {
     # setup namespace
@@ -335,6 +357,7 @@ export -f k8listcluster
 export -f jenkins-ui-agent
 export -f jenkins-can-agent
 export -f qcd
+export -f jenkins-tools
 
 . $HOME/.asdf/asdf.sh
 . $HOME/.asdf/completions/asdf.bash

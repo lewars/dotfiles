@@ -291,7 +291,7 @@ function qcd() {
 }
 
 
-vterm_printf() {
+function vterm_printf() {
     if [ -n "$TMUX" ] && ([ "${TERM%%-*}" = "tmux" ] || [ "${TERM%%-*}" = "screen" ]); then
         # Tell tmux to pass the escape sequences through
         printf "\ePtmux;\e\e]%s\007\e\\" "$1"
@@ -303,6 +303,23 @@ vterm_printf() {
     fi
 }
 
+function pip(){
+    if [ "${CONDA_PROMPT_MODIFIER-}" = "(base) " ] && [ "$1" = "install" ]; then
+        echo "ERROR: pip install not allowed in base" 1>&2
+    else
+        command pip "$@"
+    fi
+}
+
+function extended_conda(){
+    if [ "${CONDA_PROMPT_MODIFIER-}" = "(base) " ] && [ "$1" = "install" ]; then
+        echo "ERROR: conda install not allowed in base" 1>&2
+    else
+        conda "$@"
+    fi
+}
+
+alias conda=extended_conda
 if [[ "$INSIDE_EMACS" = 'vterm' ]]; then
     function clear() {
         vterm_printf "51;Evterm-clear-scrollback";
@@ -325,10 +342,12 @@ export -f qcd
 if [[ "$OSTYPE" == "darwin"* ]]; then
     export JAVA_HOME=/usr/local/opt/openjdk@17
     export CLASSPATH=${HOME}/git/cbsi-cbscom/cbssre-jenkins-migration-tools/scripts/integration/libs/jenkins-core-2.319.jar
+    source ${HOME}/.op/plugins.sh
 fi
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-17.0.8.0.7-1.fc37.x86_64/
+    source ${HOME}/.config/op/plugins.sh
 fi
 
 # source "${HOME}/.config/op/plugins.sh"
@@ -336,23 +355,23 @@ source "$HOME/usr/local/etc/task.bash"
 
 # >>> talisman >>>
 # Below environment variables should not be modified unless you know what you are doing
-export TALISMAN_HOME=/home/slams/.talisman/bin
+export TALISMAN_HOME=${HOME}/.talisman/bin
 alias talisman=$TALISMAN_HOME/talisman_linux_amd64
 export TALISMAN_INTERACTIVE=false
 # <<< talisman <<<
-source /home/slams/.config/op/plugins.sh
+
 export CLOUDSDK_PYTHON=python3.11
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/slams/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+__conda_setup="$("${HOME}/miniconda3/bin/conda" 'shell.bash' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
 else
-    if [ -f "/home/slams/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/slams/miniconda3/etc/profile.d/conda.sh"
+    if [ -f "${HOME}/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "${HOME}/miniconda3/etc/profile.d/conda.sh"
     else
-        export PATH="/home/slams/miniconda3/bin:$PATH"
+        export PATH="${HOME}/miniconda3/bin:$PATH"
     fi
 fi
 unset __conda_setup

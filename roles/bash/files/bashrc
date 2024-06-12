@@ -370,11 +370,9 @@ fi
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-17.0.8.0.7-1.fc37.x86_64/
-    source ${HOME}/.config/op/plugins.sh
+    source "${HOME}/.config/op/plugins.sh"
+    source "$HOME/usr/local/etc/task.bash"
 fi
-
-# source "${HOME}/.config/op/plugins.sh"
-source "$HOME/usr/local/etc/task.bash"
 
 # >>> talisman >>>
 # Below environment variables should not be modified unless you know what you are doing

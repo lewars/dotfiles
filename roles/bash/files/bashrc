@@ -374,6 +374,8 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     source "$HOME/usr/local/etc/task.bash"
 fi
 
+export CLOUDSDK_PYTHON=python3.11
+
 # >>> talisman >>>
 # Below environment variables should not be modified unless you know what you are doing
 export TALISMAN_HOME=${HOME}/.talisman/bin

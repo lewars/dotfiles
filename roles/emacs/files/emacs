@@ -1507,7 +1507,15 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package gptel
   :ensure t
-  :bind ([(super return)] . gptel-send))
+  :bind ([(super return)] . gptel-send)
+  :init
+  (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
+  :config
+  (gptel-make-ollama "Ollama"
+    :host "localhost:11434"
+    :stream t
+    :models '("llama3:70b" "llama3:8b-instruct-q8_0"))
+  )
 
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)

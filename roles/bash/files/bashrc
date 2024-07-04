@@ -183,6 +183,7 @@ alias jf='sudo journalctl --follow'
 alias k=kubectl
 alias qpv=fpv
 alias jcli=jenkins-cli
+alias task=go-task
 
 # watcher aliases
 alias ccbs='cd $HOME/git/cbsi-cbscom'

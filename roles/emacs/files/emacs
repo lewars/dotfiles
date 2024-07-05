@@ -365,8 +365,10 @@ the threshold."
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files '("~/git/org/todo/gtd.org"))
  '(package-selected-packages
-   '(multi-vterm multi-term gnu-elpa-keyring-update gptel auth-source-1password k8s-mode helm npm-mode xterm-color company-emoji edit-server ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet consult all-the-icons bats bats-mode lsp-pyright lsp-ui lsp-mode dired-git-mode async org-modern consult-lsp helpful org-make-toc diminish nerd-icons-dired dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode company-box dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs marginalia centaur-tabs bazel jinja2-mode highlight-symbol color-theme direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project doom-themes doom-modeline dockerfile-mode corfu copilot))
- '(warning-suppress-types '((lsp-mode) (comp))))
+   '(centaur-tabs multi-vterm multi-term gnu-elpa-keyring-update gptel auth-source-1password k8s-mode helm npm-mode xterm-color company-emoji edit-server ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet consult bats bats-mode lsp-pyright lsp-ui lsp-mode dired-git-mode async org-modern consult-lsp helpful org-make-toc diminish nerd-icons-dired dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode company-box dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs marginalia bazel jinja2-mode highlight-symbol color-theme direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project doom-themes doom-modeline dockerfile-mode corfu copilot))
+ '(warning-suppress-types '((lsp-mode) (comp)))
+ '(window-divider-default-right-width 2)
+ '(window-divider-mode t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -389,8 +391,8 @@ the threshold."
  '(ido-only-match ((t (:foreground "SpringGreen3"))))
  '(line-number ((t (:foreground "gray"))))
  '(line-number-current-line ((t (:foreground "white"))))
- '(mode-line ((t (:background "#1a2427" :foreground "#8396ac" :box nil))))
- '(mode-line-inactive ((t (:background "#394c55" :foreground "#8396ac" :box nil))))
+ '(mode-line ((t (:background "#093159" :foreground "#dde4eb" :box nil))))
+ '(mode-line-inactive ((t (:background "#394c55" :foreground "#a4aeba" :box nil))))
  '(org-agenda-dimmed-todo-face ((t (:foreground "dark gray"))))
  '(org-block-begin-line ((t (:inherit org-block :extend t :background "#222D32" :foreground "SlateGray3"))))
  '(org-document-title ((t (:foreground "#82aaff" :weight extra-bold :height 1.3))))
@@ -417,7 +419,7 @@ the threshold."
  '(shadow ((t (:foreground "rosy brown"))))
  '(show-paren-match ((t (:background "dim gray" :foreground "cyan" :weight ultra-bold))))
  '(treemacs-root-face ((t (:inherit font-lock-string-face :weight bold :height 1.0))))
- '(vertical-border ((t (:background "#1a2427" :foreground "#1a2427")))))
+ '(vertical-border ((t (:background "#1c262b" :foreground "#1c262b")))))
 
 ;; Misc
 (use-package all-the-icons
@@ -1273,7 +1275,7 @@ All buffer name start with * will group to \"Emacs\".
 Other buffer group by `centaur-tabs-get-group-name' with project name."
   (list
    (cond
-    ((or (string-equal "*vterm" (substring (buffer-name) 0 6))
+    ((or (string-equal "*" (substring (buffer-name) 0 1))
          (memq major-mode '(magit-process-mode
                             magit-status-mode
                             magit-diff-mode
@@ -1306,7 +1308,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package centaur-tabs
   :ensure t
-  :demand
+  ;; :demand
   :hook
   (dashboard-mode . centaur-tabs-local-mode)
   (vterm-mode . centaur-tabs-local-mode)
@@ -1315,8 +1317,9 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (org-agenda-mode . centaur-tabs-local-mode)
   (helpful-mode . centaur-tabs-local-mode)
   (imenu-list-major-mode . centaur-tabs-local-mode)
-;;  (centaur-tabs-mode . le/centaur-tabs-buffer-groups)
+  (centaur-tabs-mode . le/centaur-tabs-buffer-groups)
   :config
+  ;; set the terraform-mode icon to purple
   (defun le/my-centaur-tabs-icon-for-ansi-term (original-fn mode &rest args)
     "Change the face of the icon when MODE is 'ansi-term."
     (let ((new-args (if (eq mode 'term-mode)
@@ -1325,8 +1328,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
       (apply original-fn mode new-args)))
   (advice-add 'centaur-tabs--icon-for-mode :around #'le/my-centaur-tabs-icon-for-ansi-term)
   (setq centaur-tabs-set-modified-marker t
-        centaur-tabs-modified-marker "*"
         centaur-tabs-set-icons t
+        centaur-tabs-icon-type 'all-the-icons
         centaur-tabs-plain-icons nil
         centaur-tabs-gray-out-icons nil
         centaur-tabs-set-bar 'over
@@ -1335,7 +1338,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
         centaur-tabs-style "bar"
         centaur-tabs-height 32
         centaur-tabs-set-close-button "X"
-        centaur-tabs-label-fixed-length 14)
+        centaur-tabs-label-fixed-length 21)
   (centaur-tabs-mode t)
   :bind
   ("s-t" . centaur-tabs--create-new-tab)

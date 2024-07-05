@@ -1273,7 +1273,7 @@ All buffer name start with * will group to \"Emacs\".
 Other buffer group by `centaur-tabs-get-group-name' with project name."
   (list
    (cond
-    ((or (string-equal "*" (substring (buffer-name) 0 1))
+    ((or (string-equal "*vterm" (substring (buffer-name) 0 6))
          (memq major-mode '(magit-process-mode
                             magit-status-mode
                             magit-diff-mode
@@ -1308,7 +1308,14 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :ensure t
   :demand
   :hook
-  (centaur-tabs-mode . le/centaur-tabs-buffer-groups)
+  (dashboard-mode . centaur-tabs-local-mode)
+  (vterm-mode . centaur-tabs-local-mode)
+  (term-mode . centaur-tabs-local-mode)
+  (calendar-mode . centaur-tabs-local-mode)
+  (org-agenda-mode . centaur-tabs-local-mode)
+  (helpful-mode . centaur-tabs-local-mode)
+  (imenu-list-major-mode . centaur-tabs-local-mode)
+;;  (centaur-tabs-mode . le/centaur-tabs-buffer-groups)
   :config
   (defun le/my-centaur-tabs-icon-for-ansi-term (original-fn mode &rest args)
     "Change the face of the icon when MODE is 'ansi-term."
@@ -1318,19 +1325,18 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
       (apply original-fn mode new-args)))
   (advice-add 'centaur-tabs--icon-for-mode :around #'le/my-centaur-tabs-icon-for-ansi-term)
   (setq centaur-tabs-set-modified-marker t
-        centaur-tabs-modified-marker "~"
+        centaur-tabs-modified-marker "*"
         centaur-tabs-set-icons t
-        ;; centaur-tabs-plain-icons t
-        centaur-tabs-gray-out-icons 'buffer
+        centaur-tabs-plain-icons nil
+        centaur-tabs-gray-out-icons nil
         centaur-tabs-set-bar 'over
         x-underline-at-descent-line t
         centaur-tabs-projectile-buffer-group-calc t
         centaur-tabs-style "bar"
-        centaur-tabs-height 22
-        centaur-tabs-set-close-button nil
+        centaur-tabs-height 32
+        centaur-tabs-set-close-button "X"
         centaur-tabs-label-fixed-length 14)
   (centaur-tabs-mode t)
-
   :bind
   ("s-t" . centaur-tabs--create-new-tab)
   ("s-}" . centaur-tabs-forward)

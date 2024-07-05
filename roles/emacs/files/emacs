@@ -301,6 +301,13 @@ the threshold."
          (window . root)
          (direction . right)
          (window-width . 0.48))
+        ("\\*\\(ChatGPT\\|Ollama\\)\\*"
+         (display-buffer-reuse-window
+          display-buffer-in-direction)
+         (mode . '(help-mode Info-mode))
+         (window . root)
+         (direction . right)
+         (window-width . 0.48))
         ("\\*\\(Flycheck errors\\|python-black errors\\|Backtrace\\)\\*"
          (display-buffer-in-side-window)
          (window-height . 0.2)
@@ -358,7 +365,7 @@ the threshold."
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files '("~/git/org/todo/gtd.org"))
  '(package-selected-packages
-   '(gnu-elpa-keyring-update gptel auth-source-1password k8s-mode helm npm-mode xterm-color company-emoji edit-server ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet consult all-the-icons bats bats-mode lsp-pyright lsp-ui lsp-mode dired-git-mode async org-modern consult-lsp helpful org-make-toc diminish nerd-icons-dired dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode company-box dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs marginalia centaur-tabs bazel jinja2-mode highlight-symbol color-theme direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project doom-themes doom-modeline dockerfile-mode corfu copilot))
+   '(multi-vterm multi-term gnu-elpa-keyring-update gptel auth-source-1password k8s-mode helm npm-mode xterm-color company-emoji edit-server ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet consult all-the-icons bats bats-mode lsp-pyright lsp-ui lsp-mode dired-git-mode async org-modern consult-lsp helpful org-make-toc diminish nerd-icons-dired dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode company-box dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs marginalia centaur-tabs bazel jinja2-mode highlight-symbol color-theme direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project doom-themes doom-modeline dockerfile-mode corfu copilot))
  '(warning-suppress-types '((lsp-mode) (comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -1507,15 +1514,20 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package gptel
   :ensure t
-  :bind ([(super return)] . gptel-send)
+  :bind (([(super return)] . gptel-send)
+         ("C-x l" . gptel-menu))
   :init
   (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
   :config
+  (setq-local show-trailing-whitespace nil)
   (gptel-make-ollama "Ollama"
     :host "localhost:11434"
     :stream t
     :models '("llama3:70b" "llama3:8b-instruct-q8_0"))
   )
+
+(use-package multi-vterm
+  :ensure t)
 
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)

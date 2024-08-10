@@ -45,7 +45,7 @@
 
 
 ;; Global settings
-(setq fill-column 80)
+(setq fill-column 120)
 
 ;; fundamental-mode hook
 (add-hook 'prog-mode-hook 'le/large-file-handle-hook)
@@ -1378,6 +1378,15 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 ;; (require 'tree-sitter)
 ;; (require 'tree-sitter-langs)
+
+(use-package corfu
+  :ensure t)
+(setq lsp-completion-provider 'corfu-lsp-setup)
+(defun corfu-lsp-setup ()
+  (corfu-mode)
+  (setq-local completion-styles '(orderless)
+              completion-category-defaults nil))
+;; (add-hook 'lsp-mode-hook #'corfu-lsp-setup)
 
 (use-package lsp-mode
   :ensure t

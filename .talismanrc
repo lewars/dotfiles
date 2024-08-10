@@ -1,4 +1,4 @@
 fileignoreconfig:
 - filename: roles/bash/files/bashrc
-  checksum: 6e7608f6ef6f11d14b085bf35271c588d6dff21117f7a60ca78ef20e3bd4dd49
+  checksum: 5afaf2a82ebf94fdc8e0f355ceb8e6c3b82141479ed52910406db063ba965671
 version: ""

@@ -167,7 +167,6 @@ shopt -u nocaseglob
 shopt -u nocasematch
 
 # unalias oh-my-bash stuff
-unalias s
 unalias g
 unalias p
 unalias d
@@ -194,6 +193,9 @@ alias fcbs=scbs
 alias cans='cd $HOME/git/ansi-anscom'
 alias sans='qcd $HOME/git/ansi-anscom'
 alias fans=sans
+
+# system/admin
+alias s='sudo systemctl'
 
 # functions
 ## A function that changes the k8 namespace
@@ -375,7 +377,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     source "$HOME/usr/local/etc/task.bash"
 fi
 
-export CLOUDSDK_PYTHON=python3.11
+export CLOUDSDK_PYTHON=python3
 
 # >>> talisman >>>
 # Below environment variables should not be modified unless you know what you are doing
@@ -383,8 +385,6 @@ export TALISMAN_HOME=${HOME}/.talisman/bin
 alias talisman=$TALISMAN_HOME/talisman_linux_amd64
 export TALISMAN_INTERACTIVE=false
 # <<< talisman <<<
-
-export CLOUDSDK_PYTHON=python3.11
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
@@ -400,3 +400,14 @@ else
 fi
 unset __conda_setup
 # <<< conda initialize <<<
+
+export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
+  --color=fg:#89e76a,fg+:#ffd000,bg:#191919,bg+:#262626
+  --color=hl:#00f6f6,hl+:#b0faff,info:#afaf87,marker:#87ff00
+  --color=prompt:#d7005f,spinner:#af5fff,pointer:#af5fff,header:#87afaf
+  --color=border:#262626,label:#aeaeae,query:#d9d9d9
+  --border="rounded" --border-label="" --preview-window="border-rounded" --prompt="> "
+  --marker=">" --pointer="◆" --separator="─" --scrollbar="│"'
+
+# Set up fzf key bindings and fuzzy completion
+eval "$(fzf --bash)"

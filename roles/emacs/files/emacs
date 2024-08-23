@@ -47,8 +47,15 @@
 ;; Global settings
 (setq fill-column 120)
 
+
+;; Manual isntalled packages
+(add-to-list 'load-path "~/.emacs.d/site-lisp")
+(progn (cd "~/.emacs.d/site-lisp")
+       (normal-top-level-add-subdirs-to-load-path))
+(require 'fzf)
+
 ;; fundamental-mode hook
-(add-hook 'prog-mode-hook 'le/large-file-handle-hook)
+;; (add-hook 'prog-mode-hook 'le/large-file-handle-hook)
 
 ;; prog-mode settings and hooks
 (defun my-prog-mode-settings ()
@@ -56,7 +63,7 @@
   (hl-line-mode)
   (hs-minor-mode)
   (outline-minor-mode)
-  (highlight-indent-guides-mode)
+;;  (highlight-indent-guides-mode)
   (setq auto-fill-mode 0)
   (setq toggle-word-wrap 1)
   (setq fill-column 80)
@@ -105,13 +112,20 @@
 (set-face-attribute 'default nil :height my-default-font-height :foundry "ADBO" :family "Source Code Pro")
 
 (require 'package)
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
+(setq package-archives
+      '(("gnu" . "https://elpa.gnu.org/packages/")
+        ("melpa-stable" . "https://stable.melpa.org/packages/")
+        ("melpa" . "https://melpa.org/packages/")))
+
+(setq package-archive-priorities
+      '(("gnu" . 30)
+        ("melpa-stable" . 20)
+        ("melpa" . 10)))
 
 (package-initialize)
 
 (require 'use-package)
-(require 'quelpa-use-package)
+;; (require 'quelpa-use-package)
 
 ;; Misc configs
 (recentf-mode 1)
@@ -119,12 +133,11 @@
 (setq recentf-max-saved-items 50)
 (run-at-time nil (* 5 60) 'recentf-save-list)
 
-(global-unset-key (kbd "C-z"))
 (global-set-key "\C-x\ \C-r" 'fzf-recentf)
 (global-set-key "\C-x\ \C-y" 'find-file-read-only)
 
 ;; Re-define help mode keys
-(define-key help-mode-map (kbd "^") 'help-go-back)
+;; (define-key help-mode-map (kbd "^") 'help-go-back)
 
 (setq-default indent-tabs-mode nil)
 
@@ -288,7 +301,7 @@ the threshold."
 
 (setq display-buffer-alist
       '(
-        ("\\*\\(vterm\\|[eE]?shell\\)\\*"
+        ("\\*\\(term\\|[eE]?shell\\)\\*"
          (display-buffer-in-side-window)
          (window-height . 0.2)
          (side . bottom)
@@ -317,11 +330,6 @@ the threshold."
          (display-buffer-at-bottom)
          (window-height . 0.3))
         ))
-
-;; Configure EAF browser
-;; (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
-;; (require 'eaf)
-;; (require 'eaf-browser)
 
 (defun le/my-find-file-symlink-target ()
   "Follow symlinks for specific files, avoiding the VC prompt."
@@ -365,7 +373,7 @@ the threshold."
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files '("~/git/org/todo/gtd.org"))
  '(package-selected-packages
-   '(centaur-tabs multi-vterm multi-term gnu-elpa-keyring-update gptel auth-source-1password k8s-mode helm npm-mode xterm-color company-emoji edit-server ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet consult bats bats-mode lsp-pyright lsp-ui lsp-mode dired-git-mode async org-modern consult-lsp helpful org-make-toc diminish nerd-icons-dired dired-single dired-git origami visual-fill-column emojify which-key idle-highlight-mode company-box dashboard-project-status dashboard-hackernews dashboard-ls dashboard nerd-icons-corfu expand-region company-quickhelp tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs marginalia bazel jinja2-mode highlight-symbol color-theme direx fzf dumb-jump flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto nerd-icons python-mode groovy-mode imenu-anywhere imenu-list yaml-mode windresize vterm vertico-posframe treemacs-projectile treemacs-persp treemacs-nerd-icons treemacs-magit treemacs-icons-dired terraform-mode terraform-doc quelpa-use-package python-black orderless multiple-cursors markdown-mode jedi iedit icomplete-vertical highlight-indent-guides helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project doom-themes doom-modeline dockerfile-mode corfu copilot))
+   '(corfu company orderless fzf all-the-icons-dired projectile-ripgrep gptel k8s-mode dockerfile-mode edit-server bats-mode helpful origami company-emoji emojify which-key dashboard lsp-pyright lsp-ui company-quickhelp company-box marginalia centaur-tabs multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async consult-lsp diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project copilot))
  '(warning-suppress-types '((lsp-mode) (comp)))
  '(window-divider-default-right-width 2)
  '(window-divider-mode t))
@@ -409,7 +417,7 @@ the threshold."
  '(org-modern-block-name ((t (:weight semi-light :height 0.8))))
  '(org-modern-label ((t (:box t (:line-width (0 . -3) :color "#263238") :underline nil :weight extra-bold :height 0.95 :width condensed))))
  '(org-modern-todo ((t (:inherit (org-todo org-modern-label) :inverse-video t :underline nil :weight extra-bold :height 0.95 :width condensed))))
- '(org-property-value ((t (:foreground "SlateGray3"))) t)
+ '(org-property-value ((t (:foreground "SlateGray3"))))
  '(org-scheduled-today ((t (:foreground "dark gray"))))
  '(org-special-keyword ((t (:foreground "SlateGray3"))))
  '(org-tag ((t (:foreground "cyan3" :weight normal))))
@@ -432,6 +440,7 @@ the threshold."
 
 ;; ========== Developer configurations ===========
 (use-package fzf
+  ;; :ensure t
   :bind
     ;; TODO(slams): set keybinds
   :config
@@ -450,9 +459,9 @@ the threshold."
   :ensure t)
 (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
 
-(use-package rg
-  :ensure t)
-(rg-enable-default-bindings)
+;; (use-package rg
+;;   :ensure t)
+;; (rg-enable-default-bindings)
 
 (use-package highlight-indent-guides
   :ensure t
@@ -505,11 +514,11 @@ the threshold."
 (use-package projectile
   :ensure t
   :init
-  (projectile-mode +1)
   :bind (:map projectile-mode-map
               ("s-p" . projectile-command-map)
               ("C-c p" . projectile-command-map))
   :config
+  (projectile-mode +1)
   (setq projectile-project-search-path '(("~/git" . 1))))
 
 (use-package treemacs-projectile
@@ -621,13 +630,13 @@ the threshold."
 
 ;; Linters and formatters
 (use-package python-black
-  :demand t
+  :ensure t
   :after python
   :hook (python-mode . python-black-on-save-mode-enable-dwim))
 
-(with-eval-after-load 'flycheck
-  (flycheck-grammarly-setup))
-(setq flycheck-grammarly-check-time 1.0)
+;; (with-eval-after-load 'flycheck
+;;   (flycheck-grammarly-setup))
+;; (setq flycheck-grammarly-check-time 1.0)
 
 (use-package flycheck
   :ensure t
@@ -638,36 +647,36 @@ the threshold."
 
 ;;  :config (setq-default flycheck-disabled-checkers '(emacs-lisp)))
 
-;; (use-package flycheck-posframe
-;;   :ensure t
-;;   :after flycheck
-;;   :config
-;;   (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
-;;   (flycheck-posframe-configure-pretty-defaults)
-;;   (setq flycheck-posframe-warning-prefix "\u26a0 "))
+(use-package flycheck-posframe
+  :ensure t
+  :after flycheck
+  :config
+  (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
+  (flycheck-posframe-configure-pretty-defaults)
+  (setq flycheck-posframe-warning-prefix "\u26a0 "))
 
 ;; Productivity
-(use-package copilot
-  :quelpa (copilot :fetcher github
-                   :repo "zerolfx/copilot.el"
-                   :branch "main"
-                   :files ("dist" "*.el"))
-  :ensure t
-  :hook ((post-command-hook . copilot-clear-overlay))
-         ;;(prog-mode . copilot-mode))
-  :bind (("M-\\" . copilot-complete)
-         :map copilot-completion-map
-         ("C-g" . copilot-clear-overlay)
-         ("<ESC>" . copilot-clear-overlay)
-         ("C-p" . copilot-previous-completion)
-         ("C-n" . copilot-next-completion)
-         ("<tab>" . copilot-accept-completion)
-         ("[tab]" . copilot-accept-completion)
-         ("C-w" . copilot-accept-completion-by-word)
-         ("C-l" . copilot-accept-completion-by-line))
-  :config
-  (setq copilot-idle-delay .5)
-  (setq copilot-max-chars 1000000))
+;; (use-package copilot
+;;   :quelpa (copilot :fetcher github
+;;                    :repo "zerolfx/copilot.el"
+;;                    :branch "main"
+;;                    :files ("dist" "*.el"))
+;;   :ensure t
+;;   :hook ((post-command-hook . copilot-clear-overlay))
+;;          ;;(prog-mode . copilot-mode))
+;;   :bind (("M-\\" . copilot-complete)
+;;          :map copilot-completion-map
+;;          ("C-g" . copilot-clear-overlay)
+;;          ("<ESC>" . copilot-clear-overlay)
+;;          ("C-p" . copilot-previous-completion)
+;;          ("C-n" . copilot-next-completion)
+;;          ("<tab>" . copilot-accept-completion)
+;;          ("[tab]" . copilot-accept-completion)
+;;          ("C-w" . copilot-accept-completion-by-word)
+;;          ("C-l" . copilot-accept-completion-by-line))
+;;   :config
+;;   (setq copilot-idle-delay .5)
+;;   (setq copilot-max-chars 1000000))
 
 ;; ibuffer
 (use-package ibuffer
@@ -1151,6 +1160,7 @@ the threshold."
 
 ;; Enable vertico
 (use-package vertico
+  :ensure t
   :init
   (vertico-mode)
 
@@ -1214,6 +1224,7 @@ the threshold."
 
 ;; Persist history over Emacs restarts. Vertico sorts by history position.
 (use-package savehist
+  :ensure t
   :init
   (savehist-mode))
 
@@ -1250,10 +1261,11 @@ the threshold."
   (completion-styles '(partial-completion substring initials flex orderless basic))
   (orderless-component-separator "[ //]+"))
 
-;; (use-package consult-lsp
-;;  :ensure t)
+(use-package consult-lsp
+ :ensure t)
 
 (use-package consult
+  :ensure t
   :hook (completion-list-mode . consult-preview-at-point-mode)
   :init
   (setq xref-show-xrefs-function #'consult-xref
@@ -1311,7 +1323,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   ;; :demand
   :hook
   (dashboard-mode . centaur-tabs-local-mode)
-  (vterm-mode . centaur-tabs-local-mode)
+  ;; (vterm-mode . centaur-tabs-local-mode)
   (term-mode . centaur-tabs-local-mode)
   (calendar-mode . centaur-tabs-local-mode)
   (org-agenda-mode . centaur-tabs-local-mode)
@@ -1346,6 +1358,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   ("s-{" . centaur-tabs-backward))
 
 (use-package marginalia
+    :ensure t
   ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
   ;; available in the *Completions* buffer, add it to the
   ;; `completion-list-mode-map'.
@@ -1361,6 +1374,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (marginalia-mode))
 
 (use-package company
+  :ensure t
   :config
   (setq company-minimum-prefix-length 1
         company-idle-delay 0.0)
@@ -1493,23 +1507,23 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 (use-package bats-mode
   :ensure t)
 
-(use-package edit-server
-  :ensure t
-  :if window-system
-  :commands edit-server-start
-  :init (if after-init-time
-              (edit-server-start)
-            (add-hook 'after-init-hook
-                      #'(lambda() (edit-server-start))))
-  :config (setq edit-server-new-frame-alist
-                '((name . "Edit with Emacs FRAME")
-                  (top . 200)
-                  (left . 200)
-                  (width . 80)
-                  (height . 25)
-                  (minibuffer . t)
-                  (menu-bar-lines . t)
-                  (window-system . x))))
+;; (use-package edit-server
+;;   :ensure t
+;;   :if window-system
+;;   :commands edit-server-start
+;;   :init (if after-init-time
+;;               (edit-server-start)
+;;             (add-hook 'after-init-hook
+;;                       #'(lambda() (edit-server-start))))
+;;   :config (setq edit-server-new-frame-alist
+;;                 '((name . "Edit with Emacs FRAME")
+;;                   (top . 200)
+;;                   (left . 200)
+;;                   (width . 80)
+;;                   (height . 25)
+;;                   (minibuffer . t)
+;;                   (menu-bar-lines . t)
+;;                   (window-system . x))))
 
 (use-package dockerfile-mode
   :ensure t
@@ -1517,13 +1531,13 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :mode
   ("Dockerfile\\'" . dockerfile-mode))
 
-(use-package vterm
-  :ensure t
-  :hook (vterm-mode-hook eterm-256color-mode)
-  :config
-  (setq vterm-copy-exclude-prompt t
-        vterm-use-vterm-prompt-detection-method t
-        vterm-max-scrollback 10000))
+;; (use-package vterm
+;;   :ensure t
+;;   :hook (vterm-mode-hook eterm-256color-mode)
+;;   :config
+;;   (setq vterm-copy-exclude-prompt t
+;;         vterm-use-vterm-prompt-detection-method t
+;;         vterm-max-scrollback 10000))
 
 (use-package k8s-mode
   :ensure t
@@ -1541,11 +1555,13 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (gptel-make-ollama "Ollama"
     :host "localhost:11434"
     :stream t
-    :models '("llama3:70b" "llama3:8b-instruct-q8_0"))
+    :models '("llama3.1:70b" "llama3.1:8b-instruct-q8_0" "deepseek-coder-v2:16b"
+              "gemma2:27b" "phi3:3.8b" "phi3:14b"
+              ))
   )
 
-(use-package multi-vterm
-  :ensure t)
+;; (use-package multi-vterm
+;;   :ensure t)
 
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)

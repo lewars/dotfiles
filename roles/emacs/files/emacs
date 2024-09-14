@@ -66,7 +66,7 @@
 ;;  (highlight-indent-guides-mode)
   (setq auto-fill-mode 0)
   (setq toggle-word-wrap 1)
-  (setq fill-column 80)
+  (setq fill-column 160)
   (setq display-fill-column-indicator 1)
   (setq display-fill-column-indicator-column 80)
   (setq indent-tabs-mode nil)
@@ -114,8 +114,9 @@
 (require 'package)
 (setq package-archives
       '(("gnu" . "https://elpa.gnu.org/packages/")
+        ("melpa" . "https://melpa.org/packages/")
         ("melpa-stable" . "https://stable.melpa.org/packages/")
-        ("melpa" . "https://melpa.org/packages/")))
+        ))
 
 (setq package-archive-priorities
       '(("gnu" . 30)
@@ -125,15 +126,18 @@
 (package-initialize)
 
 (require 'use-package)
-;; (require 'quelpa-use-package)
+(require 'quelpa-use-package)
 
 ;; Misc configs
-(recentf-mode 1)
+(require 'recentf)
+(recentf-mode t)
 (setq recentf-max-menu-items 50)
 (setq recentf-max-saved-items 50)
 (run-at-time nil (* 5 60) 'recentf-save-list)
 
-(global-set-key "\C-x\ \C-r" 'fzf-recentf)
+;; todo: fix this
+;; (global-set-key "\C-x\ \C-r" 'fzf-recentf)
+(global-set-key "\C-x\ \C-r" 'recentf-open)
 (global-set-key "\C-x\ \C-y" 'find-file-read-only)
 
 ;; Re-define help mode keys
@@ -301,11 +305,11 @@ the threshold."
 
 (setq display-buffer-alist
       '(
-        ("\\*\\(term\\|[eE]?shell\\)\\*"
-         (display-buffer-in-side-window)
-         (window-height . 0.2)
-         (side . bottom)
-         (slot . -1))
+        ;; ("\\*\\(term\\|[eE]?shell\\)\\*"
+        ;;  (display-buffer-in-side-window)
+        ;;  (window-height . 0.2)
+        ;;  (side . bottom)
+        ;;  (slot . -1))
         ("\\*\\([Hh]elp.*\\|[Ii]nfo\\|.*[Ff]inder.*\\|Apropos\\)\\*"
          ;; todo - have matched buffers use the same window
          (display-buffer-reuse-window
@@ -373,7 +377,7 @@ the threshold."
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files '("~/git/org/todo/gtd.org"))
  '(package-selected-packages
-   '(corfu company orderless fzf all-the-icons-dired projectile-ripgrep gptel k8s-mode dockerfile-mode edit-server bats-mode helpful origami company-emoji emojify which-key dashboard lsp-pyright lsp-ui company-quickhelp company-box marginalia centaur-tabs multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async consult-lsp diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project copilot))
+   '(quelpa-use-package quelpa json-rpc editorconfig fzf corfu company orderless all-the-icons-dired projectile-ripgrep gptel k8s-mode dockerfile-mode edit-server bats-mode helpful origami company-emoji emojify which-key dashboard lsp-pyright lsp-ui company-quickhelp company-box marginalia centaur-tabs multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async consult-lsp diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project copilot))
  '(warning-suppress-types '((lsp-mode) (comp)))
  '(window-divider-default-right-width 2)
  '(window-divider-mode t))
@@ -440,7 +444,8 @@ the threshold."
 
 ;; ========== Developer configurations ===========
 (use-package fzf
-  ;; :ensure t
+  :ensure t
+  :pin melpa
   :bind
     ;; TODO(slams): set keybinds
   :config
@@ -452,7 +457,7 @@ the threshold."
         fzf/grep-command "rg --no-heading -nH"
         ;; fzf/grep-command "grep -nrH"
         ;; If nil, the fzf buffer will appear at the top of the window
-        fzf/position-bottom t
+        fzf/position-bottom nil
         fzf/window-height 15))
 
 (use-package dumb-jump
@@ -656,27 +661,27 @@ the threshold."
   (setq flycheck-posframe-warning-prefix "\u26a0 "))
 
 ;; Productivity
-;; (use-package copilot
-;;   :quelpa (copilot :fetcher github
-;;                    :repo "zerolfx/copilot.el"
-;;                    :branch "main"
-;;                    :files ("dist" "*.el"))
-;;   :ensure t
-;;   :hook ((post-command-hook . copilot-clear-overlay))
-;;          ;;(prog-mode . copilot-mode))
-;;   :bind (("M-\\" . copilot-complete)
-;;          :map copilot-completion-map
-;;          ("C-g" . copilot-clear-overlay)
-;;          ("<ESC>" . copilot-clear-overlay)
-;;          ("C-p" . copilot-previous-completion)
-;;          ("C-n" . copilot-next-completion)
-;;          ("<tab>" . copilot-accept-completion)
-;;          ("[tab]" . copilot-accept-completion)
-;;          ("C-w" . copilot-accept-completion-by-word)
-;;          ("C-l" . copilot-accept-completion-by-line))
-;;   :config
-;;   (setq copilot-idle-delay .5)
-;;   (setq copilot-max-chars 1000000))
+(use-package copilot
+  :quelpa (copilot :fetcher github
+                   :repo "copilot-emacs/copilot.el"
+                   :branch "main"
+                   :files ("*.el"))
+  :ensure t
+  :hook ((post-command-hook . copilot-clear-overlay))
+         ;;(prog-mode . copilot-mode))
+  :bind (("M-\\" . copilot-complete)
+         :map copilot-completion-map
+         ("C-g" . copilot-clear-overlay)
+         ("<ESC>" . copilot-clear-overlay)
+         ("C-p" . copilot-previous-completion)
+         ("C-n" . copilot-next-completion)
+         ("<tab>" . copilot-accept-completion)
+         ("[tab]" . copilot-accept-completion)
+         ("C-w" . copilot-accept-completion-by-word)
+         ("C-l" . copilot-accept-completion-by-line))
+  :config
+  (setq copilot-idle-delay .5)
+  (setq copilot-max-chars 1000000))
 
 ;; ibuffer
 (use-package ibuffer
@@ -1325,6 +1330,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (dashboard-mode . centaur-tabs-local-mode)
   ;; (vterm-mode . centaur-tabs-local-mode)
   (term-mode . centaur-tabs-local-mode)
+  (eshell-mode . centaur-tabs-local-mode)
   (calendar-mode . centaur-tabs-local-mode)
   (org-agenda-mode . centaur-tabs-local-mode)
   (helpful-mode . centaur-tabs-local-mode)

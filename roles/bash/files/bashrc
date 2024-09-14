@@ -362,7 +362,7 @@ export -f jenkins-tools
 . $HOME/.asdf/asdf.sh
 . $HOME/.asdf/completions/asdf.bash
 
-source <(op completion bash)
+#source <(op completion bash)
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     export JAVA_HOME=/usr/local/opt/openjdk@17
@@ -373,7 +373,6 @@ fi
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-17.0.8.0.7-1.fc37.x86_64/
     # source "${HOME}/.config/op/plugins.sh"
-    source "$HOME/usr/local/etc/task.bash"
 fi
 
 export CLOUDSDK_PYTHON=python3

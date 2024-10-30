@@ -79,7 +79,7 @@
 (defun my-text-mode-settings ()
   (setq-local show-trailing-whitespace nil)
   (visual-line-mode)
-  (setq fill-column 80)
+  (setq fill-column 220)
   (setq sentence-end-double-space nil)
   (flyspell-mode)
   (setq show-trailing-whitespace t)

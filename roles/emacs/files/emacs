@@ -889,7 +889,7 @@ the threshold."
    org-log-repeat t
    org-blank-before-new-entry '((heading . nil) (plain-list-item . nil))
 
-   org-ellipsis "▼"
+   org-ellipsis " ▼"
    ;; org-ellipsis " ⤵"
    org-clock-sound "~/.emacs.d/org/media/alarm.wav"
    ;; TODO keywords setup
@@ -1321,7 +1321,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   ;; :demand
   :hook
   (dashboard-mode . centaur-tabs-local-mode)
-  ;; (vterm-mode . centaur-tabs-local-mode)
   (term-mode . centaur-tabs-local-mode)
   (eshell-mode . centaur-tabs-local-mode)
   (calendar-mode . centaur-tabs-local-mode)

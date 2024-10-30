@@ -4,7 +4,7 @@
   become: false
 - name: Back up .emacs configuration
   command: mv ~/.emacs ~/.emacs.bak.{{ ansible_date_time.iso8601 }}
-  when: emacsconfig_stat.stat.isreg
+  when: emacsconfig_stat.stat.exists
   become: false
 - name: Create a symbolic link of .emacs in home folder
   file:

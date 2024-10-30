@@ -1,10 +1,13 @@
 tags = $(subst roles/,,$(wildcard roles/*))
 .PHONY: all $(tags)
 
-all:
+setup:
+    [ -L ~/.dotfiles ] || ln -s $(PWD) ~/.dotfiles
+
+all: setup
 	ansible-playbook dotfiles.yml --tags all
 
-$(tags):
+$(tags): setup
 	ansible-playbook -vvv -t $@ dotfiles.yml
 
 diff-emacs:

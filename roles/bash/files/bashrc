@@ -409,3 +409,12 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
 
 # Set up fzf key bindings and fuzzy completion
 eval "$(fzf --bash)"
+
+# Set up gcloud auto complete
+source /usr/share/google-cloud-sdk/completion.bash.inc
+
+# Make sure 'g' alias to 'gcloud' works as well
+_gcloud_alias_completion() {
+    _python_argcomplete gcloud "$@"
+}
+complete -o default -F _gcloud_alias_completion g

@@ -194,6 +194,9 @@ alias fans=sans
 # system/admin
 alias s='sudo systemctl'
 
+# development
+alias conda=extended_conda
+
 # functions
 ## A function that changes the k8 namespace
 function k8cluster() {
@@ -312,7 +315,6 @@ function qcd() {
     cd "$(fd --type directory . "$start_dir" | fzf)" || return 1
 }
 
-
 function vterm_printf() {
     if [ -n "$TMUX" ] && ([ "${TERM%%-*}" = "tmux" ] || [ "${TERM%%-*}" = "screen" ]); then
         # Tell tmux to pass the escape sequences through
@@ -324,6 +326,13 @@ function vterm_printf() {
         printf "\e]%s\e\\" "$1"
     fi
 }
+
+if [[ "$INSIDE_EMACS" = 'vterm' ]]; then
+    function clear() {
+        vterm_printf "51;Evterm-clear-scrollback";
+        tput clear;
+    }
+fi
 
 function pip(){
     if [ "${CONDA_PROMPT_MODIFIER-}" = "(base) " ] && [ "$1" = "install" ]; then
@@ -341,13 +350,12 @@ function extended_conda(){
     fi
 }
 
-alias conda=extended_conda
-if [[ "$INSIDE_EMACS" = 'vterm' ]]; then
-    function clear() {
-        vterm_printf "51;Evterm-clear-scrollback";
-        tput clear;
-    }
-fi
+function frg(){
+    rg --line-number --with-filename . --color=always --field-match-separator ' '\
+        | fzf --preview "bat --color=always {1} --highlight-line {2}" \
+              --preview-window ~8,+{2}-5
+}
+
 
 export -f k8ns
 export -f k8listns

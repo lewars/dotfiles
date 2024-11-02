@@ -342,6 +342,11 @@ the threshold."
 ;; Revert buffers when the underlying file has changed
 (global-auto-revert-mode 1)
 
+;; Tramp configuration
+(customize-set-variable 'tramp-use-ssh-controlmaster-options 'suppress)
+(customize-set-variable 'tramp-default-method "ssh")
+;; (customize-set-variable 'tramp-verbose 6 "Enable remote command traces")
+
 ;; Setup Dired Git integration
 (use-package nerd-icons-dired
   :ensure t

@@ -2,7 +2,7 @@ tags = $(subst roles/,,$(wildcard roles/*))
 .PHONY: all $(tags)
 
 setup:
-    [ -L ~/.dotfiles ] || ln -s $(PWD) ~/.dotfiles
+	[ -L ~/.dotfiles ] || ln -s $(PWD) ~/.dotfiles
 
 all: setup
 	ansible-playbook dotfiles.yml --tags all

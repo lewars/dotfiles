@@ -13,7 +13,7 @@ export OSH="${HOME}/.dotfiles/oh-my-bash"
 
 # if running on aroma set the theme to powerbash10k
 if [[ "$HOSTNAME" == "aroma" ]]; then
-    OSH_THEME="powerlevel10k"
+    OSH_THEME="powerbash10k"
 else
     OSH_THEME="font"
 fi

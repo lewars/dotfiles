@@ -190,6 +190,11 @@ alias qpv=fpv
 alias jcli=jenkins-cli
 alias task=go-task
 
+alias jmp='ssh k8s-jumpserver'
+alias c1='ssh k8s-control-01'
+alias w1='ssh k8s-worker-01'
+alias w2='ssh k8s-worker-02'
+
 # watcher aliases
 alias ccbs='cd $HOME/git/cbsi-cbscom'
 alias scbs='qcd $HOME/git/cbsi-cbscom'
@@ -376,8 +381,8 @@ export -f jenkins-can-agent
 export -f qcd
 export -f jenkins-tools
 
-. $HOME/.asdf/asdf.sh
-. $HOME/.asdf/completions/asdf.bash
+# . $HOME/.asdf/asdf.sh
+# . $HOME/.asdf/completions/asdf.bash
 
 #source <(op completion bash)
 
@@ -435,3 +440,8 @@ eval "$(fzf --bash)"
 #     _python_argcomplete gcloud "$@"
 # }
 # complete -o default -F _gcloud_alias_completion g
+
+source <(kubectl completion bash)
+alias k=kubectl
+complete -o default -F __start_kubectl k
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"

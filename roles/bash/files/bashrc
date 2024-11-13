@@ -13,9 +13,9 @@ export OSH="${HOME}/.dotfiles/oh-my-bash"
 
 # if running on aroma set the theme to powerbash10k
 if [[ "$HOSTNAME" == "aroma" ]]; then
-    OMB_THEME="powerlevel10k"
+    OSH_THEME="powerlevel10k"
 else
-    OMB_THEME="font"
+    OSH_THEME="font"
 fi
 
 # Show Python virtual environment and conda environment

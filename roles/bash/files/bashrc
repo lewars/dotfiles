@@ -10,7 +10,16 @@ export OSH="${HOME}/.dotfiles/oh-my-bash"
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-bash is loaded.
-OSH_THEME="font"
+
+# if running on aroma set the theme to powerbash10k
+if [[ "$HOSTNAME" == "aroma" ]]; then
+    OMB_THEME="powerlevel10k"
+else
+    OMB_THEME="font"
+fi
+
+# Show Python virtual environment and conda environment
+THEME_SHOW_PYTHON=true
 
 # Uncomment the following line to use case-sensitive completion.
 # OMB_CASE_SENSITIVE="true"
@@ -418,11 +427,11 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
 # Set up fzf key bindings and fuzzy completion
 eval "$(fzf --bash)"
 
-# Set up gcloud auto complete
-source /usr/share/google-cloud-sdk/completion.bash.inc
+# # Set up gcloud auto complete
+# source /usr/share/google-cloud-sdk/completion.bash.inc
 
-# Make sure 'g' alias to 'gcloud' works as well
-_gcloud_alias_completion() {
-    _python_argcomplete gcloud "$@"
-}
-complete -o default -F _gcloud_alias_completion g
+# # Make sure 'g' alias to 'gcloud' works as well
+# _gcloud_alias_completion() {
+#     _python_argcomplete gcloud "$@"
+# }
+# complete -o default -F _gcloud_alias_completion g

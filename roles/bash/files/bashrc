@@ -15,7 +15,7 @@ export OSH="${HOME}/.dotfiles/oh-my-bash"
 if [[ "$HOSTNAME" == "aroma" ]]; then
     OSH_THEME="powerbash10k"
 else
-    OSH_THEME="font"
+    OSH_THEME="powerline-icon"
 fi
 
 # Show Python virtual environment and conda environment
@@ -185,7 +185,6 @@ alias fh="fzf --bind 'enter:become(history)'"
 alias fpv="fzf --preview 'bat --color=always {}' --preview-window '~3'"
 alias g=gcloud
 alias jf='sudo journalctl --follow'
-alias k=kubectl
 alias qpv=fpv
 alias jcli=jenkins-cli
 alias task=go-task
@@ -210,6 +209,7 @@ alias s='sudo systemctl'
 
 # development
 alias conda=extended_conda
+alias gcsheet='gcloud cheat-sheet'
 
 # functions
 ## A function that changes the k8 namespace
@@ -433,15 +433,19 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
 eval "$(fzf --bash)"
 
 # # Set up gcloud auto complete
-# source /usr/share/google-cloud-sdk/completion.bash.inc
+source /usr/share/google-cloud-sdk/completion.bash.inc
 
 # # Make sure 'g' alias to 'gcloud' works as well
-# _gcloud_alias_completion() {
-#     _python_argcomplete gcloud "$@"
-# }
-# complete -o default -F _gcloud_alias_completion g
+_gcloud_alias_completion() {
+    _python_argcomplete gcloud "$@"
+}
+complete -o default -F _gcloud_alias_completion g
 
-source <(kubectl completion bash)
-alias k=kubectl
-complete -o default -F __start_kubectl k
+
+# if kubectl is found source the completion and setup aliases
+if command -v kubectl &> /dev/null; then
+    source <(kubectl completion bash)
+    alias k=kubectl
+    complete -o default -F __start_kubectl k
+fi
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"

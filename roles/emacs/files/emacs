@@ -21,11 +21,6 @@
                               (time-subtract after-init-time before-init-time)))
                      gcs-done)))
 
-(when (string-equal system-type "darwin")
-  ;; TODO(lewars): This is needed to overcome a bug with Emacs <29,
-  ;; running on MacOs >=13. Remove when upgrading Emacs to 29.
-  (setq image-types (cons 'svg image-types)))
-
 (when (string-equal system-type "gnu/linux")
   (defvar ispell-program-name "aspell"))
 

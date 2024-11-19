@@ -71,6 +71,7 @@
                          indentation empty space-after-tab
                          space-mark tab-mark
                          missing-newline-at-eof))
+  (local-set-key (kbd "C-+") 'hs-toggle-hiding)
   (local-set-key (kbd "C-c C-c") 'compile))
 
 (add-hook 'prog-mode-hook 'my-prog-mode-settings)
@@ -80,11 +81,7 @@
 (defun my-text-mode-settings ()
   (setq-local show-trailing-whitespace nil)
   (visual-line-mode)
-<<<<<<< HEAD
   (setq fill-column 220)
-=======
-  (setq fill-column 120)
->>>>>>> 1a86a34 (Update emacs site-lisp and fill-column value)
   (setq sentence-end-double-space nil)
   (flyspell-mode)
   (setq show-trailing-whitespace t)
@@ -303,11 +300,11 @@ the threshold."
 
 (setq display-buffer-alist
       '(
-        ;; ("\\*\\(term\\|[eE]?shell\\)\\*"
-        ;;  (display-buffer-in-side-window)
-        ;;  (window-height . 0.2)
-        ;;  (side . bottom)
-        ;;  (slot . -1))
+        ("\\*\\(term\\|vterm\\|[eE]?shell\\)\\*"
+         (display-buffer-in-side-window)
+         (window-height . 0.2)
+         (side . bottom)
+         (slot . -1))
         ("\\*\\([Hh]elp.*\\|[Ii]nfo\\|.*[Ff]inder.*\\|Apropos\\)\\*"
          ;; todo - have matched buffers use the same window
          (display-buffer-reuse-window
@@ -380,7 +377,7 @@ the threshold."
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files '("~/git/org/todo/gtd.org"))
  '(package-selected-packages
-   '(atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu company orderless all-the-icons-dired projectile-ripgrep gptel k8s-mode dockerfile-mode edit-server bats-mode helpful origami company-emoji emojify which-key dashboard lsp-pyright lsp-ui company-quickhelp marginalia centaur-tabs multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async consult-lsp diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project copilot))
+   '(consult consult-lsp vterm eterm-256color atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu company orderless all-the-icons-dired projectile-ripgrep gptel k8s-mode dockerfile-mode edit-server bats-mode helpful origami company-emoji emojify which-key dashboard lsp-pyright lsp-ui company-quickhelp marginalia centaur-tabs multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets lsp-treemacs bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode pyvenv-auto imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project copilot))
  '(warning-suppress-types '((lsp-mode) (comp)))
  '(window-divider-default-right-width 2)
  '(window-divider-mode t))
@@ -1086,9 +1083,11 @@ the threshold."
     (setq treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
           treemacs-directory-name-transformer      #'identity
           treemacs-display-in-side-window          t
+          treemacs-display-current-project-exclusively 1
           treemacs-indentation                     1
           treemacs-indentation-guide-mode          t
           treemacs-indentation-guide-style         'line
+          treemacs-project-follow-mode             t
           treemacs-width-is-initially-locked       nil)
 
     ;; The default width and height of the icons is 22 pixels. If you are
@@ -1294,7 +1293,10 @@ the threshold."
 (defun le/centaur-tabs-buffer-groups ()
   "`centaur-tabs-buffer-groups' control buffers' group rules.
 
-Group centaur-tabs with mode if buffer is derived from `eshell-mode' `emacs-lisp-mode' `dired-mode' `org-mode' `magit-mode'.
+Group centaur-tabs with mode if buffer is derived from
+`eshell-mode' `emacs-lisp-mode' `dired-mode' `org-mode'
+`magit-mode'.
+
 All buffer name start with * will group to \"Emacs\".
 Other buffer group by `centaur-tabs-get-group-name' with project name."
   (list
@@ -1307,10 +1309,11 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                             magit-file-mode
                             magit-blob-mode
                             magit-blame-mode
+                            vterm-mode
                             )))
      "Emacs")
     ((derived-mode-p 'prog-mode)
-     "Editing")
+     "Development")
     ((derived-mode-p 'dired-mode)
      "Dired")
     ((memq major-mode '(helpful-mode
@@ -1336,6 +1339,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :hook
   (dashboard-mode . centaur-tabs-local-mode)
   (term-mode . centaur-tabs-local-mode)
+  (vterm-mode . centaur-tabs-local-mode)
   (eshell-mode . centaur-tabs-local-mode)
   (calendar-mode . centaur-tabs-local-mode)
   (org-agenda-mode . centaur-tabs-local-mode)
@@ -1447,7 +1451,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                 lsp-ui-peek-enable t
                 lsp-ui-peek-show-directory t
                 lsp-ui-doc-enable t
-                lsp-ui-doc-delay 2
+                lsp-ui-doc-delay 5
                 lsp-ui-doc-show-with-cursor t
                 lsp-ui-doc-position 'top))
 
@@ -1519,37 +1523,22 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 (use-package bats-mode
   :ensure t)
 
-;; (use-package edit-server
-;;   :ensure t
-;;   :if window-system
-;;   :commands edit-server-start
-;;   :init (if after-init-time
-;;               (edit-server-start)
-;;             (add-hook 'after-init-hook
-;;                       #'(lambda() (edit-server-start))))
-;;   :config (setq edit-server-new-frame-alist
-;;                 '((name . "Edit with Emacs FRAME")
-;;                   (top . 200)
-;;                   (left . 200)
-;;                   (width . 80)
-;;                   (height . 25)
-;;                   (minibuffer . t)
-;;                   (menu-bar-lines . t)
-;;                   (window-system . x))))
-
 (use-package dockerfile-mode
   :ensure t
   :defer 2
   :mode
   ("Dockerfile\\'" . dockerfile-mode))
 
-;; (use-package vterm
-;;   :ensure t
-;;   :hook (vterm-mode-hook eterm-256color-mode)
-;;   :config
-;;   (setq vterm-copy-exclude-prompt t
-;;         vterm-use-vterm-prompt-detection-method t
-;;         vterm-max-scrollback 10000))
+(use-package eterm-256color
+  :ensure t)
+
+(use-package vterm
+  :ensure t
+  :hook (vterm-mode-hook eterm-256color-mode)
+  :config
+  (setq vterm-copy-exclude-prompt t
+        vterm-use-vterm-prompt-detection-method t
+        vterm-max-scrollback 5000))
 
 (use-package k8s-mode
   :ensure t
@@ -1572,8 +1561,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
               ))
   )
 
-;; (use-package multi-vterm
-;;   :ensure t)
+(use-package multi-vterm
+  :ensure t)
 
 (use-package atomic-chrome
   :ensure t

@@ -589,6 +589,8 @@ the threshold."
 
 (use-package yaml-mode
   :ensure t
+  :bind (:map yaml-mode-map
+              ("C-+" . hs-toggle-hiding))
   :hook
   ((yaml-mode . outline-minor-mode)
    (yaml-mode . hs-minor-mode)
@@ -618,6 +620,8 @@ the threshold."
 
 (use-package terraform-mode
   :ensure t
+  :bind (:map terraform-mode-map
+              ("C-+" . hs-toggle-hiding))
   :config
   (defun frmt-hcl ()
     "Reformat HCL file with terraform fmt."
@@ -632,6 +636,8 @@ the threshold."
 
 (use-package markdown-mode
   :ensure t
+  :bind (:map markdown-mode-map
+              ("C-+" . hs-toggle-hiding))
   :commands (markdown-mode gfm-mode)
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)

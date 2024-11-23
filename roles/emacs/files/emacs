@@ -1613,10 +1613,16 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (gptel-make-ollama "Ollama"
     :host "localhost:11434"
     :stream t
-    :models '("llama3.1:70b" "llama3.1:8b-instruct-q8_0" "deepseek-coder-v2:16b"
-              "gemma2:27b" "phi3:3.8b" "phi3:14b"
-              ))
-  )
+    :models '(
+              "deepseek-coder-v2:16b"
+              "gemma2:27b"
+              "llama3.1:8b-instruct-q8_0"
+              "llama3.2-vision:90b"
+              "phi3:14b"
+              "phi3:3.8b"
+              "qwen2.5:72b"
+              "llama3.1:70b"
+              )))
 
 (use-package multi-vterm
   :ensure t)

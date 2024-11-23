@@ -838,14 +838,14 @@ the threshold."
 
 (defun le/org-mode-visual-fill ()
   "Setup visual-fill-mode."
-  (setq visual-fill-column-width 130
+  (setq visual-fill-column-width 180
         visual-fill-column-center-text t)
   (visual-fill-column-mode 1))
 
 (use-package visual-fill-column
   :ensure t
-  :defer t)
-;;  :hook (org-mode . le/org-mode-visual-fill))
+  :defer t
+  :hook (org-mode . le/org-mode-visual-fill))
 
 (add-hook 'visual-line-mode-hook #'visual-fill-column-mode)
 
@@ -1093,7 +1093,7 @@ the threshold."
   :ensure t
   :hook (after-save . magit-after-save-refresh-status)
   :config
-  (defun magit-display-buffer-pop-up-frame (buffer)
+  (defun le/magit-display-buffer-pop-up-frame (buffer)
     (if (with-current-buffer buffer (eq major-mode 'magit-status-mode))
         (display-buffer buffer
                         '((display-buffer-reuse-window
@@ -1203,19 +1203,17 @@ the threshold."
   ;; Different scroll margin
   ;; (setq vertico-scroll-margin 0)
 
-  ;; Show more candidates
   (setq vertico-count 15)
 
   ;; Grow and shrink the Vertico minibuffer
   ;; (setq vertico-resize nil)
 
   ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
-  (setq vertico-cycle t)
-  )
+  (setq vertico-cycle t))
 
 (use-package vertico-posframe
-  :ensure t
-  )
+  :ensure t)
+
 (require 'vertico-posframe)
 (vertico-posframe-mode 1)
 (setq vertico-posframe-parameters
@@ -1566,10 +1564,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package company-emoji
   :ensure t)
-
-(use-package origami
-  :ensure t
-  :hook (yaml-mode . origami-mode))
 
 (use-package helpful
   :ensure t

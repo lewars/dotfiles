@@ -1402,6 +1402,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                             magit-blob-mode
                             magit-blame-mode
                             vterm-mode
+                            tags-table-mode
                             )))
      "Emacs")
     ((derived-mode-p 'prog-mode)
@@ -1429,15 +1430,16 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :ensure t
   :demand
   :hook
-  (dashboard-mode . centaur-tabs-local-mode)
-  (term-mode . centaur-tabs-local-mode)
-  (vterm-mode . centaur-tabs-local-mode)
-  (eshell-mode . centaur-tabs-local-mode)
   (calendar-mode . centaur-tabs-local-mode)
-  (org-agenda-mode . centaur-tabs-local-mode)
+  (centaur-tabs-mode . le/centaur-tabs-buffer-groups)
+  (dashboard-mode . centaur-tabs-local-mode)
+  (eshell-mode . centaur-tabs-local-mode)
   (helpful-mode . centaur-tabs-local-mode)
   (imenu-list-major-mode . centaur-tabs-local-mode)
-  (centaur-tabs-mode . le/centaur-tabs-buffer-groups)
+  (org-agenda-mode . centaur-tabs-local-mode)
+  (tags-table-mode . centaur-tabs-local-mode)
+  (term-mode . centaur-tabs-local-mode)
+  (vterm-mode . centaur-tabs-local-mode)
   :config
   ;; set the terraform-mode icon to purple
   (defun le/my-centaur-tabs-icon-for-ansi-term (original-fn mode &rest args)

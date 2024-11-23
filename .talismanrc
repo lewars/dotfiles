@@ -1,6 +1,6 @@
 fileignoreconfig:
 - filename: roles/emacs/files/emacs
-  checksum: 89430bad1763af1b5ba4fe3f1f2da6c6427272e5c952a8b92b5850f4566177b0
+  checksum: c9293b4c9417a04869f8902d75e91c958403b8c4d8132db0d7379f66b1a2414d
 - filename: roles/bash/files/bashrc
   checksum: 4244cee5fe98de04642870a6ed1d17a6a84995e99b31abd3a9e8ef5893aca160
 version: ""

@@ -536,6 +536,60 @@ the threshold."
                                               "*Calendar*" "*server*" "*gnus*"
                                               "*mm*" "*copilot*")))
 
+(use-package treemacs
+  :ensure t
+  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  :config
+  (progn
+    (setq treemacs-collapse-dirs                   (if treemacs-python-executable 1 0)
+          treemacs-directory-name-transformer      #'identity
+          treemacs-display-in-side-window          t
+          treemacs-display-current-project-exclusively t
+          treemacs-indentation                     1
+          treemacs-indentation-guide-mode          t
+          treemacs-indentation-guide-style         'line
+          treemacs-project-follow-mode             t
+          treemacs-follow-after-init               t
+          treemacs-width-is-initially-locked       nil)
+
+    ;; The default width and height of the icons is 22 pixels. If you are
+    ;; using a Hi-DPI display, uncomment this to double the icon size.
+    (setq treemacs-resize-icons 12)
+
+    (treemacs-follow-mode t)
+    (treemacs-project-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (treemacs-fringe-indicator-mode 'always)
+    (when treemacs-python-executable
+      (treemacs-git-commit-diff-mode t))
+
+    (pcase (cons (not (null (executable-find "git")))
+                 (not (null treemacs-python-executable)))
+      (`(t . t)
+       (treemacs-git-mode 'deferred))
+      (`(t . _)
+       (treemacs-git-mode 'simple)))
+
+    (treemacs-hide-gitignored-files-mode nil))
+  :bind
+  (:map global-map
+        ("M-0"       . treemacs-select-window)
+        ("C-x t 1"   . treemacs-delete-other-windows)
+        ("C-x t t"   . treemacs)
+        ("C-x t d"   . treemacs-select-directory)
+        ("C-x t B"   . treemacs-bookmark)
+        ("C-x t C-t" . treemacs-find-file)
+        ("C-x t M-t" . treemacs-find-tag)))
+
+(use-package treemacs-nerd-icons
+  :ensure t
+  :after treemacs nerd-icons all-the-icons
+  :config
+  (treemacs-load-theme "nerd-icons")
+  (treemacs-refresh))
+
 (use-package treemacs-projectile
   :after (treemacs projectile)
   :ensure t)
@@ -1100,59 +1154,6 @@ the threshold."
                           (reusable-frames . t)))
       (magit-display-buffer-traditional buffer)))
 )
-
-(use-package treemacs
-  :ensure t
-  :defer t
-  :init
-  (with-eval-after-load 'winum
-    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
-  :config
-  (progn
-    (setq treemacs-collapse-dirs                   (if treemacs-python-executable 1 0)
-          treemacs-directory-name-transformer      #'identity
-          treemacs-display-in-side-window          t
-          treemacs-display-current-project-exclusively t
-          treemacs-indentation                     1
-          treemacs-indentation-guide-mode          t
-          treemacs-indentation-guide-style         'line
-          treemacs-project-follow-mode             t
-          treemacs-width-is-initially-locked       nil)
-
-    ;; The default width and height of the icons is 22 pixels. If you are
-    ;; using a Hi-DPI display, uncomment this to double the icon size.
-    (setq treemacs-resize-icons 12)
-
-    (treemacs-follow-mode t)
-    (treemacs-filewatch-mode t)
-    (treemacs-fringe-indicator-mode 'always)
-    (when treemacs-python-executable
-      (treemacs-git-commit-diff-mode t))
-
-    (pcase (cons (not (null (executable-find "git")))
-                 (not (null treemacs-python-executable)))
-      (`(t . t)
-       (treemacs-git-mode 'deferred))
-      (`(t . _)
-       (treemacs-git-mode 'simple)))
-
-    (treemacs-hide-gitignored-files-mode nil))
-  :bind
-  (:map global-map
-        ("M-0"       . treemacs-select-window)
-        ("C-x t 1"   . treemacs-delete-other-windows)
-        ("C-x t t"   . treemacs)
-        ("C-x t d"   . treemacs-select-directory)
-        ("C-x t B"   . treemacs-bookmark)
-        ("C-x t C-t" . treemacs-find-file)
-        ("C-x t M-t" . treemacs-find-tag)))
-
-(use-package treemacs-nerd-icons
-  :ensure t
-  :after treemacs nerd-icons all-the-icons
-  :config
-  (treemacs-load-theme "nerd-icons")
-  (treemacs-refresh))
 
 ;; UI
 ;; Configure doom-modeline

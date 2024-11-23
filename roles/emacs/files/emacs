@@ -521,12 +521,20 @@ the threshold."
 (use-package projectile
   :ensure t
   :init
-  :bind (:map projectile-mode-map
-              ("s-p" . projectile-command-map)
-              ("C-c p" . projectile-command-map))
-  :config
   (projectile-mode +1)
-  (setq projectile-project-search-path '(("~/git" . 1))))
+  :bind (:map projectile-mode-map
+              ("C-x p" . projectile-command-map))
+  :config
+  (setq projectile-project-search-path '(("~/git" . 1)))
+  (setq projectile-enable-caching t)
+  (setq projectile-completion-system 'vertico)
+  (setq projectile-switch-project-action #'projectile-dired)
+  (setq projectile-globally-ignored-buffers '("*scratch*" "*Messages*"
+                                              "*Warnings*" "*Help*"
+                                              "*Customize*" "*Echo*" "*vterm*"
+                                              "*dashboard*" "*Org Agenda*"
+                                              "*Calendar*" "*server*" "*gnus*"
+                                              "*mm*" "*copilot*")))
 
 (use-package treemacs-projectile
   :after (treemacs projectile)
@@ -1273,14 +1281,42 @@ the threshold."
   (orderless-component-separator "[ //]+"))
 
 (use-package consult-lsp
- :ensure t)
+  :ensure t)
 
 (use-package consult
   :ensure t
   :hook (completion-list-mode . consult-preview-at-point-mode)
+  :bind-keymap
+  ("C-x c" . consult-command-map)
   :init
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref)
+  (defvar consult-command-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map "b" #'consult-buffer)
+      (define-key map "l" #'consult-line)
+      (define-key map "i" #'consult-imenu)
+      (define-key map "r" #'consult-ripgrep)
+      (define-key map "f" #'consult-find)
+      (define-key map "F" #'consult-focus-lines)
+      (define-key map "G" #'consult-global-mark)
+
+      ;; nested keymap for 'p' prefix (projectile)
+      (let ((projectile-map (make-sparse-keymap)))
+        (define-key projectile-map "p" #'consult-projectile)
+        (define-key projectile-map "f" #'consult-projectile-find-file)
+        (define-key projectile-map "o" #'consult-projectile-find-file-other-window)
+        (define-key projectile-map "r" #'consult-projectile-recentf)
+        (define-key projectile-map "s" #'consult-projectile-switch-project)
+        (define-key projectile-map "b" #'consult-projectile-switch-to-buffer)
+        (define-key projectile-map "d" #'consult-projectile-find-dir)
+        (define-key map "p" projectile-map))
+
+      ;; nested keymap for 'g' prefix (git)
+      (let ((git-map (make-sparse-keymap)))
+        (define-key git-map "g" #'consult-git-grep)
+        (define-key map "g" git-map))
+      map))
   :bind
   ("M-y" . consult-yank-pop)
   :config

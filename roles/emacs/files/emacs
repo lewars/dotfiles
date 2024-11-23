@@ -41,6 +41,7 @@
 
 ;; Global settings
 (setq fill-column 120)
+(setq tab-bar-show nil)
 
 ;; Manual isntalled packages
 ;; (add-to-list 'load-path "~/.emacs.d/site-lisp")
@@ -440,7 +441,8 @@ the threshold."
 
 (use-package nerd-icons
   :ensure t
-  )
+  :config
+  (setq nerd-icons-font-family "SauceCodePro Nerd Font"))
 
 ;; ========== Developer configurations ===========
 (use-package fzf
@@ -1080,10 +1082,10 @@ the threshold."
     (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
   :config
   (progn
-    (setq treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
+    (setq treemacs-collapse-dirs                   (if treemacs-python-executable 1 0)
           treemacs-directory-name-transformer      #'identity
           treemacs-display-in-side-window          t
-          treemacs-display-current-project-exclusively 1
+          treemacs-display-current-project-exclusively t
           treemacs-indentation                     1
           treemacs-indentation-guide-mode          t
           treemacs-indentation-guide-style         'line
@@ -1120,7 +1122,7 @@ the threshold."
 
 (use-package treemacs-nerd-icons
   :ensure t
-  :after treemacs
+  :after treemacs nerd-icons all-the-icons
   :config
   (treemacs-load-theme "nerd-icons")
   (treemacs-refresh))
@@ -1154,16 +1156,14 @@ the threshold."
   :ensure t
   :config
   ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (setq doom-themes-enable-bold t
+        doom-themes-enable-italic t)
   (load-theme 'doom-material t)
 
-  ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
-  ;; Enable custom neotree theme (all-the-icons must be installed!)
   (doom-themes-neotree-config)
-  ;; or for treemacs users
-  (doom-themes-treemacs-config)
+  ;; (doom-themes-treemacs-config)
+  ;; (doom-themes-treemacs-theme)
   (doom-themes-org-config))
 
 ;; Enable vertico
@@ -1454,6 +1454,13 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                 lsp-ui-doc-delay 5
                 lsp-ui-doc-show-with-cursor t
                 lsp-ui-doc-position 'top))
+
+(use-package lsp-treemacs
+  :ensure t
+  :custom
+  (lsp-treemacs-theme "Default")
+  :config (lsp-treemacs-sync-mode 1)
+  :commands lsp-treemacs-errors-list)
 
 (use-package lsp-pyright
   :ensure t

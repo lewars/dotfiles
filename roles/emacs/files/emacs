@@ -72,7 +72,6 @@
                          indentation empty space-after-tab
                          space-mark tab-mark
                          missing-newline-at-eof))
-  (local-set-key (kbd "C-+") 'hs-toggle-hiding)
   (local-set-key (kbd "C-c C-c") 'compile))
 
 (add-hook 'prog-mode-hook 'my-prog-mode-settings)
@@ -466,6 +465,12 @@ the threshold."
  '(vertical-border ((t (:background "#1c262b" :foreground "#1c262b")))))
 
 ;; Misc
+;; set keybinding for prog-mode for hideshowing using use-package
+(use-package hideshow
+    :bind
+    (:map prog-mode-map
+            ("C-+" . hs-toggle-hiding)))
+
 (use-package all-the-icons
   :ensure t
   :if (display-graphic-p))
@@ -681,8 +686,6 @@ the threshold."
 
 (use-package yaml-mode
   :ensure t
-  :bind (:map yaml-mode-map
-              ("C-+" . hs-toggle-hiding))
   :hook
   ((yaml-mode . outline-minor-mode)
    (yaml-mode . hs-minor-mode)
@@ -1488,7 +1491,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :config
   (setq company-minimum-prefix-length 1
         company-idle-delay 0.0)
-  (setq company-global-modes '(not text-mode outline-mode fundamental-mode))
+  (setq company-global-modes '(not text-mode fundamental-mode))
   )
 
 (use-package company-box
@@ -1505,16 +1508,16 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package corfu
   :ensure t)
-(setq lsp-completion-provider 'corfu-lsp-setup)
-(defun corfu-lsp-setup ()
+
+(defun le/corfu-lsp-setup ()
   (corfu-mode)
   (setq-local completion-styles '(orderless)
               completion-category-defaults nil))
-;; (add-hook 'lsp-mode-hook #'corfu-lsp-setup)
 
 (use-package lsp-mode
   :ensure t
-  :hook ((terraform-mode . lsp-deferred))
+  :hook ((terraform-mode . lsp-deferred)
+         le/corfu-lsp-setup)
   :config (setq lsp-enable-links t
                 read-process-output-max (* 2048 2048)
                 lsp-use-plists t
@@ -1529,10 +1532,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                 lsp-semantic-tokens-honor-refresh-requests t
                 lsp-ansible-add-on t
                 lsp-enable-symbol-highlighting t
-                lsp-groovy-server-file
-                (concat (getenv "HOME") "/.emacs.d/.cache/lsp/groovy-language-server-all.jar")
-                lsp-groovy-classpath
-                (concat (getenv "HOME") "/groovy-language-server/build/libs"))
+                lsp-groovy-server-file (concat (getenv "HOME") "/.emacs.d/.cache/lsp/groovy-language-server-all.jar")
+                lsp-groovy-classpath (concat (getenv "HOME") "/groovy-language-server/build/libs"))
   :commands (lsp lsp-deferred))
 
 (use-package lsp-ui

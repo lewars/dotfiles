@@ -10,8 +10,6 @@
 
 ;;; Code:
 
-(setq gc-cons-threshold 100000000)
-
 ;; Profile emacs startup
 (add-hook 'emacs-startup-hook
           (lambda ()
@@ -43,17 +41,94 @@
 (setq fill-column 120)
 (setq tab-bar-show nil)
 
-;; Manual isntalled packages
-;; (add-to-list 'load-path "~/.emacs.d/site-lisp")
-;; (progn (cd "~/.emacs.d/site-lisp")
-;;        (normal-top-level-add-subdirs-to-load-path))
-;; (require 'fzf)
+;; Handle large file
+;; Enable so-long mode globally (built into Emacs 27+)
+;; (global-so-long-mode 1)
 
-;; fundamental-mode hook
-;; (add-hook 'prog-mode-hook 'le/large-file-handle-hook)
+(defun le/setup-large-file-handling-high-mem ()
+  "Configure settings for better large file handling in Emacs on
+ systems with large RAM."
+
+  (setq-default
+   ;; Increase read-process-output-max to 8MB for better performance
+   read-process-output-max (* 8 1024 1024)
+
+   ;; 1GB
+   gc-cons-threshold (* 10 1024 1024 )
+
+   ;; Increase large-file-warning-threshold to 100MB
+   large-file-warning-threshold (* 100 1024 1024 )
+
+   ;; Increase undo limits
+   undo-limit (* 4 1024 1024)
+   undo-strong-limit (* 6 1024 1024)
+   undo-outer-limit (* 12 1024 1024)
+
+   read-process-output-max (* 16 1024 1024)) ; 16MB
+
+
+   ;; Configure literal mode for very large files
+   ;; (setq-default literal-mode-threshold (* 1 1024 1024))
+
+   ;; Settings for vlf (Very Large Files) mode
+   (use-package vlf
+     :ensure t
+     :config
+     (require 'vlf-setup)
+     (setq vlf-batch-size (* 16 1024 1024)))
+
+   ;; Configure file-name-handler-alist to ignore certain operations
+   (let ((file-name-handler-alist nil)))
+
+   (defun le/disable-undo-in-large-buffers ()
+     "Disable undo only for extremely large buffers"
+     (when (> (buffer-size) (* 500 1024 1024)) ; 500MB
+       (buffer-disable-undo)))
+   (add-hook 'find-file-hook 'le/disable-undo-in-large-buffers)
+
+   (defun le/disable-minor-modes-for-large-files ()
+     "Disable various minor modes for large files"
+     (when (> (buffer-size) (* 100 1024 1024)) ; 100MB
+       (font-lock-mode -1)
+       (line-number-mode -1)
+       (flycheck-mode -1)
+       (linum-mode -1)
+       (company-quickhelp-mode -1)
+       (company-quickhelp-local-mode -1)
+       (emojify-mode -1)
+       (company-mode -1)
+       (company-box -1)
+       (company-qickhelp-mode -1)
+       (company-qickhelp-local-mode -1)
+       (global-emojify-mode -1)
+       (global-font-lock-mode -1)
+       (global-git-commit-mode -1)
+       (global-org-modern-mode -1)
+       (line-number-mode -1)
+       (show-paren-mode -1)
+       (tooltip-mode -1)
+       (transient-mark-mode -1)
+       (column-number-mode -1)
+       (display-line-numbers-mode -1)))
+   (add-hook 'find-file-hook 'le/disable-minor-modes-for-large-files)
+
+   ;; Enable jit-lock-stealth-time for background fontification
+   (setq jit-lock-stealth-time 1)
+   (setq jit-lock-stealth-nice 0.5)
+   (setq jit-lock-chunk-size 100000)
+
+   ;; Increase read buffer size
+   (setq read-buffer-size (* 8 1024 1024)))
+
+;; Initialize the configuration
+(le/setup-large-file-handling-high-mem)
+
+;; Additional settings for specific file types
+(add-to-list 'auto-mode-alist '("\\.log\\'" . fundamental-mode))
+(add-to-list 'auto-mode-alist '("\\.sql\\'" . fundamental-mode))
 
 ;; prog-mode settings and hooks
-(defun my-prog-mode-settings ()
+(defun le/my-prog-mode-settings ()
   (display-line-numbers-mode)
   (hl-line-mode)
   (hs-minor-mode)
@@ -74,11 +149,11 @@
                          missing-newline-at-eof))
   (local-set-key (kbd "C-c C-c") 'compile))
 
-(add-hook 'prog-mode-hook 'my-prog-mode-settings)
+(add-hook 'prog-mode-hook 'le/my-prog-mode-settings)
 (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode t)
 
 ;; text-mode settings and hooks
-(defun my-text-mode-settings ()
+(defun le/my-text-mode-settings ()
   (setq-local show-trailing-whitespace nil)
   (visual-line-mode)
   (setq fill-column 220)
@@ -92,7 +167,7 @@
                          missing-newline-at-eof))
   (local-set-key (kbd "C-c C-w") 'count-words))
 
-(add-hook 'text-mode-hook 'my-text-mode-settings)
+(add-hook 'text-mode-hook 'le/my-text-mode-settings)
 
 (setq ispell-dictionary "english")
 (setq ispell-silently-savep t)
@@ -135,9 +210,6 @@
 (global-set-key "\C-x\ \C-r" 'recentf-open)
 (global-set-key "\C-x\ \C-y" 'find-file-read-only)
 
-;; Re-define help mode keys
-;; (define-key help-mode-map (kbd "^") 'help-go-back)
-
 (setq-default indent-tabs-mode nil)
 
 (setq explicit-shell-file-name "/bin/bash")
@@ -145,9 +217,9 @@
   '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
 
 ;; Only vailable in emacs 29.1
-;; (setq auto-save-visited-predicate
-;;       (lambda () (eq major-mode 'org-mode)
-;;         auto-save-visited-interval 5))
+(setq auto-save-visited-predicate
+      (lambda () (eq major-mode 'org-mode)
+        auto-save-visited-interval 5))
 
 (defun le/my-c-mode-hook ()
   "This hook define hooks for 'c-mode'."
@@ -185,95 +257,10 @@
 ;; Setup keybinding for eww
 (defun le/my-eww-config ()
     "For use in `eww-mode-hook'."
-    (local-set-key (kbd "^") #'eww-back-url)
-    ;; more here
-    )
+    (local-set-key (kbd "^") #'eww-back-url))
 
 (when (fboundp 'eww-mode)
   (add-hook 'eww-mode-hook 'le/my-eww-config))
-
-(defun le/large-file-disable-minor-modes ()
-  "Disable minor modes for large files"
-    (company-quickhelp-mode -1)
-    (company-quickhelp-local-mode -1)
-    (display-time-mode -1)
-    (electric-indent-mode -1)
-    (emojify-mode -1)
-    (font-lock-mode -1)
-    (global-auto-revert-mode -1)
-    (company-mode -1)
-    (company-box -1)
-    (company-qickhelp-mode -1)
-    (company-qickhelp-local-mode -1)
-    (eldoc-mode -1)
-    (global-emojify-mode -1)
-    (global-font-lock-mode -1)
-    (global-git-commit-mode -1)
-    (global-org-modern-mode -1)
-    (line-number-mode -1)
-    (magit-auto-revert-mode -1)
-    (override-global-mode -1)
-    (pyvenv-mode -1)
-    (shell-dirtrack-mode -1)
-    (show-paren-mode -1)
-    (tooltip-mode -1)
-    (transient-mark-mode -1)
-    (yas-minor-mode -1)
-    (yas-global-mode -1)
-    (column-number-mode -1))
-
-(defun le/large-file-enable-minor-modes ()
-  "Enable minor modes for large files"
-    (display-time-mode 1)
-    (electric-indent-mode 1)
-    (font-lock-mode 1)
-    (global-auto-revert-mode 1)
-    (global-font-lock-mode 1)
-    (global-git-commit-mode 1)
-    (line-number-mode 1)
-    (override-global-mode 1)
-    (shell-dirtrack-mode 1)
-    (show-paren-mode 1)
-    (tooltip-mode 1)
-    (transient-mark-mode 1)
-    (yas-minor-mode 1)
-    (yas-global-mode 1)
-    (column-number-mode 1))
-
-(defun le/large-file-read-only-hook ()
-  "If a file is over a given size, make the buffer read only."
-  (when (> (buffer-size) (* 1024 1024))
-    (setq buffer-read-only t)
-    (buffer-disable-undo)
-    (fundamental-mode)
-    ;; disable minor modes
-    (le/large-file-disable-minor-modes)
-    (message "Buffer is set to read-only because it is large.")))
-
-(add-hook 'find-file-hook 'le/large-file-read-only-hook)
-
-(defun le/disable-mode-line ()
-  "Disable the line and character count in Doom Modeline."
-  (setq doom-modeline-mode nil))
-
-(defun le/restore-default-mode-line ()
-  "Restore the default mode-line-format if the file size is below
-the threshold."
-  (when (<= (buffer-size) (* 1024 1024))
-    (setq doom-modeline-mode t)))
-
-(defun le/large-file-handle-hook ()
-  "Disable functionalisty with large file"
-  (if (> (buffer-size) (* 1024 1024))
-      (prog
-       (le/large-file-read-only-hook)
-       (font-lock-mode -1)
-       (turn-off-smartparens-mode)
-       (turn-off-eldoc-mode)
-       (turn-off-flycheck-mode)
-       (turn-off-flyspell-mode)
-       (le/disable-mode-line))
-    (le/restore-default-mode-line)))
 
 (setq inhibit-startup-screen t)
 (setq display-time-day-and-date t)
@@ -283,6 +270,11 @@ the threshold."
 (setq read-buffer-completion-ignore-case t)
 (setq read-file-name-completion-ignore-case t)
 (setq completion-cycle-threshold t)
+
+(use-package help
+  :bind
+  (:map help-mode-map
+        ("^" . help-go-back)))
 
 (use-package whitespace
   :ensure t
@@ -408,7 +400,7 @@ the threshold."
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files '("~/git/org/todo/gtd.org"))
  '(package-selected-packages
-   '(py-isort blacken vertico-posframe vertico treemacs-all-the-icons treemacs-nerd-icons consult consult-lsp vterm eterm-256color atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu orderless all-the-icons-dired projectile-ripgrep gptel k8s-mode dockerfile-mode edit-server bats-mode helpful emojify which-key dashboard lsp-ui marginalia multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project copilot))
+   '(systemd auctex-latexmk py-isort blacken vertico-posframe vertico treemacs-all-the-icons treemacs-nerd-icons consult consult-lsp vterm eterm-256color atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu orderless all-the-icons-dired projectile-ripgrep gptel k8s-mode dockerfile-mode edit-server bats-mode helpful emojify which-key dashboard lsp-ui marginalia multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project copilot))
  '(warning-suppress-types '((lsp-mode) (comp)))
  '(window-divider-default-right-width 2)
  '(window-divider-mode t))
@@ -559,7 +551,9 @@ the threshold."
   :init
   (projectile-mode +1)
   :bind (:map projectile-mode-map
-              ("C-x p" . projectile-command-map))
+              ("C-x p" . projectile-command-map)
+              :map projectile-command-map
+              ("A" . projectile-add-known-project))
   :config
   (setq projectile-project-search-path '(("~/git" . 1)))
   (setq projectile-enable-caching t)

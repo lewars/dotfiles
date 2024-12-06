@@ -982,8 +982,8 @@
        (t
         (org-return))))))
 
-(defun le/org-mode-setup ()
-  "Perform some org-mode setup at hook execution."
+(defun le/org-mode-basic-setup ()
+  "Perform some basic non-org-mode configuration setup at hook execution."
   (variable-pitch-mode 0)
   (auto-fill-mode 0)
   (visual-line-mode t)
@@ -995,7 +995,7 @@
   :defer t
   :init (setq org-replace-disputed-keys t)
   :hook
-  (org-mode . le/org-mode-setup)
+  (org-mode . le/org-mode-basic-setup)
   (org-mode . le/org-mode-visual-fill)
   :mode (("\\.org$" . org-mode))
   :config
@@ -1031,8 +1031,8 @@
    org-log-repeat t
    org-blank-before-new-entry '((heading . nil) (plain-list-item . nil))
 
-   org-ellipsis " ▼"
-   ;; org-ellipsis " ⤵"
+   ;; org-ellipsis " ▼"
+   org-ellipsis " ⤵"
    org-clock-sound "~/.emacs.d/org/media/alarm.wav"
    ;; TODO keywords setup
    org-todo-keywords
@@ -1145,7 +1145,7 @@
    '(org-level-5 ((t (:inherit outline-5 :weight normal :height 1.0))))
    '(org-document-title ((t (:foreground "#82aaff" :weight extra-bold :height 1.3)))))
 
-  (setq org-hidden-keywords '(author date title))
+  ;; (setq org-hidden-keywords '(author date title))
 
   (push '("conf-unix" . conf-unix) org-src-lang-modes)) ;; org-mode ; end of "use-package org"
 
@@ -1157,19 +1157,32 @@
 ;; Other org-mode setup
 
 (use-package org-modern
- :ensure t)
-
-(with-eval-after-load 'org (global-org-modern-mode))
-
-(global-org-modern-mode)
-
-(use-package org-superstar
   :ensure t
-  :after org
-  :hook (org-mode . org-superstar-mode)
   :custom
-  (org-superstar-remove-leading-stars t)
-  (org-superstar-headline-bullets-list '("◉" "○" "●" "○" "●" "○" "●")))
+  (org-modern-hide-stars nil)
+  (org-modern-hide-properties nil)
+  (org-modern-property nil)
+  (org-modern-keyword nil)
+  (org-modern-footnote nil)
+  (org-modern-property nil)
+  ;; (org-modern-priority nil)
+  ;; (org-modern-todo nil)
+  (org-modern-star nil)
+  :hook
+  (org-mode . org-modern-mode)
+  (org-agenda-finalize . org-modern-agenda))
+
+;; (with-eval-after-load 'org (global-org-modern-mode))
+
+;; (global-org-modern-mode)
+
+;; (use-package org-superstar
+;;   :ensure t
+;;   :after org
+;;   :hook (org-mode . org-superstar-mode)
+;;   :custom
+;;   (org-superstar-remove-leading-stars t)
+;;   (org-superstar-headline-bullets-list '("◉" "○" "●" "○" "●" "○" "●")))
 
 ;; Org font settings
 ;; (set-face-attribute 'org-default nil :font "Iosevka Aile" :weight 'bold :height 1.5)

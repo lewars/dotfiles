@@ -1185,13 +1185,20 @@
            :unnarrowed t)
           ))
 
-  ;; Custom agenda view for fleeting notes
-  (setq org-agenda-custom-commands
-        '(("f" "Fleeting Notes Dashboard"
-           ((tags "fleeting"
-                  ((org-agenda-files (list my-fleeting-notes-dir))
-                   (org-agenda-sorting-strategy '(deadline-up))
-                   (org-agenda-prefix-format "  %?-12t% s")))))))
+(setq org-agenda-custom-commands
+      '(("f" "Fleeting Notes Dashboard"
+         ((tags "fleeting"
+                ((org-agenda-files (list my-fleeting-notes-dir))
+                 (org-agenda-prefix-format )
+                 (org-agenda-sorting-strategy '(deadline-up))
+                 (org-agenda-remove-tags t)
+                 (org-agenda-overriding-header "Fleeting Notes")
+                 ;; Only show level 0 headlines (the titles)
+                 (org-agenda-skip-function
+                  '(org-agenda-skip-entry-if 'notregexp "^\\* Captured on"))
+                 ;; Show the captured content
+                 (org-agenda-entry-text-mode t)
+                 (org-agenda-entry-text-maxlines 3)))))))
 
   (org-roam-db-autosync-mode))
 

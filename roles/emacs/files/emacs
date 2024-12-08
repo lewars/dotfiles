@@ -201,7 +201,15 @@
       (setq my-default-font-height 100))
     (setq my-default-font-height 125))
 
-(set-face-attribute 'default nil :height my-default-font-height :foundry "ADBO" :family "Source Code Pro")
+;; Set fonts
+(set-face-attribute 'default nil
+                    :height my-default-font-height
+                    :foundry "ADBO"
+                    :family "Source Code Pro")
+
+(set-face-attribute 'variable-pitch nil
+                    :family "Open Sans"
+                    :height 1.40)
 
 (require 'package)
 (setq package-archives
@@ -974,7 +982,8 @@
 
 (defun le/org-mode-basic-setup ()
   "Perform some basic non-org-mode configuration setup at hook execution."
-  (variable-pitch-mode 0)
+  (variable-pitch-mode 1)
+  (line-spacing 0.2)
   (auto-fill-mode 0)
   (visual-line-mode t)
   (setq-local show-trailing-whitespace nil)
@@ -1144,37 +1153,19 @@
 
   ;; Set up directories for different note types
   (make-directory "~/git/org-roam" t)
-  (make-directory "~/git/org-roam/tech" t)
-  (make-directory "~/git/org-roam/ai" t)
-  (make-directory "~/git/org-roam/devops" t)
-  (make-directory "~/git/org-roam/courses" t)
+  (make-directory "~/git/org-roam/kb" t)
   (make-directory "~/git/org-roam/brag" t)
   (make-directory my-fleeting-notes-dir t)
 
   ;; Configure capture templates for different types of notes
   (setq org-roam-capture-templates
-        '(("t" "tech" plain
-           "\n* Overview\n%?\n\n* Key Points\n\n* Code Examples\n\n* References\n"
-           :target (file+head "tech/%<%Y%m%d%H%M%S>-${slug}.org"
-                            "#+title: ${title}\n#+category: tech\n#+filetags: :tech:\n")
-           :unnarrowed t)
-          ("a" "ai/ml" plain
-           "\n* Concept\n%?\n\n* Implementation\n\n* Use Cases\n\n* Resources\n"
-           :target (file+head "ai/%<%Y%m%d%H%M%S>-${slug}.org"
-                            "#+title: ${title}\n#+category: ai\n#+filetags: :ai:ml:\n")
-           :unnarrowed t)
-          ("d" "devops" plain
-           "\n* Tool/Process\n%?\n\n* Configuration\n\n* Best Practices\n\n* Examples\n"
-           :target (file+head "devops/%<%Y%m%d%H%M%S>-${slug}.org"
-                            "#+title: ${title}\n#+category: devops\n#+filetags: :devops:\n")
-           :unnarrowed t)
-          ("c" "course" plain
-           "\n* Course Info\nProvider: %^{Provider}\nInstructor: %^{Instructor}\n\n* Notes\n%?\n\n* Key Takeaways\n\n* Projects\n"
-           :target (file+head "courses/%<%Y%m%d%H%M%S>-${slug}.org"
-                            "#+title: ${title}\n#+category: course\n#+filetags: :course:\n")
+        '(("k" "kb" plain
+           "\n* ${title}\n\n%?"
+           :target (file+head "kb/%<%Y%m%d%H%M%S>-${slug}.org"
+                              "#+title: ${title}\n#+category: kb\n#+filetags: :kb:\n")
            :unnarrowed t)
           ("f" "fleeting" plain
-           "\n* Captured on %T\n%?\n\n* Source/Context\n\n* Initial Thoughts\n\n* Potential Connections\n\n* Action Items\n- [ ] Process this note within 48 hours\n- [ ] Convert relevant parts to permanent notes\n- [ ] Create necessary connections\n- [ ] Archive or delete this note"
+           "\n%?\n\n  *Captured on %T*"
            :target (file+head "fleeting/%<%Y%m%d%H%M%S>-${slug}.org"
                               "#+title: ${title}\n#+category: fleeting\n#+filetags: :fleeting:\n#+created: %U\n#+deadline: %(org-insert-time-stamp (time-add (current-time) (days-to-time 2)))\n")
            :unnarrowed t)
@@ -1189,7 +1180,6 @@
       '(("f" "Fleeting Notes Dashboard"
          ((tags "fleeting"
                 ((org-agenda-files (list my-fleeting-notes-dir))
-                 (org-agenda-prefix-format )
                  (org-agenda-sorting-strategy '(deadline-up))
                  (org-agenda-remove-tags t)
                  (org-agenda-overriding-header "Fleeting Notes")

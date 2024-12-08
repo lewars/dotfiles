@@ -1687,25 +1687,72 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package gptel
   :ensure t
+  ;; rewrite the bind to use a keymap instead of a list
   :bind (([(super return)] . gptel-send)
-         ("C-x l" . gptel-menu))
+         ("C-x l" . gptel-menu)
+         ("C-x L p" . gptel-org-set-properties)
+         ("C-x L t" . gptel-org-set-topic)
+         ("C-x L a" . gptel-add)
+         ("C-x L f" . gptel-add-file)
+         ("C-x L r" . gptel-rewrite-menu)
+         )
   :init
   (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
   :config
   (setq-local show-trailing-whitespace nil)
-  (gptel-make-ollama "Ollama"
-    :host "localhost:11434"
-    :stream t
-    :models '(
-              "deepseek-coder-v2:16b"
-              "gemma2:27b"
-              "llama3.1:8b-instruct-q8_0"
-              "llama3.2-vision:90b"
-              "phi3:14b"
-              "phi3:3.8b"
-              "qwen2.5:72b"
-              "llama3.1:70b"
-              )))
+  (setq
+   gptel-model 'llama3.3:latest
+   gptel-backend (gptel-make-ollama "Ollama"
+                   :host "localhost:11434"
+                   :stream t
+                   :models '("llama3.3:latest"
+                             "bwf-lit-expert:latest"
+                             "bwf-yt-video-series-producer:latest"
+                             "bwf-yt-video-series-producer-qwen2_5-72b:latest"
+                             "bwf-yt-video-series-producer-qwen2_5:latest"
+                             "codegemma:7b-instruct-fp16"
+                             "codegemma:latest"
+                             "deepseek-coder-v2:16b-lite-instruct-fp16"
+                             "dolphin-mixtral:8x22b"
+                             "ft-art-dir:latest"
+                             "gemma2:27b"
+                             "gemma2:9b"
+                             "le-ai-consultant:latest"
+                             "le-ai-learn:latest"
+                             "le-ai-learn-qwen2_5-72b:latest"
+                             "le-ai-pc:latest"
+                             "le-career-and-job-consultant:latest"
+                             "le-cyber-security-gemma2:latest"
+                             "le-cyber-security:latest"
+                             "le-cyber-security-qwen2_5-72b:latest"
+                             "le-cyber-security-qwen2_5:latest"
+                             "le-devops:latest"
+                             "le-devops-learn-gemma2-27b:latest"
+                             "le-devops-learn-k8s-command-quiz:latest"
+                             "le-devops-learn-k8s-free-form-quiz:latest"
+                             "le-devops-learn-k8s-multi-choice-quiz:latest"
+                             "le-devops-learn:latest"
+                             "le-devops-learn-qwen2_5-72b:latest"
+                             "le-emacs-8b:latest"
+                             "le-emacs:latest"
+                             "le-financial-advisor:latest"
+                             "le-financial-advisor-qwen2_5-72b:latest"
+                             "le-ivy-plan:latest"
+                             "le-linux-admin-8b:latest"
+                             "le-linux-admin:latest"
+                             "le-math-8b:latest"
+                             "llama3.1:70b"
+                             "llama3.1:70b-instruct-q8_0"
+                             "llama3.1:8b"
+                             "llama3.1:8b-instruct-q8_0"
+                             "llama3.2-vision:90b"
+                             "llama3:8b-instruct-q8_0"
+                             "mistral-nemo:12b-instruct-2407-fp16"
+                             "mistral-nemo:latest"
+                             "phi3:14b"
+                             "phi3:latest"
+                             "qwen2.5:72b"
+                             )))) ;; gptel
 
 (use-package multi-vterm
   :ensure t)

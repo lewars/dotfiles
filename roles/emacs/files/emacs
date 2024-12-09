@@ -147,6 +147,7 @@
 ;; Additional settings for specific file types
 (add-to-list 'auto-mode-alist '("\\.log\\'" . fundamental-mode))
 (add-to-list 'auto-mode-alist '("\\.sql\\'" . fundamental-mode))
+(add-to-list 'auto-mode-alist '("\\.odt\\'" . docview-mode))
 
 ;; prog-mode settings and hooks
 (defun le/my-prog-mode-settings ()

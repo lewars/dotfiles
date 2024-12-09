@@ -464,9 +464,9 @@
  '(org-block-end-line ((t (:inherit org-block-begin-line))))
  '(org-code ((t (:inherit fixed-pitch))))
  '(org-document-info ((t (:height 1.0))))
- '(org-document-info-keyword ((t (:inherit org-drawer :weight light :height 0.9))))
+ '(org-document-info-keyword ((t (:inherit org-drawer))))
  '(org-document-title ((t (:foreground "#82aaff" :weight bold :height 1.1))))
- '(org-drawer ((t (:foreground "SlateGray4"))))
+ '(org-drawer ((t (:foreground "SlateGray4" :height 0.9))))
  '(org-ellipsis ((t (:foreground "orange" :weigth extra-bold :height 0.9 :underline nil))))
  '(org-headline-done ((t (:foreground "gray"))))
  '(org-level-1 ((t (:inherit outline-1 :weight bold :height 1.1))))
@@ -474,7 +474,7 @@
  '(org-level-3 ((t (:inherit outline-3 :weight bold :height 1.0))))
  '(org-level-4 ((t (:inherit outline-4 :weight bold :height 1.0))))
  '(org-level-5 ((t (:inherit outline-5 :weight normal :height 1.0))))
- '(org-meta-line ((t (:inherit fixed-pitch :foreground "SlateGray4" :weight light :height 0.96))))
+ '(org-meta-line ((t (:foreground "SlateGray4" :weight light :height 0.96))))
  '(org-modern-block-name ((t (:weight semi-light :height 0.8))))
  '(org-modern-label ((t (:box t (:line-width (0 . -3) :color "#263238") :underline nil :weight extra-bold :height 0.95 :width condensed))))
  '(org-modern-todo ((t (:inherit (org-todo org-modern-label) :inverse-video t :underline nil :weight extra-bold :height 0.95 :width condensed))))
@@ -986,7 +986,7 @@
 (defun le/org-mode-basic-setup ()
   "Perform some basic non-org-mode configuration setup at hook execution."
   (variable-pitch-mode 1)
-  (line-spacing 0.2)
+  (setq-local line-spacing 0.2)
   (auto-fill-mode 0)
   (visual-line-mode t)
   (setq-local show-trailing-whitespace nil)
@@ -1168,7 +1168,7 @@
                               "#+title: ${title}\n#+category: kb\n#+filetags: :kb:\n")
            :unnarrowed t)
           ("f" "fleeting" plain
-           "\n%?\n\n  *Captured on %T*"
+           "\n\n* %?\n\n  *Captured on %T*"
            :target (file+head "fleeting/%<%Y%m%d%H%M%S>-${slug}.org"
                               "#+title: ${title}\n#+category: fleeting\n#+filetags: :fleeting:\n#+created: %U\n#+deadline: %(org-insert-time-stamp (time-add (current-time) (days-to-time 2)))\n")
            :unnarrowed t)
@@ -1183,15 +1183,19 @@
       '(("f" "Fleeting Notes Dashboard"
          ((tags "fleeting"
                 ((org-agenda-files (list my-fleeting-notes-dir))
-                 (org-agenda-sorting-strategy '(deadline-up))
-                 (org-agenda-remove-tags t)
-                 (org-agenda-overriding-header "Fleeting Notes")
-                 ;; Only show level 0 headlines (the titles)
-                 (org-agenda-skip-function
-                  '(org-agenda-skip-entry-if 'notregexp "^\\* Captured on"))
-                 ;; Show the captured content
-                 (org-agenda-entry-text-mode t)
-                 (org-agenda-entry-text-maxlines 3)))))))
+                 (org-agenda-prefix-format '((tags . "FLEETING-NOTE ")))
+                 (org-agenda-sorting-strategy '(timestamp-up))
+                 (org-agenda-overriding-header "Fleeting Notes Dashboard\n")
+                 ;; Extract and show the captured date from the content
+                 (org-agenda-format-item
+                  (lambda (cat tags priority txt &optional beg end)
+                    (let* ((txt-copy txt)
+                           (date-string
+                            (if (string-match "\\*Captured on <\\([^>]+\\)>" txt-copy)
+                                (match-string 1 txt-copy)
+                              "")))
+                      (format "%s %s <%s>" cat txt date-string))))))))
+        ))
 
   (org-roam-db-autosync-mode))
 

@@ -434,7 +434,7 @@
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files '("~/git/org/todo/gtd.org"))
  '(package-selected-packages
-   '(latex-preview-pane flyspell-correct lorem-ipsum nerd-icons org-projectile org-make-toc pdf-tools org-roam-ui org-noter buttercup org-download org-roam systemd auctex-latexmk py-isort blacken vertico-posframe vertico treemacs-all-the-icons treemacs-nerd-icons consult consult-lsp vterm eterm-256color atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu orderless all-the-icons-dired projectile-ripgrep gptel k8s-mode dockerfile-mode edit-server bats-mode helpful emojify which-key dashboard lsp-ui marginalia multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project copilot))
+   '(consult-gh consult-gh-forge consult-org-roam latex-preview-pane flyspell-correct lorem-ipsum nerd-icons org-projectile org-make-toc pdf-tools org-roam-ui org-noter buttercup org-download org-roam systemd auctex-latexmk py-isort blacken vertico-posframe vertico treemacs-all-the-icons treemacs-nerd-icons consult consult-lsp vterm eterm-256color atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu orderless all-the-icons-dired projectile-ripgrep gptel k8s-mode dockerfile-mode edit-server bats-mode helpful emojify which-key dashboard lsp-ui marginalia multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project copilot))
  '(warning-suppress-types '((lsp-mode) (comp)))
  '(window-divider-default-right-width 2)
  '(window-divider-mode t))
@@ -1790,6 +1790,66 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 (use-package latex-preview-pane
   :ensure t
   :hook (latex-mode . latex-preview-pane-mode))
+
+(use-package consult-gh
+  :ensure t
+  :after consult
+  :custom
+  (consult-gh-default-clone-directory "~/git/")
+  (consult-gh-show-preview t)
+  (consult-gh-repo-action #'consult-gh--repo-browse-files-action)
+  (consult-gh-issue-action #'consult-gh--issue-view-action)
+  (consult-gh-pr-action #'consult-gh--pr-view-action)
+  (consult-gh-code-action #'consult-gh--code-view-action)
+  (consult-gh-file-action #'consult-gh--files-view-action)
+  (consult-gh-notifications-action #'consult-gh--notifications-action)
+  (consult-gh-dashboard-action #'consult-gh--dashboard-action)
+  (consult-gh-large-file-warning-threshold 2500000)
+  (consult-gh-prioritize-local-folder 'suggest)
+  :config
+  (setq consult-gh-default-orgs-list (consult-gh--get-current-orgs t))
+
+  ;; Set default org when switching accounts
+  (add-hook 'consult-gh-auth-post-switch-hook
+            (lambda (&rest args)
+              (setq consult-gh-default-orgs-list
+                    (consult-gh--get-current-orgs t))))
+
+  ;; Remember visited orgs/repos across sessions
+  (add-to-list 'savehist-additional-variables 'consult-gh--known-orgs-list)
+  (add-to-list 'savehist-additional-variables 'consult-gh--known-repos-list))
+
+(use-package consult-gh-forge
+  :ensure t
+  :after consult-gh
+  :config
+  (consult-gh-forge-mode +1)
+  (setq consult-gh-forge-timeout-seconds 20))
+
+(use-package consult-ls-git
+  :ensure t)
+
+(use-package consult-org-roam
+   :ensure t
+   :after org-roam
+   :init
+   (require 'consult-org-roam)
+   (consult-org-roam-mode 1)
+   :custom
+   (consult-org-roam-grep-func #'consult-ripgrep)
+   (consult-org-roam-buffer-narrow-key ?r)
+   (consult-org-roam-buffer-after-buffers t)
+   :config
+   ;; Eventually suppress previewing for certain functions
+   (consult-customize
+    consult-org-roam-forward-links
+    :preview-key "M-.")
+   :bind
+   ("C-x c n f" . consult-org-roam-file-find)
+   ("C-x c n b" . consult-org-roam-backlinks)
+   ("C-x c n B" . consult-org-roam-backlinks-recursive)
+   ("C-x c n l" . consult-org-roam-forward-links)
+   ("C-x c n r" . consult-org-roam-search))
 
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)

@@ -1351,40 +1351,26 @@
         '((left-fringe . 8)
           (right-fringe . 8)))
 
-  ;; Enable vertico-multiform
+
+  (setq le-bottom-center-width-7-posframe-config
+      '(posframe
+        (vertico-posframe-poshandler . posframe-poshandler-frame-bottom-center)
+        (vertico-posframe-border-width . 7)
+        (vertico-posframe-fallback-mode . vertico-buffer-mode)))
+
   (setq vertico-multiform-commands
-        '((consult-projectile
-           posframe
-           (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
-           (vertico-posframe-border-width . 7)
-           (vertico-posframe-fallback-mode . vertico-buffer-mode))
-          (consult-line
-           posframe
-           (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
-           (vertico-posframe-border-width . 5)
-           (vertico-posframe-fallback-mode . vertico-buffer-mode))
-          (consult-grep
-           posframe
-           (vertico-posframe-poshandler . posframe-poshandler-frame-bottom-center)
-           (vertico-posframe-border-width . 5)
-           (vertico-posframe-fallback-mode . vertico-buffer-mode))
-          (consult-ripgrep
-           posframe
-           (vertico-posframe-poshandler . posframe-poshandler-frame-bottom-center)
-           (vertico-posframe-border-width . 5)
-           (vertico-posframe-fallback-mode . vertico-buffer-mode))
-          (consult-imenu
-           posframe
-           (vertico-posframe-poshandler . posframe-poshandler-frame-bottom-center)
-           (vertico-posframe-border-width . 5)
-           (vertico-posframe-fallback-mode . vertico-buffer-mode))
-          (consult-bookmark
-           posframe
-           (vertico-posframe-poshandler . posframe-poshandler-frame-bottom-center)
-           (vertico-posframe-border-width . 5)
-           (vertico-posframe-fallback-mode . vertico-buffer-mode))
-          (t posframe)
-          (execute-extended-command unobtrusive)))
+      (append
+       (mapcar (lambda (cmd) (cons cmd le-bottom-center-width-7-posframe-config))
+               '(consult-line consult-buffer consult-ls-git consult-grep
+                              consult-ripgrep consult-imenu consult-bookmark))
+       '((consult-projectile
+          posframe
+          ;; (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
+          (vertico-posframe-border-width . 7)
+          (vertico-posframe-fallback-mode . vertico-buffer-mode))
+         (t posframe)
+         (execute-extended-command unobtrusive))))
+
   (setq vertico-multiform-categories
         '((file grid)))
   (vertico-multiform-mode 1))
@@ -1436,6 +1422,8 @@
       ;; nested keymap for 'g' prefix (git)
       (let ((git-map (make-sparse-keymap)))
         (define-key git-map "g" #'consult-git-grep)
+        (define-key git-map "l" #'consult-ls-git)
+        (define-key git-map "L" #'consult-ls-git-other-window)
         (define-key map "g" git-map))
       map))
   :bind

@@ -1698,6 +1698,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
   :config
   (setq-local show-trailing-whitespace nil)
+  (add-to-list 'gptel-directives '(Ai-Expert . "You are an AI expert on LLMs, stable diffusion (text2image), AI video generation (text2video, video2video), and the tools that implement them."))
+  (add-to-list 'gptel-directives '(Python . "You are a Python and conda expert. Give accurate and concise answers. Please do not hallucinate or make up stuff. If you don't know the answer or information, please indicate that you do not know."))
   (setq
    gptel-model 'llama3.3:latest
    gptel-backend (gptel-make-ollama "Ollama"

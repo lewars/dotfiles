@@ -221,7 +221,7 @@
 (setq package-archive-priorities
       '(("gnu" . 30)
         ("melpa-stable" . 20)
-        ("melpa" . 10)))
+        ("melpa" . 40)))
 
 (package-initialize)
 
@@ -282,6 +282,10 @@
 (global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
 (global-set-key (kbd "S-C-<down>") 'shrink-window)
 (global-set-key (kbd "S-C-<up>") 'enlarge-window)
+(global-set-key (read-kbd-macro "M-S-<left>") 'windmove-swap-states-left)
+(global-set-key (read-kbd-macro "M-S-<right>") 'windmove-swap-states-right)
+(global-set-key (read-kbd-macro "M-S-<up>") 'windmove-swap-states-up)
+(global-set-key (read-kbd-macro "M-S-<down>") 'windmove-swap-states-down)
 (global-set-key (read-kbd-macro "C-x f") 'find-file-at-point)
 
 ;; Setup keybinding for eww

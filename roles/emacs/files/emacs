@@ -1,4 +1,4 @@
-;;; .emacs --- Emacs initalization file -*- mode: emacs-lisp; lexical-binding: t; -*-
+;;; .emacs --- Emacs initialization file -*- mode: emacs-lisp; lexical-binding: t; -*-
 
 ;; Copyright (C) 1996-2024 Alistair Y. Lewars
 

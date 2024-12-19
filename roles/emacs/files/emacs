@@ -1612,11 +1612,14 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :config (lsp-treemacs-sync-mode 1)
   :commands lsp-treemacs-errors-list)
 
+(defun lsp-deferred ()
+  (eglot-ensure))
+
 (use-package lsp-pyright
   :ensure t
   :hook (python-mode . (lambda ()
                           (require 'lsp-pyright)
-                          (lsp-defferred))))
+                          (lsp-deferred))))
 
 (use-package dashboard
   :ensure t

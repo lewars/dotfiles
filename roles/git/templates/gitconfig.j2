@@ -68,19 +68,10 @@
 	autoSetupRemote = true
 [github]
         user = {{ git_user }}
-{% if ansible_os_family == 'RedHat' %}
 [credential "https://github.com"]
-        # helper = !/usr/bin/op plugin run -- /usr/local/bin/gh auth git-credential
         helper = !/usr/local/bin/gh auth git-credential
 [credential "https://gist.github.com"]
-	# helper = !/usr/bin/op plugin run -- /usr/local/bin/gh auth git-credential
 	helper = /usr/local/bin/gh auth git-credential
-{% elif ansible_os_family == 'Darwin' %}
-[credential "https://github.com"]
-	helper = !/usr/local/bin/gh auth git-credential
-[credential "https://gist.github.com"]
-	helper = !/usr/local/bin/gh auth git-credential
-{% endif %}
 [filter "lfs"]
 	required = true
 	clean = git-lfs clean -- %f

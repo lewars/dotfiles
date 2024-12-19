@@ -305,6 +305,20 @@
 (setq read-file-name-completion-ignore-case t)
 (setq completion-cycle-threshold t)
 
+;; Web search Jamaica
+(defun le/search-web (text)
+  "Search the web for TEXT using your default browser."
+  (interactive
+   (list (if (use-region-p)
+             (buffer-substring (region-beginning) (region-end))
+           (thing-at-point 'word t))))
+  (browse-url
+   (concat "https://www.google.com/search?q="
+           (url-encode-url text))))
+
+;; Bind it to a key of your choice, for example C-c s
+(global-set-key (kbd "C-c s") 'le/search-web)
+
 (use-package help
   :bind
   (:map help-mode-map

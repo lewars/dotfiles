@@ -1690,7 +1690,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package vterm
   :ensure t
-  :bind ("C-c v" . vterm)
+  :bind ("C-c t" . vterm)
   :hook
   (vterm-mode . eterm-256color-mode)
   :config
@@ -1777,7 +1777,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package multi-vterm
   :ensure t
-  :bind ("C-c V" . multi-vterm)
+  :bind ("C-c T" . multi-vterm)
   )
 
 (use-package atomic-chrome

@@ -1849,6 +1849,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 (use-package consult-gh
   :ensure t
   :after consult
+  :init
+  (require 'consult-gh)
   :custom
   (consult-gh-default-clone-directory "~/git/")
   (consult-gh-show-preview t)
@@ -1862,7 +1864,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (consult-gh-large-file-warning-threshold 2500000)
   (consult-gh-prioritize-local-folder 'suggest)
   :config
-  (setq consult-gh-default-orgs-list (consult-gh--get-current-orgs t))
+  ;; (setq consult-gh-default-orgs-list (consult-gh--get-current-orgs t))
 
   ;; Set default org when switching accounts
   (add-hook 'consult-gh-auth-post-switch-hook
@@ -1874,12 +1876,14 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (add-to-list 'savehist-additional-variables 'consult-gh--known-orgs-list)
   (add-to-list 'savehist-additional-variables 'consult-gh--known-repos-list))
 
-(use-package consult-gh-forge
-  :ensure t
-  :after consult-gh
-  :config
-  (consult-gh-forge-mode +1)
-  (setq consult-gh-forge-timeout-seconds 20))
+
+(use-package consult-gh-forge                 ;;
+  :ensure t                                   ;;
+  :after consult-gh                           ;;
+  :config                                     ;;
+  (consult-gh-forge-mode +1)                  ;;
+  (setq consult-gh-forge-timeout-seconds 20)) ;;
+
 
 (use-package consult-ls-git
   :ensure t)
@@ -1887,9 +1891,22 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 (use-package consult-org-roam
    :ensure t
    :after org-roam
+   :bind-keymap
+   ("C-x c" . consult-command-map)
    :init
    (require 'consult-org-roam)
    (consult-org-roam-mode 1)
+      (defvar consult-command-map
+     (let ((map (make-sparse-keymap)))
+       ;; nested keymap for 'n' prefix (projectile)
+       (let ((projectile-map (make-sparse-keymap)))
+         (define-key projectile-map "f" #'consult-org-roam-file-find)
+         (define-key projectile-map "b" #'consult-org-roam-backlinks)
+         (define-key projectile-map "B" #'consult-org-roam-backlinks-recursive)
+         (define-key projectile-map "l" #'consult-org-roam-forward-links)
+         (define-key projectile-map "r" #'consult-org-roam-search)
+         (define-key map "n" projectile-map))
+       map))
    :custom
    (consult-org-roam-grep-func #'consult-ripgrep)
    (consult-org-roam-buffer-narrow-key ?r)
@@ -1898,13 +1915,19 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
    ;; Eventually suppress previewing for certain functions
    (consult-customize
     consult-org-roam-forward-links
-    :preview-key "M-.")
-   :bind
-   ("C-x c n f" . consult-org-roam-file-find)
-   ("C-x c n b" . consult-org-roam-backlinks)
-   ("C-x c n B" . consult-org-roam-backlinks-recursive)
-   ("C-x c n l" . consult-org-roam-forward-links)
-   ("C-x c n r" . consult-org-roam-search))
+    :preview-key "M-."))
+
+
+(use-package tree-sitter                                       ;;
+  :ensure t                                                    ;;
+  :config                                                      ;;
+  (add-hook 'json-mode-hook #'tree-sitter-mode)                ;;
+  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)) ;;
+                                                               ;;
+(use-package tree-sitter-langs                                 ;;
+  :ensure t                                                    ;;
+  :config                                                      ;;
+  (tree-sitter-require 'json))                                 ;;
 
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)

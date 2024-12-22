@@ -1248,26 +1248,24 @@
            "\n* Achievement Summary\n%?\n\n* Impact\n- Business Impact:\n- Technical Impact:\n- Team Impact:\n\n* Key Metrics\n- Quantitative:\n- Qualitative:\n\n* Context\n- Challenge Overcome:\n- Skills Demonstrated:\n\n* Supporting Details\n- Project Name:\n- Timeline:\n- Collaborators:\n\n* Follow-up Items\n- [ ] Add relevant metrics when available\n- [ ] Gather peer feedback\n- [ ] Update resume with achievement\n\n* Tags\n\n* Date Range\n- Started: %^{Started}t\n- Completed: %^{Completed}t\n"
            :target (file+head "brag/%<%Y%m%d%H%M%S>-${slug}.org"
                               "#+title: ${title}\n#+category: brag\n#+filetags: :brag:achievement:\n#+created: %U\n")
-           :unnarrowed t)
-          ))
+           :unnarrowed t)))
 
-(setq org-agenda-custom-commands
-      '(("f" "Fleeting Notes Dashboard"
-         ((tags "fleeting"
-                ((org-agenda-files (list my-fleeting-notes-dir))
-                 (org-agenda-prefix-format '((tags . "FLEETING-NOTE ")))
-                 (org-agenda-sorting-strategy '(timestamp-up))
-                 (org-agenda-overriding-header "Fleeting Notes Dashboard\n")
-                 ;; Extract and show the captured date from the content
-                 (org-agenda-format-item
-                  (lambda (cat tags priority txt &optional beg end)
-                    (let* ((txt-copy txt)
-                           (date-string
-                            (if (string-match "\\*Captured on <\\([^>]+\\)>" txt-copy)
-                                (match-string 1 txt-copy)
-                              "")))
-                      (format "%s %s <%s>" cat txt date-string))))))))
-        ))
+  (setq org-agenda-custom-commands
+        '(("f" "Fleeting Notes Dashboard"
+           ((tags "fleeting"
+                  ((org-agenda-files (list my-fleeting-notes-dir))
+                   (org-agenda-prefix-format '((tags . "FLEETING-NOTE ")))
+                   (org-agenda-sorting-strategy '(timestamp-up))
+                   (org-agenda-overriding-header "Fleeting Notes Dashboard\n")
+                   ;; Extract and show the captured date from the content
+                   (org-agenda-format-item
+                    (lambda (cat tags priority txt &optional beg end)
+                      (let* ((txt-copy txt)
+                             (date-string
+                              (if (string-match "\\*Captured on <\\([^>]+\\)>" txt-copy)
+                                  (match-string 1 txt-copy)
+                                "")))
+                        (format "%s %s <%s>" cat txt date-string))))))))))
 
   (org-roam-db-autosync-mode))
 
@@ -1449,6 +1447,9 @@
 (use-package consult
   :ensure t
   :hook (completion-list-mode . consult-preview-at-point-mode)
+  :bind
+  ("M-y" . consult-yank-pop)
+  ("C-x y" . consult-yasnippet)
   :bind-keymap
   ("C-x c" . consult-command-map)
   :init
@@ -1463,6 +1464,7 @@
       (define-key map "f" #'consult-find)
       (define-key map "F" #'consult-focus-lines)
       (define-key map "G" #'consult-global-mark)
+      (define-key map "y" #'consult-yasnippet)
 
       ;; nested keymap for 'p' prefix (projectile)
       (let ((projectile-map (make-sparse-keymap)))
@@ -1482,14 +1484,11 @@
         (define-key git-map "L" #'consult-ls-git-other-window)
         (define-key map "g" git-map))
       map))
-  :bind
-  ("M-y" . consult-yank-pop)
   :config
   (consult-customize
    consult-ripgrep consult-git-grep consult-grep)
   (setq
    consult-narrow-key "<"))
-   ;;consult-find-args "find . "))
 
 (defun le/centaur-tabs-buffer-groups ()
   "`centaur-tabs-buffer-groups' control buffers' group rules.
@@ -1654,9 +1653,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :config (lsp-treemacs-sync-mode 1)
   :commands lsp-treemacs-errors-list)
 
-(defun lsp-deferred ()
-  (eglot-ensure))
-
 (use-package lsp-pyright
   :ensure t
   :hook (python-mode . (lambda ()
@@ -1758,7 +1754,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
          ("C-x L r" . gptel-rewrite-menu)
          )
   :init
-  (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
+  ;; (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
   :config
   (setq-local show-trailing-whitespace nil)
   (add-to-list 'gptel-directives '(Ai-Expert . "You are an AI expert on LLMs, stable diffusion (text2image), AI video generation (text2video, video2video), and the tools that implement them."))

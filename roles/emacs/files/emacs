@@ -325,7 +325,7 @@
         ("^" . help-go-back)))
 
 (use-package whitespace
-  :ensure t
+  :ensure nil
   :bind
   ("C-c w" . whitespace-mode)
   ("C-c k" . whitespace-cleanup)
@@ -336,18 +336,65 @@
                            space-mark tab-mark
                            missing-newline-at-eof)))
 
-(use-package yasnippet
-  :ensure t)
-(require 'yasnippet)
-(setq yas-snippet-dirs '("~/.emacs.d/snippets"))
-(setq yas-wrap-around-region t)
-(setq yas-triggers-in-field t)
-(setq yas/triggers-in-field t)
+(use-package whitespace-cleanup-mode
+  :ensure t
+  :init (setq whitespace-cleanup-mode-ignore-modes '(special-mode))
+  :hook ((prog-mode . whitespace-cleanup-mode)
+         (org-mode . whitespace-cleanup-mode)))
 
-(yas-global-mode 1)
-(yas-reload-all)
-(global-set-key "\M-/" 'hippie-expand)
-(add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
+(use-package paren
+  :ensure nil
+  :init
+  (setq show-paren-delay 0)
+  (setq show-paren-style 'mixed)
+  :config
+  (show-paren-mode 1))
+
+
+(use-package eldoc
+  :ensure nil
+  :diminish
+  :hook
+  ((emacs-lisp-mode . eldoc-mode)
+   (lisp-interaction-mode . eldoc-mode)
+   (ielm-mode . eldoc-mode))
+  :config
+  (setq eldoc-idle-delay 0)
+  (setq eldoc-echo-area-use-multiline-p t))
+
+
+
+(use-package elisp-eldoc
+  :ensure nil
+  :hook (emacs-lisp-mode . elisp-eldoc-enable))
+
+(use-package electric
+  :ensure nil
+  :init
+  (electric-pair-mode 1)
+  :config
+  (setq electric-pair-preserve-balance t
+        electric-pair-delete-adjacent-pairs t
+        electric-pair-open-newline-between-pairs nil))
+
+(use-package yasnippet
+  :ensure t
+  :init
+  (setq yas-snippet-dirs '("~/git/yasnippet-snippets/snippets"
+                           "~/.emacs.d/snippets"
+                           )
+        yas-wrap-around-region t
+        yas-triggers-in-field t
+        yas/triggers-in-field t)
+  :bind
+  ("M-/" . hippie-expand)
+  :config
+  (yas-global-mode 1)
+  (yas-reload-all)
+  (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand))
+
+(use-package consult-yasnippet
+  :ensure t)
 
 (setq display-buffer-alist
       '(
@@ -448,7 +495,7 @@
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files '("~/git/org/todo/gtd.org"))
  '(package-selected-packages
-   '(djvu nov consult-gh consult-gh-forge consult-org-roam latex-preview-pane flyspell-correct lorem-ipsum org-roam-ui buttercup org-download org-roam systemd auctex-latexmk py-isort blacken vertico-posframe vertico treemacs-all-the-icons treemacs-nerd-icons consult consult-lsp vterm eterm-256color atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu orderless all-the-icons-dired projectile-ripgrep gptel k8s-mode dockerfile-mode edit-server bats-mode helpful emojify which-key dashboard lsp-ui marginalia multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project copilot))
+   '(lsp-pyright whitespace-cleanup-mode consult-gh-forge consult-gh consult-org-roam org-roam-ui org-roam djvu nov latex-preview-pane flyspell-correct lorem-ipsum buttercup org-download systemd auctex-latexmk py-isort blacken vertico-posframe vertico treemacs-all-the-icons treemacs-nerd-icons consult consult-lsp vterm eterm-256color atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu orderless all-the-icons-dired projectile-ripgrep gptel k8s-mode dockerfile-mode edit-server bats-mode helpful emojify which-key dashboard lsp-ui marginalia multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project copilot))
  '(warning-suppress-types '((lsp-mode) (comp)))
  '(window-divider-default-right-width 2)
  '(window-divider-mode t))

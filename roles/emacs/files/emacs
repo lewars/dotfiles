@@ -529,10 +529,10 @@
  '(org-block-end-line ((t (:inherit org-block-begin-line))))
  '(org-code ((t (:inherit fixed-pitch))))
  '(org-document-info ((t (:height 1.0))))
- '(org-document-info-keyword ((t (:inherit org-drawer))))
+ '(org-document-info-keyword ((t (:foreground "SlateGray4" :weight light :height 0.96))))
  '(org-document-title ((t (:foreground "#82aaff" :weight bold :height 1.1))))
- '(org-drawer ((t (:foreground "SlateGray4" :height 0.9))))
- '(org-ellipsis ((t (:foreground "orange" :weigth extra-bold :height 0.9 :underline nil))))
+ '(org-drawer ((t (:foreground "SlateGray4" :weight light :height 0.8))))
+ '(org-ellipsis ((t (:foreground "#c9880e" :weigth extra-bold :height 0.9 :underline nil))))
  '(org-headline-done ((t (:foreground "gray"))))
  '(org-level-1 ((t (:inherit outline-1 :weight bold :height 1.1))))
  '(org-level-2 ((t (:inherit outline-2 :weight bold :height 1.1))))
@@ -543,9 +543,9 @@
  '(org-modern-block-name ((t (:weight semi-light :height 0.8))))
  '(org-modern-label ((t (:box t (:line-width (0 . -3) :color "#263238") :underline nil :weight extra-bold :height 0.95 :width condensed))))
  '(org-modern-todo ((t (:inherit (org-todo org-modern-label) :inverse-video t :underline nil :weight extra-bold :height 0.95 :width condensed))))
- '(org-property-value ((t (:foreground "SlateGray3"))))
+ '(org-property-value ((t (:foreground "SlateGray3" :weight light :height 0.8))))
  '(org-scheduled-today ((t (:foreground "dark gray"))))
- '(org-special-keyword ((t (:foreground "SlateGray3"))))
+ '(org-special-keyword ((t (:foreground "SlateGray3" :weight light :height 0.8))))
  '(org-table ((t (:inherit fixed-pitch :height 0.8))))
  '(org-tag ((t (:foreground "cyan3" :weight normal))))
  '(org-time-grid ((t (:foreground "gray80"))))
@@ -1095,6 +1095,9 @@
    org-return-follows-link  t
    org-special-ctrl-a/e t
    org-support-shift-select nil
+   org-startup-with-inline-images t
+   org-image-actual-width nil
+   org-image-max-width 300
 
    org-ellipsis "  🡇"
    org-clock-sound "~/.emacs.d/org/media/alarm.wav"
@@ -1213,20 +1216,12 @@
          ("C-c n r" . le/review-fleeting-notes)
          ("C-c n b" . le/capture-brag-note))
   :config
-
   ;; Ensure main directory exists
   (make-directory (file-truename org-roam-directory) t)
 
-  (cl-defmethod org-roam-node-type ((node org-roam-node))
-  "Return the TYPE of NODE."
-  (condition-case nil
-      (file-name-nondirectory
-       (directory-file-name
-        (file-name-directory
-         (file-relative-name (org-roam-node-file node) org-roam-directory))))
-    (error "")))
+  ;; Set the display template without custom node-type method
   (setq org-roam-node-display-template
-        (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+        (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
 
   (setq my-fleeting-notes-dir "~/git/org-roam/fleeting")
 

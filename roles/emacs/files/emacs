@@ -236,7 +236,7 @@
 
 ;; todo: fix this
 (global-set-key "\C-x\ \C-r" 'fzf-recentf)
-(global-set-key "\C-x\ \C-r" 'recentf-open)
+;; (global-set-key "\C-x\ \C-r" 'recentf-open)
 (global-set-key "\C-x\ \C-y" 'find-file-read-only)
 
 (setq-default indent-tabs-mode nil)
@@ -563,9 +563,9 @@
 ;; Misc
 ;; set keybinding for prog-mode for hideshowing using use-package
 (use-package hideshow
-    :bind
-    (:map prog-mode-map
-            ("C-+" . hs-toggle-hiding)))
+  :bind
+  (:map prog-mode-map
+        ("C-+" . hs-toggle-hiding)))
 
 (use-package all-the-icons
   :ensure t

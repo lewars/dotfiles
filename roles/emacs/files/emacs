@@ -1803,7 +1803,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
          ("C-x L t" . gptel-org-set-topic)
          ("C-x L a" . gptel-add)
          ("C-x L f" . gptel-add-file)
-         ("C-x L r" . gptel-rewrite-menu)
+         ("C-x L r" . gptel-rewrite)
          )
   :init
   ;; (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
@@ -1811,6 +1811,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (setq-local show-trailing-whitespace nil)
   (add-to-list 'gptel-directives '(Ai-Expert . "You are an AI expert on LLMs, stable diffusion (text2image), AI video generation (text2video, video2video), and the tools that implement them."))
   (add-to-list 'gptel-directives '(Python . "You are a Python and conda expert. Give accurate and concise answers. Please do not hallucinate or make up stuff. If you don't know the answer or information, please indicate that you do not know."))
+  (add-to-list 'gptel-directives '(Linux . "You are an expert system administrator for Fedora Linux Server. Provide concise, structured, and accurate answers. If I need in-depth information or a detailed explanation, I will request it. If you do not know the answer or information to provide, please admit that instead of making something up."))
   (setq
    gptel-model 'llama3.3:latest
    gptel-backend (gptel-make-ollama "Ollama"

@@ -1190,12 +1190,29 @@
   (interactive)
   (org-agenda nil "f"))
 
-
 ;; Quick capture function for brag notes
 (defun le/capture-brag-note ()
   "Quickly capture a brag-worthy achievement."
   (interactive)
   (org-roam-capture nil "b"))
+
+;; Function to review fleeting notes
+(defun le/review-brag-notes ()
+  "Open a buffer with all unprocessed brag notes."
+  (interactive)
+  (org-agenda nil "b"))
+
+;; Function to quickly capture ideas
+(defun le/capture-idea-note ()
+  "Quickly capture a idea note."
+  (interactive)
+  (org-roam-capture nil "!"))
+
+;; Function to review fleeting notes
+(defun le/review-idea-notes ()
+  "Open a buffer with all unprocessed idea notes."
+  (interactive)
+  (org-agenda nil "!"))
 
 ;; org-roam base configuration
 (use-package org-roam
@@ -1211,7 +1228,8 @@
          ("C-c n j" . org-roam-dailies-capture-today)
          ("C-c n q" . le/capture-fleeting-note)
          ("C-c n r" . le/review-fleeting-notes)
-         ("C-c n b" . le/capture-brag-note))
+         ("C-c n b" . le/capture-brag-note)
+         ("C-c n !" . le/capture-idea-note))
   :config
   ;; Ensure main directory exists
   (make-directory (file-truename org-roam-directory) t)
@@ -1221,19 +1239,22 @@
         (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
 
   (setq my-fleeting-notes-dir "~/git/org-roam/fleeting")
+  (setq my-brag-notes-dir "~/git/org-roam/brag")
+  (setq my-idea-notes-dir "~/git/org-roam/ideas")
 
   ;; Set up directories for different note types
   (make-directory "~/git/org-roam" t)
   (make-directory "~/git/org-roam/kb" t)
   (make-directory "~/git/org-roam/brag" t)
+  (make-directory "~/git/org-roam/ideas" t)
   (make-directory my-fleeting-notes-dir t)
 
   ;; Configure capture templates for different types of notes
   (setq org-roam-capture-templates
         '(("k" "kb" plain
-           "\n* ${title}\n\n%?"
+           "\n* %(replace-regexp-in-string \"-+\" \" \" \"${title}\")\n\n%?"
            :target (file+head "kb/${slug}.org"
-                              "#+title: ${title}\n#+category: kb\n#+filetags: :kb:\n")
+                              "#+title: ${title}\n#+category: kb\n#+filetags: :kb:\n#+startup: inlineimages\n")
            :immediate-finish t
            :unnarrowed t)
           ("f" "fleeting" plain
@@ -1245,6 +1266,12 @@
            "\n* Achievement Summary\n%?\n\n* Impact\n- Business Impact:\n- Technical Impact:\n- Team Impact:\n\n* Key Metrics\n- Quantitative:\n- Qualitative:\n\n* Context\n- Challenge Overcome:\n- Skills Demonstrated:\n\n* Supporting Details\n- Project Name:\n- Timeline:\n- Collaborators:\n\n* Follow-up Items\n- [ ] Add relevant metrics when available\n- [ ] Gather peer feedback\n- [ ] Update resume with achievement\n\n* Tags\n\n* Date Range\n- Started: %^{Started}t\n- Completed: %^{Completed}t\n"
            :target (file+head "brag/%<%Y%m%d%H%M%S>-${slug}.org"
                               "#+title: ${title}\n#+category: brag\n#+filetags: :brag:achievement:\n#+created: %U\n")
+           :unnarrowed t)
+          ("!" "idea" plain
+           "\n* %(replace-regexp-in-string \"-+\" \" \" \"${title}\")\n\n%?"
+           :target (file+head "ideas/${slug}.org"
+                              "#+title: ${title}\n#+category: idea\n#+filetags: :idea:\n#+startup: inlineimages\n")
+           :immediate-finish t
            :unnarrowed t)))
 
   (setq org-agenda-custom-commands
@@ -1254,6 +1281,36 @@
                    (org-agenda-prefix-format '((tags . "FLEETING-NOTE ")))
                    (org-agenda-sorting-strategy '(timestamp-up))
                    (org-agenda-overriding-header "Fleeting Notes Dashboard\n")
+                   ;; Extract and show the captured date from the content
+                   (org-agenda-format-item
+                    (lambda (cat tags priority txt &optional beg end)
+                      (let* ((txt-copy txt)
+                             (date-string
+                              (if (string-match "\\*Captured on <\\([^>]+\\)>" txt-copy)
+                                  (match-string 1 txt-copy)
+                                "")))
+                        (format "%s %s <%s>" cat txt date-string))))))))
+          ("b" "Brag Notes Dashboard"
+           ((tags "brag"
+                  ((org-agenda-files (list my-brag-notes-dir))
+                   (org-agenda-prefix-format '((tags . "BRAG-NOTE ")))
+                   (org-agenda-sorting-strategy '(timestamp-up))
+                   (org-agenda-overriding-header "Brag Notes Dashboard\n")
+                   ;; Extract and show the captured date from the content
+                   (org-agenda-format-item
+                    (lambda (cat tags priority txt &optional beg end)
+                      (let* ((txt-copy txt)
+                             (date-string
+                              (if (string-match "\\*Captured on <\\([^>]+\\)>" txt-copy)
+                                  (match-string 1 txt-copy)
+                                "")))
+                        (format "%s %s <%s>" cat txt date-string))))))))
+          ("!" "Idea Notes Dashboard"
+           ((tags "idea"
+                  ((org-agenda-files (list my-idea-notes-dir))
+                   (org-agenda-prefix-format '((tags . "IDEA-NOTE ")))
+                   (org-agenda-sorting-strategy '(timestamp-up))
+                   (org-agenda-overriding-header "Idea Notes Dashboard\n")
                    ;; Extract and show the captured date from the content
                    (org-agenda-format-item
                     (lambda (cat tags priority txt &optional beg end)

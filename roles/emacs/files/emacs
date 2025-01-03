@@ -152,10 +152,9 @@
 ;; prog-mode settings and hooks
 (defun le/my-prog-mode-settings ()
   (display-line-numbers-mode)
-  (hl-line-mode)
-  (hs-minor-mode)
+  ;; (hl-line-mode)
+  ;; (hs-minor-mode)
   (outline-minor-mode)
-;;  (highlight-indent-guides-mode)
   (setq auto-fill-mode 0)
   (setq toggle-word-wrap 1)
   (setq fill-column 160)
@@ -345,7 +344,7 @@
 (use-package paren
   :ensure nil
   :init
-  (setq show-paren-delay 0)
+  (setq show-paren-delay 1)
   (setq show-paren-style 'mixed)
   :config
   (show-paren-mode 1))
@@ -601,15 +600,13 @@
 
 (use-package highlight-indent-guides
   :ensure t
-  :hook  (prog-mode . highlight-indent-guides-mode)
+  ;; :hook  (prog-mode . highlight-indent-guides-mode)
   :config
-  (setq highlight-indent-guides-mode t
-        highlight-indent-guides-method 'bitmap
+  (setq highlight-indent-guides-method 'bitmap
         highlight-indent-guides-bitmap-function 'highlight-indent-guides--bitmap-line))
 
 (use-package highlight-symbol
   :ensure t
-  ;; :hook (prog-mode . highlight-symbol-mode)
   :config
   (setf highlight-symbol-idle-delay 0)
   :bind (("M-s" . highlight-symbol-at-point)
@@ -783,10 +780,10 @@
   :ensure t
   :hook
   ((yaml-mode . outline-minor-mode)
-   (yaml-mode . hs-minor-mode)
+   ;; (yaml-mode . hs-minor-mode)
    (yaml-mode . display-line-numbers-mode)
    (yaml-mode . le/yaml-mode-setup)
-   (yaml-mode . highlight-indent-guides-mode)
+   ;; (yaml-mode . highlight-indent-guides-mode)
    (yaml-mode . (lambda ()
                   (add-hook 'after-save-hook 'le/yaml-frmt nil t))))
   :config
@@ -806,7 +803,7 @@
       (message "YAML file reformatted.")))
   (defun le/yaml-mode-setup ()
     "Setup yaml mode"
-    (setq hs-minor-mode 1)))
+    (setq hs-minor-mode -1)))
 
 (use-package terraform-mode
   :ensure t
@@ -820,8 +817,8 @@
       (auto-revert-mode)))
   (add-hook 'after-save-hook 'frmt-hcl)
   (add-hook 'terraform-mode-hook 'outline-minor-mode)
-  (add-hook 'terraform-mode-hook 'highlight-indent-guides-mode)
-  (add-hook 'terraform-mode-hook 'hs-minor-mode)
+  ;; (add-hook 'terraform-mode-hook 'highlight-indent-guides-mode)
+  ;; (add-hook 'terraform-mode-hook 'hs-minor-mode)
   (add-hook 'terraform-mode-hook 'display-line-numbers-mode))
 
 (use-package markdown-mode
@@ -835,8 +832,8 @@
   :init (setq markdown-command "multimarkdown")
   :config
   (add-hook 'markdown-mode-hook 'outline-minor-mode)
-  (add-hook 'markdown-mode-hook 'highlight-indent-guides-mode)
-  (add-hook 'markdown-mode-hook 'hs-minor-mode)
+  ;; (add-hook 'markdown-mode-hook 'highlight-indent-guides-mode)
+  ;; (add-hook 'markdown-mode-hook 'hs-minor-mode)
   (add-hook 'markdown-mode-hook 'display-line-numbers-mode))
 
 ;; Linters and formatters
@@ -1675,14 +1672,12 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (defun le/emojify-setup ()
   "Setup emojify on hook execution."
-  (global-emojify-mode)
-  (company-emoji-init))
+  (global-emojify-mode -1))
+;; (company-emoji-init))
 
 (use-package emojify
   :ensure t
   :hook (after-init . le/emojify-setup)
-  ;; :init
-  ;; (add-hook 'after-init-hook 'le/emojify-setup)
   :config (setq emojify-display-style 'unicode))
 
 (defun le/enable-company-emoji ()

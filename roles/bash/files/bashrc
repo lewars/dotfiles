@@ -15,7 +15,11 @@ export OSH="${HOME}/.dotfiles/oh-my-bash"
 if [[ "$HOSTNAME" == "aroma" ]]; then
     OSH_THEME="powerbash10k"
 else
-    OSH_THEME="powerline-icon"
+    # OSH_THEME="powerline-icon"
+    # OSH_THEME="powerline-plain"
+    # OSH_THEME="primer"
+    OSH_THEME="minimal"
+    POWERLINE_PROMPT_USER_INFO_MODE="sudo"
 fi
 
 # Show Python virtual environment and conda environment

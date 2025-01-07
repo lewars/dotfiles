@@ -659,17 +659,18 @@
               :map projectile-command-map
               ("A" . projectile-add-known-project))
   :config
-  (setq projectile-project-search-path '(("~/git" . 1)))
+  (setq projectile-project-search-path '(("~/git" . 2)))
   (setq projectile-enable-caching t)
-  ;; (setq projectile-completion-system 'vertico)
   (setq projectile-switch-project-action #'projectile-dired)
+  (setq projectile-switch-project-action nil)
   (setq projectile-per-project-compilation-buffer t)
   (setq projectile-globally-ignored-buffers '("*scratch*" "*Messages*"
                                               "*Warnings*" "*Help*"
                                               "*Customize*" "*Echo*" "*vterm*"
                                               "*dashboard*" "*Org Agenda*"
                                               "*Calendar*" "*server*" "*gnus*"
-                                              "*mm*" "*copilot*")))
+                                              "*mm*" "*copilot*"))
+  (projectile-discover-projects-in-search-path))
 
 (use-package treemacs
   :ensure t

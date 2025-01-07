@@ -1550,7 +1550,8 @@
   (consult-customize
    consult-ripgrep consult-git-grep consult-grep)
   (setq
-   consult-narrow-key "<"))
+   consult-narrow-key "<")
+  (setq consult-projectile-source-projectile-project-action #'dired))
 
 (defun le/centaur-tabs-buffer-groups ()
   "`centaur-tabs-buffer-groups' control buffers' group rules.

@@ -905,7 +905,8 @@
          ("C-l" . copilot-accept-completion-by-line))
   :config
   (setq copilot-idle-delay .5)
-  (setq copilot-max-chars 1000000))
+  (setq copilot-max-chars 1000000)
+  (setq copilot-indent-offset-warning-disable t))
 
 ;; ibuffer
 (use-package ibuffer

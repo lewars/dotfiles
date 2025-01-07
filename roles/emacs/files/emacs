@@ -499,7 +499,7 @@
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files '("~/git/org/todo/gtd.org"))
  '(package-selected-packages
-   '(google-this eldoc-box elisp-docstring-mode lsp-pyright whitespace-cleanup-mode consult-gh-forge consult-gh consult-org-roam org-roam-ui org-roam djvu nov latex-preview-pane flyspell-correct lorem-ipsum buttercup org-download systemd auctex-latexmk py-isort blacken vertico-posframe vertico treemacs-all-the-icons treemacs-nerd-icons consult consult-lsp vterm eterm-256color atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu orderless all-the-icons-dired projectile-ripgrep k8s-mode dockerfile-mode edit-server bats-mode helpful emojify which-key dashboard lsp-ui marginalia multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project copilot))
+   '(page-break-lines google-this eldoc-box elisp-docstring-mode lsp-pyright whitespace-cleanup-mode consult-gh-forge consult-gh consult-org-roam org-roam-ui org-roam djvu nov latex-preview-pane flyspell-correct lorem-ipsum buttercup org-download systemd auctex-latexmk py-isort blacken vertico-posframe vertico treemacs-all-the-icons treemacs-nerd-icons consult consult-lsp vterm eterm-256color atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu orderless all-the-icons-dired projectile-ripgrep k8s-mode dockerfile-mode edit-server bats-mode helpful emojify which-key lsp-ui marginalia multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project copilot))
  '(warning-suppress-types '((lsp-mode) (comp)))
  '(window-divider-default-right-width 2)
  '(window-divider-mode t))
@@ -2002,6 +2002,9 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
       ad-do-it))
   (setq google-this-keybind (kbd "C-x G"))
   (global-set-key google-this-keybind 'google-this))
+
+(use-package page-break-lines
+  :ensure t)
 
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)

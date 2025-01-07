@@ -384,9 +384,9 @@
 (use-package yasnippet
   :ensure t
   :init
-  (setq yas-snippet-dirs '("~/git/yasnippet-snippets/snippets"
-                           "~/.emacs.d/snippets"
-                           )
+  (add-to-list 'load-path "~/.emacs.d/elpa/yasnippet-0.14.1")
+  (require 'yasnippet)
+  (setq yas-snippet-dirs '("~/git/yasnippet-snippets/snippets")
         yas-wrap-around-region t
         yas-triggers-in-field t
         yas/triggers-in-field t)

@@ -1723,11 +1723,60 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                           (lsp-deferred))))
 
 (use-package dashboard
-  :ensure t
-  :config (dashboard-setup-startup-hook)
-          (setq dashboard-display-icons-p t
-                dashboard-icon-type 'nerd-icons
-                dashboard-startup-banner 'logo))
+  :config
+  (dashboard-setup-startup-hook)
+  ;; Format: "(icon title help action face prefix suffix)"
+  (setq dashboard-navigator-buttons
+        `(
+          ((,(all-the-icons-octicon "mark-github" :height 1.1 :v-adjust 0.0)
+            "Homepage"
+            "Browse homepage"
+            (lambda (&rest _) (browse-url "https://github.com/lewars"))))
+          ))
+  :custom
+  (dashboard-startup-banner 'logo)
+  (dashboard-icon-type 'nerd-icons)
+  (dashboard-set-heading-icons t)
+  (dashboard-set-file-icons t)
+  (dashboard-center-content t)
+  (dashboard-set-footer t)
+  (dashboard-projects-backend 'project-el)
+  (dashboard-display-icons-p t)
+  (dashboard-recentf-show-base t)
+  (dashboard-projects-show-base t)
+  (dashboard-bookmarks-show-base t)
+  (dashboard-items '(
+                     (recents . 10)
+                     (projects  . 15)
+                     (bookmarks . 10)
+                     (agenda    . 20)
+                     (registers . 10)
+                     ))
+  (dashboard-item-shortcuts '(
+                              (recents   . "r")
+                              (projects  . "p")
+                              (bookmarks . "m")
+                              (agenda    . "a")
+                              (registers . "e"))
+                            )
+  (dashboard-startupify-list '(
+                               dashboard-insert-banner
+                               dashboard-insert-newline
+                               dashboard-insert-banner-title
+                               dashboard-insert-newline
+                               dashboard-insert-navigator
+                               dashboard-insert-newline
+                               dashboard-insert-init-info
+                               dashboard-insert-items
+                               dashboard-insert-newline
+                               dashboard-insert-footer
+                               ))
+  (dashboard-item-names '(
+                          ("Agenda for today:"           . "Today's agenda:")
+                          ("Agenda for the coming week:" . "Agenda:")
+                          ))
+
+  )
 
 (use-package which-key
   :ensure t

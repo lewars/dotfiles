@@ -574,8 +574,9 @@
 
 (use-package nerd-icons
   :ensure t
-  :config
-  (setq nerd-icons-font-family "SauceCodePro Nerd Font"))
+  :custom
+  (nerd-icons--cache-limit 4096)
+  (nerd-icons-font-family "SauceCodePro Nerd Font"))
 
 ;; ========== Developer configurations ===========
 (use-package fzf

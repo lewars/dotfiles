@@ -107,7 +107,8 @@ completions=(
 # Example format: aliases=(vagrant composer git-avh)
 # Add wisely, as too many aliases slow down shell startup.
 aliases=(
-  general
+    general
+    docker
 )
 
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-bash/plugins/*)
@@ -214,6 +215,20 @@ alias s='sudo systemctl'
 # development
 alias conda=extended_conda
 alias gcsheet='gcloud cheat-sheet'
+
+# networking
+alias lsock='sudo lsof -i -P'                   # lsock:        Display open sockets
+alias lsockU='sudo lsof -nP | grep UDP'         # lsockU:       Display only open UDP sockets
+alias lsockT='sudo lsof -nP | grep TCP'         # lsockT:       Display only open TCP sockets
+alias openPorts='sudo lsof -i | grep LISTEN'    # openPorts:    All listening connections
+
+# date and time
+alias cal3='cal -3'
+alias epochtime='date +%s'
+alias mytime='date +%H:%M:%S'
+alias tstamp='date "+%Y%m%dT%H%M%S"'
+alias today='date +"%A, %B %-d, %Y"'
+alias weeknum='date +%V'
 
 # functions
 ## A function that changes the k8 namespace

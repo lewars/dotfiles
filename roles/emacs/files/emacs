@@ -500,7 +500,7 @@
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files '("~/git/org/todo/gtd.org"))
  '(package-selected-packages
-   '(org org-roam-ql rainbow-mode copilot page-break-lines google-this eldoc-box elisp-docstring-mode lsp-pyright whitespace-cleanup-mode consult-gh-forge consult-gh consult-org-roam org-roam-ui org-roam djvu nov latex-preview-pane flyspell-correct lorem-ipsum buttercup org-download systemd auctex-latexmk py-isort blacken vertico-posframe vertico treemacs-all-the-icons treemacs-nerd-icons consult consult-lsp vterm eterm-256color atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu orderless all-the-icons-dired projectile-ripgrep k8s-mode dockerfile-mode edit-server bats-mode helpful emojify which-key lsp-ui marginalia multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu tree-sitter ansible-vault ansible-doc ansible yasnippet-snippets bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project))
+   '(org-bookmarks transient elisp-docstring-mode gptel org org-roam-ql rainbow-mode copilot page-break-lines google-this eldoc-box lsp-pyright whitespace-cleanup-mode consult-gh-forge consult-gh consult-org-roam org-roam-ui org-roam djvu nov latex-preview-pane flyspell-correct lorem-ipsum buttercup org-download systemd auctex-latexmk py-isort vertico-posframe vertico treemacs-all-the-icons treemacs-nerd-icons consult consult-lsp vterm eterm-256color atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu orderless all-the-icons-dired projectile-ripgrep k8s-mode dockerfile-mode edit-server bats-mode helpful emojify which-key lsp-ui marginalia multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu ansible-vault ansible-doc ansible yasnippet-snippets bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project))
  '(warning-suppress-types '((lsp-mode) (comp)))
  '(window-divider-default-right-width 2)
  '(window-divider-mode t))
@@ -1147,8 +1147,7 @@
 
   (setq org-modules
         '(org-habit
-          org-bookmark
-          org-eshell))
+          org-bookmark))
 
   (setq org-refile-targets '((nil :maxlevel . 1)
                              (org-agenda-files :maxlevel . 1)))
@@ -1878,76 +1877,107 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :commands (k8s-mode))
 
 (use-package gptel
-  :ensure t
-  ;; rewrite the bind to use a keymap instead of a list
-  :bind (([(super return)] . gptel-send)
-         ("C-x l" . gptel-menu)
-         ("C-x L p" . gptel-org-set-properties)
-         ("C-x L t" . gptel-org-set-topic)
-         ("C-x L a" . gptel-add)
-         ("C-x L f" . gptel-add-file)
-         ("C-x L r" . gptel-rewrite)
-         )
-  :init
-  ;; (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
-  :config
-  (setq-local show-trailing-whitespace nil)
-  (add-to-list 'gptel-directives '(Ai-Expert . "You are an AI expert on LLMs, stable diffusion (text2image), AI video generation (text2video, video2video), and the tools that implement them."))
-  (add-to-list 'gptel-directives '(Python . "You are a Python and conda expert. Give accurate and concise answers. Please do not hallucinate or make up stuff. If you don't know the answer or information, please indicate that you do not know."))
-  (add-to-list 'gptel-directives '(Linux . "You are an expert system administrator for Fedora Linux Server. Provide concise, structured, and accurate answers. If I need in-depth information or a detailed explanation, I will request it. If you do not know the answer or information to provide, please admit that instead of making something up."))
-  (setq
-   gptel-model 'llama3.3:latest
-   gptel-backend (gptel-make-ollama "Ollama"
-                   :host "localhost:11434"
-                   :stream t
-                   :models '("llama3.3:latest"
-                             "bwf-lit-expert:latest"
-                             "bwf-yt-video-series-producer:latest"
-                             "bwf-yt-video-series-producer-qwen2_5-72b:latest"
-                             "bwf-yt-video-series-producer-qwen2_5:latest"
-                             "codegemma:7b-instruct-fp16"
-                             "codegemma:latest"
-                             "deepseek-coder-v2:16b-lite-instruct-fp16"
-                             "dolphin-mixtral:8x22b"
-                             "ft-art-dir:latest"
-                             "gemma2:27b"
-                             "gemma2:9b"
-                             "le-ai-consultant:latest"
-                             "le-ai-learn:latest"
-                             "le-ai-learn-qwen2_5-72b:latest"
-                             "le-ai-pc:latest"
-                             "le-career-and-job-consultant:latest"
-                             "le-cyber-security-gemma2:latest"
-                             "le-cyber-security:latest"
-                             "le-cyber-security-qwen2_5-72b:latest"
-                             "le-cyber-security-qwen2_5:latest"
-                             "le-devops:latest"
-                             "le-devops-learn-gemma2-27b:latest"
-                             "le-devops-learn-k8s-command-quiz:latest"
-                             "le-devops-learn-k8s-free-form-quiz:latest"
-                             "le-devops-learn-k8s-multi-choice-quiz:latest"
-                             "le-devops-learn:latest"
-                             "le-devops-learn-qwen2_5-72b:latest"
-                             "le-emacs-8b:latest"
-                             "le-emacs:latest"
-                             "le-financial-advisor:latest"
-                             "le-financial-advisor-qwen2_5-72b:latest"
-                             "le-ivy-plan:latest"
-                             "le-linux-admin-8b:latest"
-                             "le-linux-admin:latest"
-                             "le-math-8b:latest"
-                             "llama3.1:70b"
-                             "llama3.1:70b-instruct-q8_0"
-                             "llama3.1:8b"
-                             "llama3.1:8b-instruct-q8_0"
-                             "llama3.2-vision:90b"
-                             "llama3:8b-instruct-q8_0"
-                             "mistral-nemo:12b-instruct-2407-fp16"
-                             "mistral-nemo:latest"
-                             "phi3:14b"
-                             "phi3:latest"
-                             "qwen2.5:72b"
-                             )))) ;; gptel
+ :ensure t
+ :bind (([(super return)] . gptel-send)
+        ("C-x l" . gptel-menu)
+        ("C-x L p" . gptel-org-set-properties)
+        ("C-x L t" . gptel-org-set-topic)
+        ("C-x L a" . gptel-add)
+        ("C-x L f" . gptel-add-file)
+        ("C-x L r" . gptel-rewrite))
+ :config
+ (setq-local show-trailing-whitespace nil)
+
+ (add-to-list 'gptel-directives
+              `(Ai-Expert . ,(concat
+                              "You are an AI research expert specializing in:\n"
+                              "1. Large Language Models - including architecture, training, and deployment\n"
+                              "2. Stable Diffusion and text-to-image systems - including models, samplers, and parameters\n"
+                              "3. AI video generation - covering text-to-video, video-to-video, and frame interpolation\n\n"
+                              "Provide technical, accurate responses focused on current techniques and best practices.\n"
+                              "When discussing implementations, reference specific models, frameworks, and tools.\n"
+                              "If you're uncertain about any detail, acknowledge the limitation rather than speculate.\n"
+                              "Include relevant parameter settings and technical constraints when explaining processes.")))
+
+(add-to-list 'gptel-directives
+             `(Linux-Admin . ,(concat
+                               "You are a Fedora Linux Server 40 expert. Provide concise command examples "
+                               "with essential flags and proper error handling. Include verification steps "
+                               "for critical operations. Focus on security and stability. If asked for help, "
+                               "provide a concise and simple solution with a brief explanation after.\n"
+                               "If uncertain about anything, just say so.")))
+
+(add-to-list 'gptel-directives
+             `(Python-Coder . ,(concat
+                                "You're a Python software engineer.\n"
+                                "Generate Python code only, no explanations. Follow these rules when writing code:\n\n"
+                                "1. Use type hints\n"
+                                "2. Handle errors with specific try/except blocks\n"
+                                "3. Write clear docstrings as described in the Google Python Style Guide\n"
+                                "4. Keep functions small and single-purpose\n"
+                                "5. Use comments only for complex logic\n"
+                                "6. Follow SOLID principles, especially single responsibility and dependency inversion")))
+
+(add-to-list 'gptel-directives
+             `(Bash-Coder . ,(concat
+                              "You are a Bash shell programming expert. Produce code only, no explanation. Follow these rules when writing code:\n"
+                              "1. Always include proper error handling with 'set -euo pipefail' and quote all variables\n"
+                              "2. Write clear code with meaningful variable/function names, only comment complex logic\n"
+                              "3. Prioritize built-in commands over external tools when possible\n"
+                              "4. Consider security implications and validate all inputs\n"
+                              "5. Optimize for both performance and maintainability\n"
+                              "6. Ensure proper file permissions and handle cleanup appropriately\n")))
+
+ (add-to-list 'gptel-directives
+              `(Ansible-Coder . ,(concat
+                               "You are an Ansible automation expert. Produce code only, no explanation. Follw these rules when writing code:\n"
+                               "1. Always use YAML syntax correctly with proper indentation and format\n"
+                               "2. Write clear task names and use meaningful variable names\n"
+                               "3. Follow idempotency principles - tasks should be repeatable without side effects\n"
+                               "4. Use built-in Ansible modules over shell/command modules when possible\n"
+                               "5. Include proper error handling and validate all inputs\n"
+                               "6. Follow least privilege principle and use proper permissions\n"
+                               "7. Use loops and conditionals effectively to avoid task repetition\n")))
+
+(add-to-list 'gptel-directives
+            `(OCI-Container-Coder . ,(concat
+                             "You are an OCI container engineer. Produce code only, no explanation. When creating containers and writing Dockerfiles:\n"
+                             "1. Follow multi-stage build patterns to minimize final image size\n"
+                             "2. Use specific base image tags, never 'latest'\n"
+                             "3. Group RUN commands with && to reduce layers\n"
+                             "4. Place frequently changing files and commands later in the Dockerfile\n"
+                             "5. Include proper health checks and set appropriate user permissions\n"
+                             "6. Remove unnecessary files and cleanup package manager caches\n")))
+
+(add-to-list 'gptel-directives
+            `(Golang-Coder . ,(concat
+                             "You are a Golang expert engineer. Produce code only, no explanation. When writing Go code:\n"
+                             "2. Use proper error handling with meaningful error messages\n"
+                             "3. Implement interfaces only where needed and keep them small\n"
+                             "4. Write concurrent code safely using proper synchronization\n"
+                             "5. Follow standard naming conventions (CamelCase for exported)\n"
+                             "6. Use the standard library over external packages when possible\n"
+                             "7. Implement appropriate logging and tracing mechanisms\n"
+                             "8. Use context for cancellation and timeout handling\n"
+                             "9. Structure code for dependency injection when applicable\n"
+                             "10. Follow SOLID principles, especially single responsibility and dependency inversion")))
+
+
+ (setq
+  gptel-model 'deepseek-r1:70b
+  gptel-backend (gptel-make-ollama "Ollama"
+                  :host "localhost:11434"
+                  :stream t
+                  :models '("deepseek-r1:70b"
+                          "codegemma:7b-instruct-fp16"
+                          "codegemma:latest"
+                          "deepseek-coder-v2:16b-lite-instruct-fp16"
+                          "deepseek-coder:33b-base-q8_0"
+                          "dolphin-mixtral:8x22b"
+                          "llama3.2-vision:90b"
+                          "llama3.3:latest"
+                          "qwen2.5-coder:32b"
+                          "qwen2.5:72b"))))
 
 (use-package multi-vterm
   :ensure t
@@ -2054,16 +2084,15 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
     :preview-key "M-."))
 
 
-(use-package tree-sitter                                       ;;
-  :ensure t                                                    ;;
-  :config                                                      ;;
-  (add-hook 'json-mode-hook #'tree-sitter-mode)                ;;
-  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)) ;;
-                                                               ;;
-(use-package tree-sitter-langs                                 ;;
-  :ensure t                                                    ;;
-  :config                                                      ;;
-  (tree-sitter-require 'json))                                 ;;
+;; (use-package tree-sitter
+;;   ;; :ensure t
+;;   :config
+;;   (add-hook 'json-mode-hook #'tree-sitter-mode)
+;;   (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+
+;; (use-package tree-sitter-langs
+;;   :ensure t
+;;   :after tree-sitter)
 
 (use-package google-this
   :ensure t

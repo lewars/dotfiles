@@ -234,6 +234,9 @@ alias weeknum='date +%V'
 alias ai='ssh aroma'
 alias aroma='ssh aroma'
 
+# Wayland
+echo 'alias wp=="waypipe -c lz4=9 ssh aroma"'
+
 # functions
 ## A function that changes the k8 namespace
 function k8cluster() {

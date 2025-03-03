@@ -2,5 +2,5 @@ fileignoreconfig:
 - filename: roles/emacs/files/emacs
   ignore_detectors: [filecontent]
 - filename: roles/bash/files/bashrc
-  checksum: 4244cee5fe98de04642870a6ed1d17a6a84995e99b31abd3a9e8ef5893aca160
+  ignore_detectors: [filename]
 version: ""

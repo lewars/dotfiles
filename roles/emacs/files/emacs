@@ -172,6 +172,7 @@
 
 (add-hook 'prog-mode-hook 'le/my-prog-mode-settings)
 (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode t)
+(add-hook 'emacs-lisp-mode-hook (lambda () (yas-minor-mode -1)))
 
 ;; text-mode settings and hooks
 (defun le/my-text-mode-settings ()
@@ -260,14 +261,6 @@
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (setq use-dialog-box nil)
-
-(defun le/run-command-on-save (command)
-  "Run a specified COMMAND every time the current buffer is saved."
-  (interactive "sEnter command to run on save: ")
-  (add-hook 'after-save-hook
-            (lambda ()
-              (shell-command command))
-            nil t))
 
 ;; Start emacs server
 (if (display-graphic-p)
@@ -500,7 +493,7 @@
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files '("~/git/org/todo/gtd.org"))
  '(package-selected-packages
-   '(org-bookmarks transient elisp-docstring-mode org org-roam-ql rainbow-mode copilot page-break-lines google-this eldoc-box lsp-pyright whitespace-cleanup-mode consult-gh-forge consult-gh consult-org-roam org-roam-ui org-roam djvu nov latex-preview-pane flyspell-correct lorem-ipsum buttercup org-download systemd auctex-latexmk py-isort vertico-posframe vertico treemacs-all-the-icons treemacs-nerd-icons consult consult-lsp vterm eterm-256color atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu orderless all-the-icons-dired projectile-ripgrep k8s-mode dockerfile-mode edit-server bats-mode helpful emojify which-key lsp-ui marginalia multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu ansible-vault ansible-doc ansible yasnippet-snippets bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project))
+   '(gptel org-bookmarks transient elisp-docstring-mode org org-roam-ql rainbow-mode copilot page-break-lines google-this eldoc-box lsp-pyright whitespace-cleanup-mode consult-gh-forge consult-gh consult-org-roam org-roam-ui org-roam djvu nov latex-preview-pane flyspell-correct lorem-ipsum buttercup org-download systemd auctex-latexmk py-isort vertico-posframe vertico treemacs-all-the-icons treemacs-nerd-icons consult consult-lsp vterm eterm-256color atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu orderless all-the-icons-dired projectile-ripgrep k8s-mode dockerfile-mode edit-server bats-mode helpful emojify which-key lsp-ui marginalia multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu ansible-vault ansible-doc ansible yasnippet-snippets bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project))
  '(warning-suppress-types '((lsp-mode) (comp)))
  '(window-divider-default-right-width 2)
  '(window-divider-mode t))
@@ -852,7 +845,7 @@
 
 ;; Linters and formatters
 (use-package python-black
-  :ensure t
+  :demand t
   :after python
   :hook (python-mode . python-black-on-save-mode-enable-dwim))
 
@@ -2054,7 +2047,83 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                              "7. Use STL containers and algorithms when applicable\n"
                              "8. Implement proper memory management to prevent leaks\n"
                              "9. Follow consistent naming conventions and formatting\n"
-                             "10. Use forward declarations to minimize compilation dependencies\n"))))
+                             "10. Use forward declarations to minimize compilation dependencies\n")))
+
+;;;; gptel tool functions
+;;;; ====================
+
+;; Create a file
+(gptel-make-tool
+ :function (lambda (rel-path script-content)
+             "Create a file at a given path relative to the home directory,
+   creating any necessary directories.  If the file already exists,
+   signal an error."
+             (let* ((full-path (expand-file-name rel-path (expand-file-name "~")))
+                    (dir-path (file-name-directory full-path)))
+               (when (file-exists-p full-path)
+                 (error "File already exists: %s" full-path))
+               (condition-case err
+                   (progn
+                     (when dir-path
+                       (make-directory dir-path t))
+                     (write-region script-content nil full-path)
+                     full-path)  ; Return the created file path
+                 (error (error "Failed to create file: %s (%s)"
+                               full-path (error-message-string err))))))
+
+ :name "create_file"
+ :description "Create a file with text"
+ :args (list '(:name "rel-path"
+                     :type string
+                     :description "file path relative to home directory")
+             '(:name "script-content"
+                     :type string
+                     :description "file text data")))
+
+;; Create a directory
+(gptel-make-tool
+ :function (lambda (rel-path)
+  "Create directories specified by a relative path, relative to the
+   home directory. Creates parent directories as needed.  Errors if
+   any part of the path already exists as a file."
+  (let ((full-path (expand-file-name rel-path (expand-file-name "~"))))
+    (when (file-exists-p full-path)
+      (error "ERROR: Path already exists (as a file): %s" full-path))
+    (unless (file-directory-p full-path)
+      (condition-case err
+          (progn
+            (make-directory full-path t)
+            (message "Created directory: %s" full-path)
+            full-path)  ; Return the created path
+        (error (error "ERROR: Failed to create directory: %s (%s)"
+                     full-path (error-message-string err)))))))
+ :name "create_directory"
+ :description "Create a directory"
+ :args (list '(:name "rel-path"
+                     :type string
+                     :description "directory path relative to home directory")))
+
+;; List files
+(gptel-make-tool
+ :function (lambda (dir-path)
+             "List files recursively in a directory, appending / to empty directories."
+             (let* ((full-dir-path (expand-file-name dir-path (expand-file-name "~")))
+                    (all-paths (directory-files-recursively full-dir-path ".*" t nil t)))
+               (unless (file-directory-p full-dir-path)
+                 (error "Invalid directory path: %s" full-dir-path))
+               (mapcar (lambda (path)
+                         (if (and (file-directory-p path)
+                                  (equal (directory-files path nil "^[^.]" t) nil))
+                             (concat path "/")
+                           path))
+                       all-paths)))
+ :name "list_files"
+ :description "List files in a directory"
+ :args (list '(:name "dir-path"
+                     :type string
+                     :description "directory path relative to home directory")))
+
+)
 
 (use-package multi-vterm
   :ensure t

@@ -1,3 +1,4 @@
+# -*- mode: conf-unix -*-
 dotfiles_user_home: "{{ '~' | expanduser }}"
 dotfiles_home: "{{ dotfiles_user_home }}/.dotfiles"
 

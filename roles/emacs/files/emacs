@@ -1,5 +1,4 @@
 ;;; .emacs --- Emacs initialization file -*- mode: emacs-lisp; lexical-binding: t; -*-
-
 ;; Copyright (C) 1996-2024 Alistair Y. Lewars
 
 ;; Author: Alistair Y. Lewars
@@ -467,6 +466,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(blink-matching-paren t)
+ '(centaur-tabs-bar-height 22)
  '(column-number-mode 1)
  '(custom-safe-themes
    '("f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33" "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294" "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb" "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8" "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77" "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da" "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a" "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d" "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae" "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4" "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561" "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350" default))
@@ -493,7 +493,8 @@
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files '("~/git/org/todo/gtd.org"))
  '(package-selected-packages
-   '(gptel org-bookmarks transient elisp-docstring-mode org org-roam-ql rainbow-mode copilot page-break-lines google-this eldoc-box lsp-pyright whitespace-cleanup-mode consult-gh-forge consult-gh consult-org-roam org-roam-ui org-roam djvu nov latex-preview-pane flyspell-correct lorem-ipsum buttercup org-download systemd auctex-latexmk py-isort vertico-posframe vertico treemacs-all-the-icons treemacs-nerd-icons consult consult-lsp vterm eterm-256color atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu orderless all-the-icons-dired projectile-ripgrep k8s-mode dockerfile-mode edit-server bats-mode helpful emojify which-key lsp-ui marginalia multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu ansible-vault ansible-doc ansible yasnippet-snippets bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project))
+   '(nerd-icons-ibuffer treemacs-all-the-icons all-the-icons-nerd-fonts org-bookmarks transient elisp-docstring-mode org-roam-ql rainbow-mode copilot page-break-lines google-this eldoc-box lsp-pyright whitespace-cleanup-mode consult-gh-forge consult-gh consult-org-roam org-roam-ui org-roam djvu nov latex-preview-pane flyspell-correct lorem-ipsum buttercup systemd auctex-latexmk py-isort vertico-posframe vertico consult consult-lsp vterm eterm-256color atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu orderless all-the-icons-dired projectile-ripgrep k8s-mode dockerfile-mode edit-server bats-mode helpful emojify which-key lsp-ui marginalia multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu ansible-vault ansible-doc ansible yasnippet-snippets bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project))
+ '(tramp-default-method "ssh")
  '(warning-suppress-types '((lsp-mode) (comp)))
  '(window-divider-default-right-width 2)
  '(window-divider-mode t))
@@ -504,14 +505,14 @@
  ;; If there is more than one, they won't work right.
  '(ansi-color-bright-black ((t (:background "#222D32" :foreground "dark gray"))))
  '(bold ((t (:weight extra-bold))))
- '(centaur-tabs-modified-marker-selected ((t (:foreground "#ffcb6b"))))
- '(centaur-tabs-modified-marker-unselected ((t (:foreground "#ffcb6b"))))
- '(centaur-tabs-unselected ((t (:inherit tab-line-tab :background "#293c45" :foreground "#BFC7D5" :box nil :overline nil :underline nil))))
- '(centaur-tabs-unselected-modified ((t (:background "#293c45" :foreground "#44b9b1" :overline nil :underline nil))))
+ '(centaur-tabs-active-bar-face ((t (:background "#506165"))))
+ '(centaur-tabs-default ((t (:background "dark slate gray" :foreground "white"))))
  '(copilot-overlay-face ((t (:foreground "pale violet red"))))
  '(cursor ((t (:background "#c792ea"))))
  '(custom-comment ((t (:background "#171F24" :foreground "#EEFFFF"))))
  '(custom-comment-tag ((t (:foreground "dark gray"))))
+ '(doom-modeline-buffer-file ((t (:foreground "white"))))
+ '(doom-modeline-icon ((t (:foreground "white"))))
  '(doom-themes-treemacs-root-face ((t (:inherit font-lock-string-face :height 0.85))))
  '(font-lock-comment-delimiter-face ((t (:inherit font-lock-comment-face :foreground "light gray"))))
  '(font-lock-comment-face ((t (:foreground "gray"))))
@@ -560,6 +561,7 @@
  '(treemacs-root-face ((t (:inherit font-lock-string-face :weight bold :height 1.0))))
  '(treemacs-window-background-face ((t (:inherit default :background "#293539"))))
  '(vertical-border ((t (:background "#394549" :foreground "#394549")))))
+
 
 ;; Misc
 ;; set keybinding for prog-mode for hideshowing using use-package
@@ -1654,13 +1656,57 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
     (t
      (centaur-tabs-get-group-name (current-buffer))))))
 
+(defun le/debug-centaur-tab-icon (tab)
+  "Print debug info about the icon for the given tab."
+  (interactive)
+  (with-current-buffer (car tab)
+    (let* ((file-name (buffer-file-name))
+           (icon (cond (file-name
+                        (centaur-tabs--icon-for-file (file-name-nondirectory file-name)))
+                       (t
+                        (centaur-tabs--icon-for-mode major-mode)))))
+      (message "Icon: %s, Face: %s, File: %s, Mode: %s"
+               icon
+               (get-text-property 0 'face icon)
+               (or file-name "nil")
+               major-mode))))
+
+(defun le/debug-current-tab-icon ()
+  "Print debug info about the icon for the current buffer's tab."
+  (interactive)
+  (let ((current-tab (list (current-buffer))))
+    (le/debug-centaur-tab-icon current-tab)))
+
+(defun le/debug-all-tab-icons ()
+  "Print debug info about all tabs' icons."
+  (interactive)
+  (with-output-to-temp-buffer "*Tab Icons Debug*"
+    (dolist (buff (buffer-list))
+      (with-current-buffer buff
+        (let* ((file-name (buffer-file-name))
+               (icon (cond (file-name
+                            (ignore-errors
+                             (centaur-tabs--icon-for-file (file-name-nondirectory file-name))))
+                           (t
+                            (ignore-errors
+                             (centaur-tabs--icon-for-mode major-mode)))))
+               (face (when icon (get-text-property 0 'face icon))))
+          (princ (format "Buffer: %s\nFile: %s\nMode: %s\nIcon: %s\nFace: %s\n\n"
+                         (buffer-name)
+                         (or file-name "nil")
+                         major-mode
+                         icon
+                         face)))))))
+
 (use-package centaur-tabs
-  ;; :after (dashboard org)
+  :after (dashboard org)
   :ensure t
   :demand
+  :init
+  (setq centaur-tabs-height 30
+        x-underline-at-descent-line t)
   :hook
   ((calendar-mode . centaur-tabs-local-mode)
-   (dashboard-mode . centaur-tabs-local-mode)
    (org-agenda-mode . centaur-tabs-local-mode)
    (imenu-list-major-mode . centaur-tabs-local-mode)
    (messages-buffer-mode . centaur-tabs-local-mode)
@@ -1675,23 +1721,27 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (centaur-tabs-icon-type 'nerd-icons)
   (centaur-tabs-set-close-button nil)
   (centaur-tabs-set-modified-marker t)
+  (centaur-tabs-set-bar 'under)
   :config
   (centaur-tabs-mode 1)
   (centaur-tabs-group-by-projectile-project)
 
-  (defun le/my-centaur-tabs-icon-for-ansi-term (original-fn mode &rest args)
-    "Change the face of the icon when MODE is 'ansi-term."
-    (let ((new-args (if (or (eq mode 'vterm-mode) (eq mode 'term-mode))
-                        (plist-put args :face 'all-the-icons-purple)
-                      args)))
-      (apply original-fn mode new-args))
-    (let ((new-args (if (or (eq mode 'emacs-lisp-mode) (eq mode 'prog-mode))
-                        (plist-put args :face 'all-the-icons-blue)
-                      args)))
-      (apply original-fn mode new-args))
-    )
-  (advice-add 'centaur-tabs--icon-for-mode :around #'le/my-centaur-tabs-icon-for-ansi-term)
-  )
+  (defun le/fix-icons-without-inherit (orig-fun &rest args)
+    "Add white color only to icons that don't have an :inherit property."
+    (let ((icon (apply orig-fun args)))
+      (when (and (stringp icon) (> (length icon) 0))
+        (let ((face (get-text-property 0 'face icon)))
+          (when (and (listp face)
+                     (plist-get face :family)
+                     (not (plist-get face :inherit))  ; Only fix icons without :inherit
+                     (not (plist-get face :foreground)))  ; And without :foreground
+            (let ((new-face (plist-put (copy-sequence face) :foreground "white")))
+              (put-text-property 0 (length icon) 'face new-face icon)))))
+      icon))
+
+  (advice-add 'centaur-tabs--icon-for-file :around #'le/fix-icons-without-inherit)
+  (advice-add 'centaur-tabs--icon-for-mode :around #'le/fix-icons-without-inherit)
+)
 
 (use-package marginalia
   :ensure t

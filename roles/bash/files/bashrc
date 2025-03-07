@@ -221,6 +221,7 @@ alias lsock='sudo lsof -i -P'                   # lsock:        Display open soc
 alias lsockU='sudo lsof -nP | grep UDP'         # lsockU:       Display only open UDP sockets
 alias lsockT='sudo lsof -nP | grep TCP'         # lsockT:       Display only open TCP sockets
 alias openPorts='sudo lsof -i | grep LISTEN'    # openPorts:    All listening connections
+alias openp='sudo lsof -i | grep LISTEN'        # openPorts:    All listening connections
 
 # date and time
 alias cal3='cal -3'
@@ -235,7 +236,7 @@ alias ai='ssh aroma'
 alias aroma='ssh aroma'
 
 # Wayland
-echo 'alias wp=="waypipe -c lz4=9 ssh aroma"'
+alias wp="waypipe -c lz4=9 ssh aroma"
 
 # functions
 ## A function that changes the k8 namespace

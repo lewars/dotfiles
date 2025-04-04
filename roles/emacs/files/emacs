@@ -39,7 +39,6 @@
 (setq fill-column 120)
 (setq tab-bar-show nil)
 
-
 ;; A few more useful configurations...
 (use-package emacs
   :init
@@ -493,7 +492,7 @@
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files '("~/git/org/todo/gtd.org"))
  '(package-selected-packages
-   '(nerd-icons-ibuffer treemacs-all-the-icons all-the-icons-nerd-fonts org-bookmarks transient elisp-docstring-mode org-roam-ql rainbow-mode copilot page-break-lines google-this eldoc-box lsp-pyright whitespace-cleanup-mode consult-gh-forge consult-gh consult-org-roam org-roam-ui org-roam djvu nov latex-preview-pane flyspell-correct lorem-ipsum buttercup systemd auctex-latexmk py-isort vertico-posframe vertico consult consult-lsp vterm eterm-256color atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu orderless all-the-icons-dired projectile-ripgrep k8s-mode dockerfile-mode edit-server bats-mode helpful emojify which-key lsp-ui marginalia multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu ansible-vault ansible-doc ansible yasnippet-snippets bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project))
+   '(textile textile-mode yaml-pro rg nerd-icons-ibuffer treemacs-all-the-icons all-the-icons-nerd-fonts org-bookmarks transient elisp-docstring-mode org-roam-ql rainbow-mode copilot page-break-lines google-this eldoc-box lsp-pyright whitespace-cleanup-mode consult-gh-forge consult-gh consult-org-roam org-roam-ui org-roam djvu nov latex-preview-pane flyspell-correct lorem-ipsum buttercup systemd auctex-latexmk py-isort vertico-posframe vertico consult consult-lsp vterm eterm-256color atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu orderless all-the-icons-dired projectile-ripgrep k8s-mode dockerfile-mode edit-server bats-mode helpful emojify which-key lsp-ui marginalia multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls nerd-icons-corfu ansible-vault ansible-doc ansible yasnippet-snippets bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project))
  '(tramp-default-method "ssh")
  '(warning-suppress-types '((lsp-mode) (comp)))
  '(window-divider-default-right-width 2)
@@ -789,12 +788,13 @@
   :ensure t
   :hook
   ((yaml-mode . outline-minor-mode)
-   ;; (yaml-mode . hs-minor-mode)
+   (yaml-mode . hs-minor-mode)
    (yaml-mode . display-line-numbers-mode)
    (yaml-mode . le/yaml-mode-setup)
-   ;; (yaml-mode . highlight-indent-guides-mode)
+   (yaml-mode . highlight-indent-guides-mode)
    (yaml-mode . (lambda ()
-                  (add-hook 'after-save-hook 'le/yaml-frmt nil t))))
+                  (add-hook 'after-save-hook 'le/yaml-frmt nil t)
+                  )))
   :config
   (defvar yaml-formatting-enabled t)
   (setq fill-column 200)
@@ -812,7 +812,10 @@
       (message "YAML file reformatted.")))
   (defun le/yaml-mode-setup ()
     "Setup yaml mode"
-    (setq hs-minor-mode -1)))
+    (setq hs-minor-mode -1)
+    (setq-default display-fill-column-indicator-column 80)
+    (require 'lsp)
+    (lsp-deferred)))
 
 (use-package terraform-mode
   :ensure t
@@ -884,7 +887,8 @@
   :config
   (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
   (flycheck-posframe-configure-pretty-defaults)
-  (setq flycheck-posframe-warning-prefix "\u26a0 "))
+  (setq flycheck-posframe-warning-prefix "\u26a0 ")
+  (setq flycheck-posframe-error-prefix "\u26a0 "))
 
 ;; Productivity
 (use-package copilot
@@ -1574,6 +1578,7 @@
   (defvar consult-command-map
     (let ((map (make-sparse-keymap)))
       (define-key map "b" #'consult-buffer)
+      (define-key map "B" #'consult-bookmark)
       (define-key map "l" #'consult-line)
       (define-key map "i" #'consult-imenu)
       (define-key map "r" #'consult-ripgrep)
@@ -1803,15 +1808,16 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 (use-package lsp-ui
   :commands lsp-ui-mode
   :ensure t
-  :config (setq lsp-ui-sideline-show-diagnostics t
-                lsp-ui-sideline-show-hover t
+  :config (setq lsp-ui-sideline-show-diagnostics nil
+                lsp-ui-sideline-show-hover nil
                 lsp-ui-sideline-show-code-actions t
                 lsp-ui-sideline-update-mode 'line
                 lsp-ui-peek-enable t
                 lsp-ui-peek-show-directory t
                 lsp-ui-doc-enable t
-                lsp-ui-doc-delay 5
-                lsp-ui-doc-show-with-cursor t
+                lsp-ui-doc-delay 0
+                lsp-ui-doc-show-with-cursor nil
+                lsp-ui-doc-show-with-mouse t
                 lsp-ui-doc-position 'top))
 
 (use-package lsp-treemacs
@@ -2308,6 +2314,10 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package page-break-lines
   :ensure t)
+
+(use-package textile-mode
+  :ensure t
+  :mode ("\\.textile\\'" . textile-mode))
 
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)

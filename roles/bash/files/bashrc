@@ -84,7 +84,8 @@ THEME_SHOW_PYTHON=true
 
 # To disable the uses of "sudo" by oh-my-bash, please set "false" to
 # this variable.  The default behavior for the empty value is "true".
-OMB_USE_SUDO=true
+OMB_USE_SUDO=false
+THEME_SHOW_SUDO=false
 
 # To enable/disable display of Python virtualenv and condaenv
 # OMB_PROMPT_SHOW_PYTHON_VENV=true  # enable
@@ -163,6 +164,8 @@ export LSP_USE_PLISTS=true
 export TEMP="${HOME}/tmp/"
 export EDITOR='emacs -nw'
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+export TODO_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/todo"
+export HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S  "
 
 # shopts
 set +o noclobber
@@ -213,8 +216,8 @@ alias fans=sans
 alias s='sudo systemctl'
 
 # development
-alias conda=extended_conda
 alias gcsheet='gcloud cheat-sheet'
+alias pyact='source .venv/bin/activate'
 
 # networking
 alias lsock='sudo lsof -i -P'                   # lsock:        Display open sockets
@@ -237,6 +240,7 @@ alias aroma='ssh aroma'
 
 # Wayland
 alias wp="waypipe -c lz4=9 ssh aroma"
+
 
 # functions
 ## A function that changes the k8 namespace
@@ -375,22 +379,6 @@ if [[ "$INSIDE_EMACS" = 'vterm' ]]; then
     }
 fi
 
-function pip(){
-    if [ "${CONDA_PROMPT_MODIFIER-}" = "(base) " ] && [ "$1" = "install" ]; then
-        echo "ERROR: pip install not allowed in base" 1>&2
-    else
-        command pip "$@"
-    fi
-}
-
-function extended_conda(){
-    if [ "${CONDA_PROMPT_MODIFIER-}" = "(base) " ] && [ "$1" = "install" ]; then
-        echo "ERROR: conda install not allowed in base" 1>&2
-    else
-        conda "$@"
-    fi
-}
-
 function frg(){
     rg --line-number --with-filename . --color=always --field-match-separator ' '\
         | fzf --preview "bat --color=always {1} --highlight-line {2}" \
@@ -433,21 +421,6 @@ alias talisman=$TALISMAN_HOME/talisman_linux_amd64
 export TALISMAN_INTERACTIVE=false
 # <<< talisman <<<
 
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$("${HOME}/miniconda3/bin/conda" 'shell.bash' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "${HOME}/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "${HOME}/miniconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="${HOME}/miniconda3/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-# <<< conda initialize <<<
-
 export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
   --color=fg:#89e76a,fg+:#ffd000,bg:#191919,bg+:#262626
   --color=hl:#00f6f6,hl+:#b0faff,info:#afaf87,marker:#87ff00
@@ -457,7 +430,7 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
   --marker=">" --pointer="◆" --separator="─" --scrollbar="│"'
 
 # Set up fzf key bindings and fuzzy completion
-eval "$(fzf --bash)"
+FZF_CTRL_T_COMMAND="" eval "$(fzf --bash)"
 
 # # Set up gcloud auto complete
 source /usr/share/google-cloud-sdk/completion.bash.inc

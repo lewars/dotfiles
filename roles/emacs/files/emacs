@@ -1612,6 +1612,19 @@
    consult-narrow-key "<")
   (setq consult-projectile-source-projectile-project-action #'dired))
 
+(defun le/ensure-proper-buffer-after-tab-close ()
+  "Ensure a proper buffer is selected after closing a tab."
+  (when (and (eq this-command 'kill-buffer)
+             (not (minibufferp)))
+    (let ((non-minibuf-buffers
+           (seq-filter (lambda (buf)
+                         (not (string-match "\\*Minibuf-" (buffer-name buf))))
+                       (buffer-list))))
+      (when non-minibuf-buffers
+        (switch-to-buffer (car non-minibuf-buffers))))))
+
+(add-hook 'kill-buffer-hook 'le/ensure-proper-buffer-after-tab-close)
+
 (defun le/centaur-tabs-buffer-groups ()
   "`centaur-tabs-buffer-groups' control buffers' group rules.
 

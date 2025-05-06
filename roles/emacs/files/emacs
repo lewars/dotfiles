@@ -238,95 +238,111 @@
 (require 'ffap)
 (ffap-bindings)
 
-;; Line/column/pytest file handling
+;; Variables for line/column/function handling
 (defvar ffap-file-at-point-line-number nil
   "Variable to hold line number from the last `ffap-file-at-point' call.")
 
 (defvar ffap-file-at-point-column-number nil
   "Variable to hold column number from the last `ffap-file-at-point' call.")
 
-;; vterm directory sync function
+(defvar ffap-file-at-point-function-name nil
+  "Variable to hold function name to search for.")
+
+;; Vterm directory sync function
 (defun le/vterm-directory-sync ()
   "Synchronize current working directory with vterm if it's running."
-  (interactive)
-  ;; First check if vterm is loaded
-  (when (featurep 'vterm)
-    ;; Then check for buffer-local vterm--process and if it's running
-    (when (and (boundp 'vterm--process)
-               vterm--process
-               (process-live-p vterm--process))
-      (let* ((pid (process-id vterm--process))
-             (dir (file-truename (format "/proc/%d/cwd/" pid))))
-        (setq default-directory dir)))))
+  (when (and (featurep 'vterm)
+             (boundp 'vterm--process)
+             vterm--process
+             (process-live-p vterm--process))
+    (let ((dir (file-truename (format "/proc/%d/cwd/" (process-id vterm--process)))))
+      (setq default-directory dir))))
 
-;; Combined advice function for ffap-file-at-point
+;; (with-eval-after-load 'vterm
+;;   (add-hook 'vterm-directory-tracker-hook #'le/vterm-directory-sync))
+
+(advice-add #'ffap-file-at-point :before #'le/vterm-directory-sync)
+
+;; Find test function definition
+(defun ffap-find-function-definition (filename function-name)
+  "Find the definition of FUNCTION-NAME in FILENAME."
+  (when (and filename function-name)
+    (with-current-buffer (find-file-noselect filename)
+      (save-excursion
+        (goto-char (point-min))
+        (when (re-search-forward (format "^\\s-*def\\s-+%s\\s-*(" function-name) nil t)
+          (line-number-at-pos))))))
+
+;; Main ffap-file-at-point enhancement
 (defadvice ffap-file-at-point (around ffap-combined-enhancements activate)
-  "Enhance ffap-file-at-point with vterm directory sync and special file pattern handling."
-  ;; First handle vterm directory sync if we're in vterm
-  (when (and (eq major-mode 'vterm-mode)
-             (boundp 'vterm--process))
+  "Enhance ffap-file-at-point with vterm sync and file pattern handling."
+  ;; Sync directory if in vterm
+  (when (eq major-mode 'vterm-mode)
     (le/vterm-directory-sync))
 
-  ;; Call the original function to get its result
+  ;; Call original function
   ad-do-it
 
-  ;; Now enhance the result with our pattern handling
+  ;; Pattern handling
   (let* ((string (ffap-string-at-point))
          (name (or (condition-case nil
-                       (and (not (string-match "//" string)) ; Avoid URLs like http://
+                       (and (not (string-match "//" string))
                             (substitute-in-file-name string))
                      (error nil))
                    string))
-         ;; Standard patterns for line:column
          (line-col-match (string-match ":\\([0-9]+\\):\\([0-9]+\\)" name))
          (line-match (string-match ":\\([0-9]+\\)\\(:\\|$\\)" name))
-         ;; pytest pattern with more flexible whitespace handling
-         (pytest-match (string-match "\\([^[:space:]]+\\.py\\)::\\([[:space:]]*\\)" name))
-         line-number column-number file-path)
+         (pytest-match (string-match "\\([^[:space:]]+\\.py\\)::\\([^[:space:]]+\\)" name)))
 
-    ;; Extract paths and position info based on pattern matches
     (cond
-     ;; Handle pytest output format
+     ;; Pytest format
      (pytest-match
-      (setq file-path (match-string 1 name))
-      ;; Check if we're in a pytest output line or similar context
-      (save-excursion
-        (let ((line (buffer-substring-no-properties
-                     (line-beginning-position) (line-end-position))))
-          ;; Accept the match if it looks like a pytest pattern
-          (when (or (string-match "FAILED\\|ERROR\\|test_" line)
-                    t) ; Always accept the match
-            ;; Override the ffap results with our extracted path
-            (setq ad-return-value file-path)))))
+      (let ((file-path (match-string 1 name))
+            (function-name (match-string 2 name)))
+        (setq ffap-file-at-point-function-name function-name)
+        (setq ad-return-value file-path)))
 
-     ;; Handle line:column format
+     ;; Line:column format
      (line-col-match
-      (setq line-number (string-to-number (match-string 1 name))
-            column-number (string-to-number (match-string 2 name))))
+      (setq ffap-file-at-point-line-number (string-to-number (match-string 1 name))
+            ffap-file-at-point-column-number (string-to-number (match-string 2 name))))
 
-     ;; Handle line only format
+     ;; Line only format
      (line-match
-      (setq line-number (string-to-number (match-string 1 name)))))
+      (setq ffap-file-at-point-line-number (string-to-number (match-string 1 name)))))
 
-    ;; Set the variables if we found valid numbers
-    (if (and line-number (> line-number 0))
-        (setq ffap-file-at-point-line-number line-number)
+    ;; Validate line/column numbers
+    (when (or (not ffap-file-at-point-line-number)
+              (<= ffap-file-at-point-line-number 0))
       (setq ffap-file-at-point-line-number nil))
 
-    (if (and column-number (> column-number 0))
-        (setq ffap-file-at-point-column-number column-number)
+    (when (or (not ffap-file-at-point-column-number)
+              (<= ffap-file-at-point-column-number 0))
       (setq ffap-file-at-point-column-number nil))))
 
-;; Advice for find-file-at-point to jump to line/column
-(defadvice find-file-at-point (after ffap-goto-line-column-number activate)
-  "If line/column numbers were found, jump to that position."
-  (when ffap-file-at-point-line-number
+;; Jump to the appropriate location after finding file
+(defadvice find-file-at-point (after ffap-goto-line-column-function activate)
+  "Jump to the line/column/function after opening the file."
+  (cond
+   ;; Jump to function definition (for pytest)
+   ((and ffap-file-at-point-function-name
+         (stringp buffer-file-name)
+         (string-match "\\.py$" buffer-file-name))
+    (let ((line (ffap-find-function-definition buffer-file-name
+                                             ffap-file-at-point-function-name)))
+      (when line
+        (goto-char (point-min))
+        (forward-line (1- line)))
+      (setq ffap-file-at-point-function-name nil)))
+
+   ;; Jump to line/column
+   (ffap-file-at-point-line-number
     (goto-char (point-min))
     (forward-line (1- ffap-file-at-point-line-number))
     (when ffap-file-at-point-column-number
       (move-to-column (1- ffap-file-at-point-column-number)))
     (setq ffap-file-at-point-line-number nil
-          ffap-file-at-point-column-number nil)))
+          ffap-file-at-point-column-number nil))))
 
 ;; todo: fix this
 ;; (global-set-key "\C-x\ \C-r" 'fzf-recentf)
@@ -2065,6 +2081,12 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :bind ("C-c t" . vterm)
   :hook
   (vterm-mode . eterm-256color-mode)
+  :config
+  (add-hook 'vterm-directory-tracker-hook #'le/vterm-directory-sync)
+  (add-hook 'vterm-exit-functions
+            (lambda (&rest _)
+              (when (eq major-mode 'vterm-mode)
+                (le/vterm-directory-sync))))
   :custom
   (vterm-copy-exclude-prompt t)
   (vterm-use-vterm-prompt-detection-method t)

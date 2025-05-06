@@ -377,6 +377,10 @@ if [[ "$INSIDE_EMACS" = 'vterm' ]]; then
         vterm_printf "51;Evterm-clear-scrollback";
         tput clear;
     }
+    function vterm_set_directory() {
+        vterm_printf "51;A%s" "$(pwd)"
+    }
+    export PROMPT_COMMAND="vterm_set_directory; ${PROMPT_COMMAND}"
 fi
 
 function frg(){

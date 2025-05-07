@@ -2071,7 +2071,64 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :ensure t
   :bind ("C-c t" . vterm)
   :hook
-  (vterm-mode . eterm-256color-mode)
+  (vterm-mode . (lambda ()
+                  (eterm-256color-mode)
+                  (let ((liberation-mono '(:family "Liberation Mono" :height 90)))
+                    (set (make-local-variable 'buffer-face-mode-face) liberation-mono)
+                    (buffer-face-mode t))))
+  :config
+  ;; Intercept C-k in vterm to add text to kill ring
+  (defun vterm-kill-line-and-add-to-kill-ring ()
+    "Kill line in vterm and add the text to Emacs kill ring."
+    (interactive)
+    (let ((inhibit-read-only t)
+          (pos (point))
+          (text ""))
+      ;; Save the text that will be killed
+      (save-excursion
+        (end-of-line)
+        (when (> (point) pos)
+          (setq text (buffer-substring-no-properties pos (point)))))
+
+      ;; Add to kill ring if we have text
+      (when (and text (not (string= text "")))
+        (kill-new text))
+
+      ;; Now perform the normal vterm C-k action
+      (vterm-send-key "k" nil nil t)))
+
+  ;; Override C-k with our new function
+  (define-key vterm-mode-map (kbd "C-k") 'vterm-kill-line-and-add-to-kill-ring)
+
+  ;; Make C-y insert from kill ring
+  (defun vterm-yank-from-kill-ring ()
+    "Insert text from the kill ring into vterm."
+    (interactive)
+    (when kill-ring
+      (vterm-send-string (car kill-ring))))
+
+  ;; Bind C-y to our yank function
+  (define-key vterm-mode-map (kbd "C-y") 'vterm-yank-from-kill-ring)
+
+  ;; Visual indicator for vterm-copy-mode
+  ;; TODO: Make it more pretty
+  (defun vterm-copy-mode-indicator ()
+    "Change modeline color and add indicator when in vterm-copy-mode."
+    (if vterm-copy-mode
+        (progn
+          ;; Change modeline background color
+          (set (make-local-variable 'face-remapping-alist)
+               '((mode-line . (:background "dark red" :foreground "white"))))
+          ;; Add "[COPY]" to the mode line
+          (setq mode-line-format
+                (append mode-line-format '(" " (:propertize "[COPY]" face (:weight bold))))))
+      ;; Reset when leaving copy mode
+      (kill-local-variable 'face-remapping-alist)
+      (setq mode-line-format (default-value 'mode-line-format))))
+
+  ;; Add our indicator function to copy mode hooks
+  (add-hook 'vterm-copy-mode-hook 'vterm-copy-mode-indicator)
+
   :custom
   (vterm-copy-exclude-prompt t)
   (vterm-use-vterm-prompt-detection-method t)

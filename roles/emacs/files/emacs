@@ -439,6 +439,7 @@
   :init
   (setq show-paren-delay 1)
   (setq show-paren-style 'mixed)
+  (setq show-paren-context-when-offscreen t)
   :config
   (show-paren-mode 1))
 
@@ -469,7 +470,8 @@
   :init
   (electric-pair-mode 1)
   :config
-  (setq electric-pair-preserve-balance t
+  (add-to-list 'electric-pair-pairs '(?` . ?`))
+  (setq electric-pair-preserve-balance nil
         electric-pair-delete-adjacent-pairs t
         electric-pair-open-newline-between-pairs nil))
 

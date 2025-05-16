@@ -812,6 +812,7 @@
        (treemacs-git-mode 'simple)))
 
     (treemacs-hide-gitignored-files-mode nil))
+  (set-face-attribute 'hl-line nil :background "#2a404b")
   :bind
   (:map global-map
         ("M-0"       . treemacs-select-window)

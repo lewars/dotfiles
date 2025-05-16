@@ -1867,6 +1867,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
   (advice-add 'centaur-tabs--icon-for-file :around #'le/fix-icons-without-inherit)
   (advice-add 'centaur-tabs--icon-for-mode :around #'le/fix-icons-without-inherit)
+  (set-face-attribute 'centaur-tabs-unselected nil :foreground "gray40")
 )
 
 (use-package marginalia

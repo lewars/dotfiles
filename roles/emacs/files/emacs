@@ -527,6 +527,158 @@
          (window-height . 0.3))
         ))
 
+
+;; ------------------------------- feature/info-side-windows -------------------------------
+
+
+(defvar my-info-buffer-font-spec '(:family "Liberation Mono" :height 90)
+  "Font specification for the custom info buffers.
+Height is in 1/10th of a point, so 90 means 9.0 points.")
+
+(defun my-set-info-buffer-font ()
+  "Set buffer-local font for custom info buffers using `my-info-buffer-font-spec`."
+  (face-remap-add-relative 'default my-info-buffer-font-spec))
+
+;; General helper function to toggle an information buffer
+(defun my-toggle-info-buffer (buffer-name content-fn)
+  "Toggle the display of a buffer named BUFFER-NAME.
+If the buffer is currently visible in any window, kill the buffer.
+Otherwise, create/recreate the buffer, populate it using CONTENT-FN,
+set it to special-mode, apply custom font, and display it.
+CONTENT-FN is responsible for the buffer's content and its read-only state."
+  (let ((buffer (get-buffer buffer-name)))
+    (if (and buffer (get-buffer-window buffer 'visible)) ; 'visible checks current frame
+        ;; Buffer is visible, so kill it
+        (progn
+          (message "Closing buffer: %s" buffer-name)
+          (kill-buffer buffer))
+      ;; Buffer not visible or doesn't exist, so create/show it
+      (progn
+        (message "Opening buffer: %s" buffer-name)
+        (setq buffer (get-buffer-create buffer-name))
+        (with-current-buffer buffer
+          (let ((inhibit-read-only t)) ; Allow modifications during setup
+            (erase-buffer)
+            (special-mode)             ; Set a general-purpose mode
+            (my-set-info-buffer-font)  ; <<--- APPLY CUSTOM FONT HERE
+            ;; Call the content function to populate the buffer
+            (funcall content-fn)
+            (goto-char (point-min)))) ; Go to the beginning of the buffer
+        (display-buffer buffer)))))   ; Let display-buffer-alist handle window placement
+
+;; --- 1. Journalctl Output Feature ---
+
+(defvar my-journalctl-buffer-name "*MyJournalOutput*"
+  "Name of the buffer to display journalctl output.")
+
+(defun my-insert-journalctl-output ()
+  "Clear the current buffer and insert `sudo journalctl` output asynchronously.
+The buffer is made read-only once the command completes."
+  ;; This function is called within (with-current-buffer ...) by my-toggle-info-buffer
+  ;; inhibit-read-only is also active from the caller.
+  (let ((command "SYSTEMD_COLORS=false sudo journalctl -f --no-hostname --no-pager --output=cat")
+        (output-buffer (current-buffer)))
+    (insert (format "Running '%s'...\nThis may require sudo privileges.\n\n" command))
+    (set-buffer-modified-p nil) ; Mark as not modified initially
+
+    ;; Start the asynchronous shell command
+    (let ((process (async-shell-command command output-buffer)))
+      (set_process_sentinel process
+        (lambda (proc _event-string) ; _event-string describes how process ended
+          ;; Check if the process has actually finished
+          (when (memq (process-status proc) '(exit signal))
+            (with-current-buffer (process-buffer proc) ; Ensure actions are in the output buffer
+              (setq buffer-read-only t)
+              (goto-char (point-min))
+              (message "Journalctl output updated in %s. Buffer is now read-only." (buffer-name output-buffer)))))))
+    ;; IMPORTANT: The buffer will become writable by async-shell-command.
+    ;; The sentinel ensures it's set back to read-only when the process finishes.
+    ))
+
+(defun my-toggle-journalctl-window ()
+  "Toggle the display of journalctl output in a side window."
+  (interactive)
+  (my-toggle-info-buffer my-journalctl-buffer-name #'my-insert-journalctl-output))
+
+;; (defun my-toggle-journalctl-window ()
+;;   "Toggle the display of journalctl output in a side window."
+;;   (interactive)
+;;   ;; Temporarily use the test content function:
+;;   (my-toggle-info-buffer my-journalctl-buffer-name #'my-insert-journalctl-output-TEST))
+
+;; --- 2. Read-only copy of another buffer ---
+
+(defvar my-copied-content-buffer-name "*MyCopiedBuffer*"
+  "Name of the buffer to display read-only content from another buffer.")
+
+;; This variable will store the *name* of the buffer to copy from.
+(defvar my-source-buffer-for-copy nil
+  "Name of the buffer whose content was last copied.")
+
+(defun my-insert-copied-buffer-content ()
+  "Clear the current buffer and insert content from `my-source-buffer-for-copy`
+WITHOUT its original text properties.
+The buffer is made read-only after insertion."
+  (if (not my-source-buffer-for-copy)
+      (insert "Error: No source buffer specified for copying.\nUse M-x my-toggle-copied-buffer-window to specify one.")
+    (let ((source-buf-object (get-buffer my-source-buffer-for-copy)))
+      (if (not source-buf-object)
+          (insert (format "Error: Source buffer '%s' no longer exists." my-source-buffer-for-copy))
+        (progn
+          (insert (format "Snapshot of buffer: %s (Read-only)\n" (buffer-name source-buf-object)))
+          (insert "-------------------------------------------------\n")
+          ;; Insert content without properties to ensure local font is used
+          (let ((text-to-insert (with-current-buffer source-buf-object
+                                  (buffer-substring-no-properties (point-min) (point-max)))))
+            (insert text-to-insert))
+          (insert "\n-------------------------------------------------\n")
+          (setq buffer-read-only t))))))
+
+(defun my-toggle-copied-buffer-window ()
+  "Toggle the display of another buffer's content in a read-only side window.
+If the side window is being created, it prompts for the source buffer."
+  (interactive)
+  ;; Determine if we are about to create/show the buffer (i.e., it's not currently visible)
+  (let ((creating-or-showing (not (get-buffer-window my-copied-content-buffer-name 'visible))))
+    (when creating-or-showing
+      ;; Prompt for the source buffer only when initially creating/showing.
+      (let* ((history-var 'my-source-buffer-for-copy-history) ; For read-buffer history
+             (default-source-buffer
+              (if my-source-buffer-for-copy
+                  (get-buffer my-source-buffer-for-copy)
+                (other-buffer (current-buffer) 'visible)))) ; Suggest current or other visible buffer
+        (setq my-source-buffer-for-copy
+              (read-buffer "Copy content from buffer: "
+                           (if default-source-buffer (buffer-name default-source-buffer) nil)
+                           t ; require-match: yes, buffer must exist
+                           )))))
+  ;; Now call the generic toggle function
+  (my-toggle-info-buffer my-copied-content-buffer-name #'my-insert-copied-buffer-content))
+
+;; --- Configuration for display-buffer-alist ---
+;; Add this to your Emacs configuration (e.g., init.el)
+;; This tells Emacs how to display these new buffers.
+
+(add-to-list 'display-buffer-alist
+             '("\\*\\(MyJournalOutput\\|MyCopiedBuffer\\)\\*" ; Regex to match buffer names
+               (display-buffer-reuse-mode-window display-buffer-in-direction)
+               (mode . special-mode) ; Match the mode we set in my-toggle-info-buffer
+               ;; (window . root)       ; Relative to the whole frame
+               (direction . right)   ; Place it on the right side
+               (window-width . 0.48) ; Match your existing right-side window width, or adjust
+               (side . bottom)
+               (slot . 0)
+               ;; (reusable-frames . visible) ; Standard practice
+              ) t) ; 't' appends this rule to the list
+
+;; --- Example Keybindings ---
+;; You can set these to whatever you prefer.
+(global-set-key (kbd "C-c j") #'my-toggle-journalctl-window)
+(global-set-key (kbd "C-c b") #'my-toggle-copied-buffer-window) ; Example: C-c (then) c (then) b
+
+;; ------------------------------- feature/info-side-windows -------------------------------
+
+
 (defun le/my-find-file-symlink-target ()
   "Follow symlinks for specific files, avoiding the VC prompt."
   (let ((filename (file-name-nondirectory (buffer-file-name))))

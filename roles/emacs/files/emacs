@@ -2232,6 +2232,9 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                     (set (make-local-variable 'buffer-face-mode-face) liberation-mono)
                     (buffer-face-mode t))))
   :config
+  ;; Create keybinding to allow keys to be sent to the terminal
+  (define-key vterm-mode-map (kbd "C-q") #'vterm-send-next-key)
+
   ;; Define the custom font face for vterm
   (defvar vterm-custom-face '(:family "Liberation Mono" :height 90))
 

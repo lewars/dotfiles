@@ -788,12 +788,14 @@ If the side window is being created, it prompts for the source buffer."
  '(font-lock-comment-face ((t (:foreground "gray"))))
  '(font-lock-doc-face ((t (:inherit font-lock-comment-face :foreground "gray"))))
  '(fringe ((t (:inherit default :foreground "medium aquamarine"))))
- '(highlight ((t (:background "#c792ea" :foreground "#7d7c8a"))))
+ '(highlight ((t (:background "#c792ea" :foreground "#5b5a68"))))
  '(highlight-symbol-face ((t (:background "#5a5400"))))
+ '(hl-line ((t (:extend t :background "#2a404c"))))
  '(horizontal-border ((t (:weight thin :background "#364248" :foreground "#364248"))))
  '(ido-only-match ((t (:foreground "SpringGreen3"))))
  '(line-number ((t (:foreground "gray"))))
  '(line-number-current-line ((t (:foreground "white"))))
+ '(lsp-face-highlight-textual ((t (:background "#564e6d" :foreground "#ACB4B8" :weight bold))))
  '(mode-line ((t (:background "#093159" :foreground "#dde4eb" :box nil))))
  '(mode-line-inactive ((t (:background "#394c55" :foreground "#a4aeba" :box nil))))
  '(nerd-icons-orange ((t (:foreground "steel blue"))))
@@ -998,7 +1000,6 @@ If the side window is being created, it prompts for the source buffer."
        (treemacs-git-mode 'simple)))
 
     (treemacs-hide-gitignored-files-mode nil))
-  (set-face-attribute 'hl-line nil :background "#2a404b")
   :bind
   (:map global-map
         ("M-0"       . treemacs-select-window)

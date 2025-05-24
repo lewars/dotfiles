@@ -468,7 +468,7 @@
    (lisp-interaction-mode . eldoc-mode)
    (ielm-mode . eldoc-mode))
   :config
-  (setq eldoc-idle-delay 0)
+  (setq eldoc-idle-delay 5)
   (setq eldoc-echo-area-use-multiline-p t))
 
 ;; (use-package elisp-eldoc

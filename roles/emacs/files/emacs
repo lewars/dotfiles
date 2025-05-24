@@ -2695,12 +2695,72 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :ensure t
   :mode ("\\.textile\\'" . textile-mode))
 
+(use-package anki-editor
+  :ensure t
+  :after org
+  :bind (:map org-mode-map
+              (("C-c n a" . anki-editor-push-notes))))
+
+;; create a mermaid-mode use package config
+;; TODO: fix docker command selinux lablel issue
+(use-package mermaid-mode
+  :ensure t
+  :defer t
+  :mode ("\\.mmd\\'" . mermaid-mode)
+  :config
+  ;; (setq mermaid-output-format "md")
+  (setq my-uid (user-uid))
+  (setq mermaid-mmdc-location "podman")
+  (setq mermaid-flags (format "run --userns keep-id --user %d --rm -v /tmp:/tmp:z ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:11.4.2" my-uid)))
+
+(use-package diff-hl
+  :ensure t
+  :hook ((prog-mode . diff-hl-mode)
+         (dired-mode . diff-hl-dired-mode)))
+
+
+;; (use-package symbol-overlay
+;;   :ensure t
+;;   :hook (prog-mode . symbol-overlay-mode))
+
+(use-package nerd-icons-ibuffer
+  :ensure t
+  :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
+
 (use-package nerd-icons-completion
   :ensure t
   :after marginalia
   :config
   (nerd-icons-completion-mode)
   (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+
+;; use demap and configure it
+(use-package demap
+  :ensure t
+  :diminish
+  :after doom-modeline
+  :bind (("C-m". demap-toggle))
+  :config
+  (setq demap-minimap-window-side 'right)
+  (setq demap-minimap-window-width 15)
+  ;; (face-spec-set 'demap-minimap-font-face
+  ;;                `((t :background ,gray2
+  ;;                     :inherit    unspecified
+  ;;                     :family     "minimap"
+  ;;                     :height     10          )))
+  (face-spec-set 'demap-visible-region-face
+                 `((t :background ,"#2a404b"
+                      :inherit    unspecified )))
+  (face-spec-set 'demap-visible-region-inactive-face
+                 `((t :background ,"#080808"
+                      :inherit    unspecified )))
+  (face-spec-set 'demap-current-line-face
+                 `((t :background ,"#5a5400"
+                      :inherit    unspecified )))
+  (face-spec-set 'demap-current-line-inactive-face
+                 `((t :background ,"#030303"
+                      :inherit    unspecified ))))
+
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)
 ;;; emacs ends here

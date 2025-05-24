@@ -41,7 +41,19 @@
 (setq scroll-up-aggressively 0.5)
 (setq scroll-down-aggressively 0.5)
 (global-unset-key (kbd "C-x C-z"))
-(global-unset-key (kbd "C-x C-z"))
+(global-unset-key (kbd "C-z"))
+
+;; TODO: Improve scrolling
+(setq fast-but-imprecise-scrolling t)
+;; (setq jit-lock-defer-time 0.1)
+;; (setq redisplay-skip-fontification-on-input t)
+;; Enable jit-lock-stealth-time for background fontification
+;; (setq jit-lock-stealth-time 1)
+;; (setq jit-lock-stealth-nice 0.5)
+;; (setq jit-lock-chunk-size 100000000)
+
+;; Increase read buffer size
+(setq read-buffer-size (* 8 1024 1024 1024))
 
 ;; A few more useful configurations...
 (use-package emacs
@@ -144,7 +156,7 @@
    (setq read-buffer-size (* 8 1024 1024)))
 
 ;; Initialize the configuration
-(le/setup-large-file-handling-high-mem)
+;; (le/setup-large-file-handling-high-mem)
 
 ;; Additional settings for specific file types
 (add-to-list 'auto-mode-alist '("\\.log\\'" . fundamental-mode))

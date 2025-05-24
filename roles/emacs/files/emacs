@@ -167,7 +167,7 @@
 (defun le/my-prog-mode-settings ()
   (display-line-numbers-mode)
   ;; (hl-line-mode)
-  ;; (hs-minor-mode)
+  (hs-minor-mode) ;; hideshow
   (outline-minor-mode)
   (setq auto-fill-mode 0)
   (setq toggle-word-wrap 1)

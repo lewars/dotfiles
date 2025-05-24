@@ -38,6 +38,10 @@
 ;; Global settings
 (setq fill-column 120)
 (setq tab-bar-show nil)
+(setq scroll-up-aggressively 0.5)
+(setq scroll-down-aggressively 0.5)
+(global-unset-key (kbd "C-x C-z"))
+(global-unset-key (kbd "C-x C-z"))
 
 ;; A few more useful configurations...
 (use-package emacs

@@ -837,7 +837,6 @@ If the side window is being created, it prompts for the source buffer."
 
 
 ;; Misc
-;; set keybinding for prog-mode for hideshowing using use-package
 (use-package hideshow
   :bind
   (:map prog-mode-map
@@ -2753,7 +2752,9 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :ensure t
   :diminish
   :after doom-modeline
-  :bind (("C-m". demap-toggle))
+
+
+  :bind (("C-c m". demap-toggle))
   :config
   (setq demap-minimap-window-side 'right)
   (setq demap-minimap-window-width 15)

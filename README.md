@@ -1,6 +1,5 @@
 # My dotfiles
 
-Dotfiles repo that is managed by Ansible.
+A dotfiles repo that is managed by Ansible roles.
 
-A work in progress.
-
+It is a work in progress.

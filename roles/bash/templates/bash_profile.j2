@@ -10,9 +10,17 @@ fi
 {% set default_path = '$HOME/bin:$HOME/.local/bin' %}
 
 {% if ansible_os_family == 'RedHat' %}
-GOBIN=$(go env GOPATH)/bin
-export GOBIN
-export PATH=$HOME/bin:$HOME/.local/bin:$GOBIN:/usr/local/google-cloud-sdk/bin:$PATH
+
+export PATH={{ default_path }}:/usr/local/google-cloud-sdk/bin:$PATH
+
+if [ -d "$HOME/bin" ]; then
+    export GOBIN="$HOME/bin"
+fi
+
+if [ -n "$GOBIN" ] && [[ ":$PATH:" != *":$GOBIN:"* ]]; then
+    export PATH="$GOBIN:$PATH"
+fi
+
 {% elif ansible_os_family == 'Darwin' %}
 GOBIN=$(go env GOPATH)/bin
 export GOBIN

@@ -17,6 +17,7 @@
       become: false
       tags:
         - asdf
+      when: false
     - role: python
       tags:
         - python
@@ -25,6 +26,7 @@
       become: false
       tags:
         - terraform
+      when: false
     - role: golang
       tags:
         - golang

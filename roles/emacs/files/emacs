@@ -21,7 +21,7 @@
 (when (string-equal system-type "gnu/linux")
   (defvar ispell-program-name "aspell"))
 
-(defun monitor-name-is-eDP-1 ()
+(defun le/monitor-name-is-eDP-1 ()
   "Return t if any monitor is named 'eDP-1'."
   (seq-some (lambda (monitor)
               (equal (cdr (assoc 'name monitor)) "eDP-1"))
@@ -210,16 +210,18 @@
 (setq ispell-personal-dictionary (expand-file-name "~/.ispell_english"))
 
 (if (string-equal system-type "gnu/linux")
-    (if (monitor-name-is-eDP-1)
+    (if (le/monitor-name-is-eDP-1)
         (setq my-default-font-height 150)
       (setq my-default-font-height 100))
     (setq my-default-font-height 125))
 
 ;; Set fonts
-(set-face-attribute 'default nil
-                    :height my-default-font-height
-                    :foundry "ADBO"
-                    :family "Source Code Pro")
+;;;
+(set-face-attribute 'default nil                   ;;
+                    :height my-default-font-height ;;
+                    :foundry "ADBO"                ;;
+                    :family "Source Code Pro")     ;;
+
 
 (set-face-attribute 'variable-pitch nil
                     :family "Open Sans"

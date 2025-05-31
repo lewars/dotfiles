@@ -434,7 +434,7 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
   --marker=">" --pointer="◆" --separator="─" --scrollbar="│"'
 
 # Set up fzf key bindings and fuzzy completion
-FZF_CTRL_T_COMMAND="" eval "$(fzf --bash)"
+# FZF_CTRL_T_COMMAND="" eval "$(fzf --bash)"
 
 # # Set up gcloud auto complete
 source /usr/share/google-cloud-sdk/completion.bash.inc

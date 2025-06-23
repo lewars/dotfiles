@@ -452,4 +452,4 @@ if command -v kubectl &> /dev/null; then
     alias k=kubectl
     complete -o default -F __start_kubectl k
 fi
-export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+export PATH="${HOME}/.cargo/bin:${KREW_ROOT:-$HOME/.krew}/bin:$PATH"

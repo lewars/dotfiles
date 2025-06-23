@@ -2085,6 +2085,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                           (lsp-deferred))))
 
 (use-package dashboard
+  :ensure t
   :config
   (dashboard-setup-startup-hook)
   ;; Format: "(icon title help action face prefix suffix)"

@@ -370,9 +370,11 @@
   '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
 
 ;; Only vailable in emacs 29.1
-(setq auto-save-visited-predicate
-      (lambda () (eq major-mode 'org-mode)
-        auto-save-visited-interval 5))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; (setq auto-save-visited-predicate          ;;
+;;       (lambda () (eq major-mode 'org-mode) ;;
+;;         auto-save-visited-interval 5))     ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun le/my-c-mode-hook ()
   "This hook define hooks for 'c-mode'."

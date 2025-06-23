@@ -1,5 +1,8 @@
-*~
 *.local
 dotfiles.retry
 oh-my-bash
 TAGS
+*~
+*-
+#*#
+.\#*

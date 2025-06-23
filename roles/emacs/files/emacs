@@ -472,6 +472,7 @@
 (use-package eldoc
   :ensure nil
   :diminish
+  :disabled
   :hook
   ((emacs-lisp-mode . eldoc-mode)
    (lisp-interaction-mode . eldoc-mode)
@@ -729,15 +730,11 @@ If the side window is being created, it prompts for the source buffer."
   :hook
   (dired-mode . nerd-icons-dired-mode))
 
-;; (use-package dired-git
-;;   :ensure t
-;;   :hook (dired-mode . dired-git-mode))
-
 ;; Setup dired-single
-(use-package dired-single
-  :ensure t)
+;; (use-package dired-single
+;;   :ensure t)
 
-(require 'dired-single)
+;; (require 'dired-single)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -748,31 +745,25 @@ If the side window is being created, it prompts for the source buffer."
  '(centaur-tabs-bar-height 22)
  '(column-number-mode 1)
  '(custom-safe-themes
-   '("f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33" "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294" "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb" "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8" "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77" "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da" "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a" "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d" "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae" "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4" "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561" "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350" default))
+   '("f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33" "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294"
+     "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb" "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8"
+     "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77" "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da"
+     "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a" "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d"
+     "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae" "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4"
+     "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561" "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350" default))
  '(frame-background-mode nil)
- '(ignored-local-variable-values
-   '((eval progn
-           (message "Loading .dir-locals.el for tally")
-           (setq-local projectile-project-name "tally")
-           (setq-local projectile-project-root "~/git/tally")
-           (setq-local python-shell-virtualenv-root ".venv")
-           (setq-local projectile-project-install-cmd "go-task setup")
-           (setq projectile-install-cmd "go-task setup")
-           (setq-local projectile-project-test-cmd "go-task check-all")
-           (setq projectile-test-cmd "go-task check-all")
-           (setq-local projectile-project-run-cmd "go-task run")
-           (setq projectile-run-cmd "go-task run")
-           (setq-local projectile-project-package-cmd "go-task docker-clean docker-build")
-           (setq projectile-package-cmd "go-task docker-clean docker-build")
-           (setq-local projectile-project-test-suffix "_test")
-           (setq-local projectile-project-test-prefix "test_")
-           (setq-local projectile-project-src-dir "app")
-           (setq-local projectile-project-test-dir "tests"))))
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
- '(org-agenda-files '("~/git/org/todo/gtd.org"))
+ '(org-agenda-files '("~/git/personal/notes/agenda/notes.org"))
  '(package-selected-packages
-   '(demap nerd-icons-completion symbol-overlay diff-hl mermaid-mode anki-editor rotate company-ansible textile textile-mode yaml-pro rg treemacs-all-the-icons all-the-icons-nerd-fonts org-bookmarks transient elisp-docstring-mode org-roam-ql rainbow-mode copilot page-break-lines google-this eldoc-box lsp-pyright whitespace-cleanup-mode consult-gh-forge consult-gh consult-org-roam org-roam-ui org-roam djvu nov latex-preview-pane flyspell-correct lorem-ipsum buttercup systemd auctex-latexmk py-isort vertico-posframe vertico consult consult-lsp eterm-256color atomic-chrome company-box quelpa-use-package quelpa json-rpc editorconfig fzf corfu orderless all-the-icons-dired projectile-ripgrep k8s-mode dockerfile-mode edit-server bats-mode helpful emojify which-key lsp-ui marginalia multi-term gnu-elpa-keyring-update auth-source-1password helm npm-mode xterm-color ibuffer-projectile consult-git-log-grep consult-ls-git consult-dir * consult-flycheck consult-projectile consult-yasnippet bats dired-git-mode async diminish dired-git dashboard-project-status dashboard-hackernews dashboard-ls ansible-vault ansible-doc ansible yasnippet-snippets bazel color-theme direx flycheck-posframe flycheck-grammarly json-navigator json-mode pyenv-mode imenu-anywhere windresize treemacs-persp treemacs-magit treemacs-icons-dired terraform-doc jedi iedit icomplete-vertical helm-gtags go-mode git-modes ghub flyspell-correct-helm flymd flymake-yamllint flymake-shell flymake-python-pyflakes flymake-json flymake-gradle flymake-golangci flymake-go-staticcheck flymake-go flycheck-yamllint flycheck-color-mode-line flycheck-aspell find-file-in-project))
+   '(all-the-icons anki-editor atomic-chrome blacken centaur-tabs company-box company-quickhelp consult-flycheck consult-gh-forge consult-lsp consult-org-roam
+                   consult-projectile consult-yasnippet copilot corfu dashboard demap diff-hl dockerfile-mode doom-modeline doom-themes dumb-jump emojify
+                   eterm-256color expand-region flycheck-posframe flyspell-correct fzf google-this gptel groovy-mode helpful highlight-indent-guides
+                   ibuffer-projectile idle-highlight-mode imenu-list jinja2-mode k8s-mode latex-preview-pane lsp-pyright lsp-treemacs lsp-ui marginalia
+                   mermaid-mode multi-vterm multiple-cursors nerd-icons-completion nerd-icons-dired nerd-icons-ibuffer orderless org-download org-make-toc
+                   org-modern org-noter org-preview-html org-projectile org-roam-ql org-roam-ui ox-hugo pdf-tools py-isort python-mode pyvenv quelpa-use-package
+                   rainbow-mode systemd terraform-mode textile-mode treemacs-magit treemacs-nerd-icons treemacs-projectile vertico-posframe visual-fill-column
+                   whitespace-cleanup-mode yasnippet yasnippet-snippets))
  '(tramp-default-method "ssh")
  '(warning-suppress-types '((lsp-mode) (comp)))
  '(window-divider-default-right-width 2)
@@ -2268,8 +2259,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   ([remap describe-command] . helpful-command)
   ([remap describe-key] . helpful-key))
 
-(use-package bats-mode
-  :ensure t)
+;; (use-package bats-mode
+;;   :ensure t)
 
 (use-package dockerfile-mode
   :ensure t
@@ -2606,8 +2597,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
           ("localhost" . textile-mode)))
   (setq atomic-chrome-buffer-open-style 'full))
 
-(use-package lorem-ipsum
-  :ensure t)
+;; (use-package lorem-ipsum
+;;   :ensure t)
 
 (use-package flyspell-correct
   :ensure t
@@ -2792,6 +2783,9 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (face-spec-set 'demap-current-line-inactive-face
                  `((t :background ,"#030303"
                       :inherit    unspecified ))))
+
+(use-package systemd
+  :ensure t)
 
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)

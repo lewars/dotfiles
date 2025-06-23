@@ -246,6 +246,9 @@
 (package-refresh-contents)
 (package-install 'quelpa)
 (require 'use-package-ensure)
+(quelpa '(quelpa-use-package
+          :fetcher git
+          :url "https://github.com/quelpa/quelpa-use-package.git"))
 (require 'quelpa-use-package)
 
 ;; Misc configs

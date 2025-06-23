@@ -443,9 +443,6 @@
 
 (use-package whitespace
   :ensure nil
-  :bind
-  ("C-c w" . whitespace-mode)
-  ("C-c k" . whitespace-cleanup)
   :config
   (setq whitespace-style '(face
                            tabs spaces trailing lines space-before-tab newline
@@ -455,6 +452,9 @@
 
 (use-package whitespace-cleanup-mode
   :ensure t
+  :after whitespace
+  :bind
+  ("C-c C" . whitespace-cleanup)
   :init (setq whitespace-cleanup-mode-ignore-modes '(special-mode))
   :hook ((prog-mode . whitespace-cleanup-mode)
          (org-mode . whitespace-cleanup-mode)))

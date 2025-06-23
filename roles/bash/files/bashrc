@@ -189,7 +189,7 @@ unalias d
 alias fcd=qcd
 
 alias fem="fzf --preview 'bat --color=always {}' --preview-window '~3' --bind 'enter:become(emacs {})'"
-alias fh="fzf --bind 'enter:become(history)'"
+alias fh="history | fzf"
 alias fpv="fzf --preview 'bat --color=always {}' --preview-window '~3'"
 alias g=gcloud
 alias jf='sudo journalctl --follow'
@@ -433,8 +433,19 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
   --border="rounded" --border-label="" --preview-window="border-rounded" --prompt="> "
   --marker=">" --pointer="◆" --separator="─" --scrollbar="│"'
 
+
+# CTRL-Y to copy the command into clipboard using pbcopy
+export FZF_CTRL_R_OPTS="
+  --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort'
+  --color header:italic
+  --header 'Press CTRL-Y to copy command into clipboard'"
+
 # Set up fzf key bindings and fuzzy completion
-# FZF_CTRL_T_COMMAND="" eval "$(fzf --bash)"
+FZF_CTRL_T_COMMAND=""
+if [ -x "$(command -v fzf)"  ]
+then
+    source /usr/share/fzf/shell/key-bindings.bash
+fi
 
 # # Set up gcloud auto complete
 source /usr/share/google-cloud-sdk/completion.bash.inc

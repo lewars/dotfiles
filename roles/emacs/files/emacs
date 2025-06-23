@@ -504,9 +504,9 @@
 (use-package yasnippet
   :ensure t
   :init
-  (add-to-list 'load-path "~/.emacs.d/elpa/yasnippet-0.14.1")
+  (add-to-list 'load-path "~/.emacs.d/elpa/yasnippet-20250403.1926")
   (require 'yasnippet)
-  (setq yas-snippet-dirs '("~/git/yasnippet-snippets/snippets")
+  (setq yas-snippet-dirs '("~/git/contrib/yasnippet-snippets/snippets/")
         yas-wrap-around-region t
         yas-triggers-in-field t
         yas/triggers-in-field t)
@@ -516,9 +516,6 @@
   (yas-global-mode 1)
   (yas-reload-all)
   (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand))
-
-(use-package consult-yasnippet
-  :ensure t)
 
 (setq display-buffer-alist
       '(

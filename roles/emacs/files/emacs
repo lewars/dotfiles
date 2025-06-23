@@ -244,8 +244,9 @@
         ("melpa" . 40)))
 
 (package-initialize)
-
-(require 'use-package)
+(package-refresh-contents)
+(package-install 'quelpa)
+(require 'use-package-ensure)
 (require 'quelpa-use-package)
 
 ;; Misc configs

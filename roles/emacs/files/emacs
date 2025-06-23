@@ -186,7 +186,6 @@
 
 (add-hook 'prog-mode-hook 'le/my-prog-mode-settings)
 (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode t)
-(add-hook 'emacs-lisp-mode-hook (lambda () (yas-minor-mode -1)))
 
 ;; text-mode settings and hooks
 (defun le/my-text-mode-settings ()
@@ -503,6 +502,8 @@
 
 (use-package yasnippet
   :ensure t
+  :hook
+  (emacs-lisp-mode-hook . (lambda () (yas-minor-mode -1)))
   :init
   (add-to-list 'load-path "~/.emacs.d/elpa/yasnippet-20250403.1926")
   (require 'yasnippet)

@@ -947,11 +947,23 @@ If the side window is being created, it prompts for the source buffer."
   :init
   (projectile-mode +1)
   :bind (:map projectile-mode-map
-              ("C-x p" . projectile-command-map)
+              ("C-c p" . projectile-command-map)
               :map projectile-command-map
               ("A" . projectile-add-known-project))
+  :init
+  ;; nested keymap for 'p' prefix (projectile)
+  (let ((projectile-map (make-sparse-keymap)))
+    (define-key projectile-map "p" #'consult-projectile)
+    (define-key projectile-map "f" #'consult-projectile-find-file)
+    (define-key projectile-map "o" #'consult-projectile-find-file-other-window)
+    (define-key projectile-map "r" #'consult-projectile-recentf)
+    (define-key projectile-map "s" #'consult-projectile-switch-project)
+    (define-key projectile-map "b" #'consult-projectile-switch-to-buffer)
+    (define-key projectile-map "d" #'consult-projectile-find-dir)
+    projectile-map)
+
   :config
-  (setq projectile-project-search-path '(("~/git" . 2)))
+  (setq projectile-project-search-path '(("~/git" . 4)))
   (setq projectile-enable-caching t)
   (setq projectile-switch-project-action #'projectile-dired)
   (setq projectile-per-project-compilation-buffer t)
@@ -1421,10 +1433,6 @@ If the side window is being created, it prompts for the source buffer."
             (setq-local yas/trigger-key [tab])
             (define-key yas/keymap [tab] 'yas/next-field-or-maybe-expand)
             (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t)))
-  (setq org-capture-templates
-        '(("t" "Tech Note" entry
-           (file+headline "~/git/org-roam/inbox.org" "Tech Notes")
-           "* %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n\n")))
   (define-key org-mode-map (kbd "RET")  #'le/org-mode-return)
   (setq
    org-auto-align-tags t
@@ -1527,167 +1535,23 @@ If the side window is being created, it prompts for the source buffer."
   (org-mode . org-modern-mode)
   (org-agenda-finalize . org-modern-agenda))
 
-
-;; Function to quickly capture fleeting notes from anywhere
-(defun le/capture-fleeting-note ()
-  "Quickly capture a fleeting note."
-  (interactive)
-  (org-roam-capture nil "f"))
-
-;; Function to review fleeting notes
-(defun le/review-fleeting-notes ()
-  "Open a buffer with all unprocessed fleeting notes."
-  (interactive)
-  (org-agenda nil "f"))
-
-;; Quick capture function for brag notes
-(defun le/capture-brag-note ()
-  "Quickly capture a brag-worthy achievement."
-  (interactive)
-  (org-roam-capture nil "b"))
-
-;; Function to review fleeting notes
-(defun le/review-brag-notes ()
-  "Open a buffer with all unprocessed brag notes."
-  (interactive)
-  (org-agenda nil "b"))
-
-;; Function to quickly capture ideas
-(defun le/capture-idea-note ()
-  "Quickly capture a idea note."
-  (interactive)
-  (org-roam-capture nil "!"))
-
-;; Function to review fleeting notes
-(defun le/review-idea-notes ()
-  "Open a buffer with all unprocessed idea notes."
-  (interactive)
-  (org-agenda nil "!"))
-
-;; org-roam base configuration
 (use-package org-roam
   :ensure t
-  :after org
-  :custom
-  (org-roam-directory (file-truename "~/git/org-roam"))
-  (org-roam-db-location "~/git/org-roam/org-roam.db")
-  (org-roam-database-connector 'sqlite-builtin)
-  (org-roam-completion-everywhere t)
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n i" . org-roam-node-insert)
-         ("C-c n c" . org-roam-capture)
-         ("C-c n j" . org-roam-dailies-capture-today)
-         ("C-c n q" . le/capture-fleeting-note)
-         ("C-c n r" . le/review-fleeting-notes)
-         ("C-c n b" . le/capture-brag-note)
-         ("C-c n !" . le/capture-idea-note))
-  :config
-  ;; Ensure main directory exists
-  (make-directory (file-truename org-roam-directory) t)
-
-  ;; Set the display template without custom node-type method
-  (setq org-roam-node-display-template
-        (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-
-  (setq my-fleeting-notes-dir "~/git/org-roam/fleeting")
-  (setq my-brag-notes-dir "~/git/org-roam/brag")
-  (setq my-idea-notes-dir "~/git/org-roam/ideas")
-
-  ;; Set up directories for different note types
-  (make-directory "~/git/org-roam" t)
-  (make-directory "~/git/org-roam/kb" t)
-  (make-directory "~/git/org-roam/brag" t)
-  (make-directory "~/git/org-roam/ideas" t)
-  (make-directory my-fleeting-notes-dir t)
-
-  ;; Configure capture templates for different types of notes
-  (setq org-roam-capture-templates
-        '(("k" "kb" plain
-           "\n* %(replace-regexp-in-string \"-+\" \" \" \"${title}\")\n\n%?"
-           :target (file+head "kb/${slug}.org"
-                              "#+title: ${title}\n#+category: kb\n#+filetags: :kb:\n#+startup: inlineimages\n#+property: header-args :results verbatim raw\n\n")
-           :immediate-finish t
-           :unnarrowed t)
-          ("f" "fleeting" plain
-           "\n\n* %?\n\n  *Captured on %T*"
-           :target (file+head "fleeting/%<%Y%m%d%H%M%S>-${slug}.org"
-                              "#+title: ${title}\n#+category: fleeting\n#+filetags: :fleeting:\n#+created: %U\n#+deadline: %(org-insert-time-stamp (time-add (current-time) (days-to-time 2)))\n#+property: header-args :results verbatim raw\n\n")
-           :unnarrowed t)
-          ("b" "brag" plain
-           "\n* Achievement Summary\n%?\n\n* Impact\n- Business Impact:\n- Technical Impact:\n- Team Impact:\n\n* Key Metrics\n- Quantitative:\n- Qualitative:\n\n* Context\n- Challenge Overcome:\n- Skills Demonstrated:\n\n* Supporting Details\n- Project Name:\n- Timeline:\n- Collaborators:\n\n* Follow-up Items\n- [ ] Add relevant metrics when available\n- [ ] Gather peer feedback\n- [ ] Update resume with achievement\n\n* Tags\n\n* Date Range\n- Started: %^{Started}t\n- Completed: %^{Completed}t\n"
-           :target (file+head "brag/%<%Y%m%d%H%M%S>-${slug}.org"
-                              "#+title: ${title}\n#+category: brag\n#+filetags: :brag:achievement:\n#+created: %U\n#+property: header-args :results verbatim raw\n\n")
-           :unnarrowed t)
-          ("!" "idea" plain
-           "\n* %(replace-regexp-in-string \"-+\" \" \" \"${title}\")\n\n%?"
-           :target (file+head "ideas/${slug}.org"
-                              "#+title: ${title}\n#+category: idea\n#+filetags: :idea:\n#+startup: inlineimages\n#+property: header-args :results verbatim raw\n\n")
-           :immediate-finish t
-           :unnarrowed t)))
-
-  (setq org-agenda-custom-commands
-        '(("f" "Fleeting Notes Dashboard"
-           ((tags "fleeting"
-                  ((org-agenda-files (list my-fleeting-notes-dir))
-                   (org-agenda-prefix-format '((tags . "FLEETING-NOTE ")))
-                   (org-agenda-sorting-strategy '(timestamp-up))
-                   (org-agenda-overriding-header "Fleeting Notes Dashboard\n")
-                   ;; Extract and show the captured date from the content
-                   (org-agenda-format-item
-                    (lambda (cat tags priority txt &optional beg end)
-                      (let* ((txt-copy txt)
-                             (date-string
-                              (if (string-match "\\*Captured on <\\([^>]+\\)>" txt-copy)
-                                  (match-string 1 txt-copy)
-                                "")))
-                        (format "%s %s <%s>" cat txt date-string))))))))
-          ("b" "Brag Notes Dashboard"
-           ((tags "brag"
-                  ((org-agenda-files (list my-brag-notes-dir))
-                   (org-agenda-prefix-format '((tags . "BRAG-NOTE ")))
-                   (org-agenda-sorting-strategy '(timestamp-up))
-                   (org-agenda-overriding-header "Brag Notes Dashboard\n")
-                   ;; Extract and show the captured date from the content
-                   (org-agenda-format-item
-                    (lambda (cat tags priority txt &optional beg end)
-                      (let* ((txt-copy txt)
-                             (date-string
-                              (if (string-match "\\*Captured on <\\([^>]+\\)>" txt-copy)
-                                  (match-string 1 txt-copy)
-                                "")))
-                        (format "%s %s <%s>" cat txt date-string))))))))
-          ("!" "Idea Notes Dashboard"
-           ((tags "idea"
-                  ((org-agenda-files (list my-idea-notes-dir))
-                   (org-agenda-prefix-format '((tags . "IDEA-NOTE ")))
-                   (org-agenda-sorting-strategy '(timestamp-up))
-                   (org-agenda-overriding-header "Idea Notes Dashboard\n")
-                   ;; Extract and show the captured date from the content
-                   (org-agenda-format-item
-                    (lambda (cat tags priority txt &optional beg end)
-                      (let* ((txt-copy txt)
-                             (date-string
-                              (if (string-match "\\*Captured on <\\([^>]+\\)>" txt-copy)
-                                  (match-string 1 txt-copy)
-                                "")))
-                        (format "%s %s <%s>" cat txt date-string))))))))))
-
-  (org-roam-db-autosync-mode))
-
-
+  :disabled)
 
 (use-package org-roam-ql
   :ensure t
+  :disabled
   :after (org-roam))
 
 ;; org-download configuration for images
 (use-package org-download
   :ensure t
+  :disabled
   :after org
   :custom
   (org-download-method 'directory)
-  (org-download-image-dir "~/git/org-roam/images")
+  (org-download-image-dir "~/git/personal/notes/media/img")
   (org-download-heading-lvl nil)
   (org-download-timestamp "%Y%m%d-%H%M%S_")
   :bind
@@ -1695,20 +1559,22 @@ If the side window is being created, it prompts for the source buffer."
         (("C-c d s" . org-download-screenshot)
          ("C-c d d" . org-download-delete)))
   :config
-  (make-directory "~/git/org-roam/images" t))
+  (make-directory "~/git/personal/notes/media/img" t))
 
 ;; org-noter for PDF annotations
 (use-package org-noter
   :ensure t
+  :disabled
   :after org
   :custom
-  (org-noter-notes-search-path '("~/git/org-roam"))
+  (org-noter-notes-search-path '("~/git/personal/notes/linked"))
   (org-noter-default-notes-file-names '("notes.org"))
   (org-noter-separate-notes-from-heading t))
 
 ;; org-roam-ui configuration
 (use-package org-roam-ui
   :ensure t
+  :disabled
   :after org-roam
   :custom
   (org-roam-ui-sync-theme t)
@@ -1732,6 +1598,15 @@ If the side window is being created, it prompts for the source buffer."
 
 (require 'ox-md)
 
+
+
+(use-package ox-hugo
+  :ensure t
+  :after org
+  :config
+  (setq org-hugo-base-dir (expand-file-name "~/git/kb/"))
+  (setq org-hugo-default-section-directory "docs"))
+
 (use-package org-projectile
   :ensure t
   :after org
@@ -1742,7 +1617,7 @@ If the side window is being created, it prompts for the source buffer."
   :config
   (progn
     (setq org-projectile-projects-file
-          (expand-file-name "~/git/projects-org/project.org"))
+          (expand-file-name "~/git/personal/notes/projects/notes.org"))
    (setq (or )rg-agenda-files (append org-agenda-files (org-projectile-todo-files)))
    (push (org-projectile-project-todo-entry) org-capture-templates)))
 

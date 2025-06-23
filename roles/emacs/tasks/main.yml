@@ -39,3 +39,17 @@
     dest: '{{ dotfiles_user_home }}/.emacs.d/org/media/alarm.wav'
     owner: '{{ user }}'
   become: false
+- name: Make sure rpm packages are installed
+  dnf:
+    name:
+        - automake
+        - gcc
+        - libpng-devel
+        - make
+        - poppler-devel
+        - poppler-glib-devel
+        - zlib-devel
+        - pkgconf
+        - gh
+    state: present
+  become: true

@@ -758,8 +758,8 @@ If the side window is being created, it prompts for the source buffer."
  '(org-agenda-files '("~/git/personal/notes/agenda/notes.org"))
  '(package-selected-packages
    '(all-the-icons anki-editor atomic-chrome blacken centaur-tabs company-box company-quickhelp consult-flycheck consult-gh-forge consult-lsp consult-org-roam
-                   consult-projectile consult-yasnippet copilot corfu dashboard demap diff-hl dockerfile-mode doom-modeline doom-themes dumb-jump emojify
-                   eterm-256color expand-region flycheck-posframe flyspell-correct fzf google-this gptel groovy-mode helpful highlight-indent-guides
+                   consult-projectile consult-yasnippet copilot corfu dashboard demap diff-hl dockerfile-mode doom-modeline doom-themes dotenv-mode dumb-jump
+                   emojify eterm-256color expand-region flycheck-posframe flyspell-correct fzf google-this gptel groovy-mode helpful highlight-indent-guides
                    ibuffer-projectile idle-highlight-mode imenu-list jinja2-mode k8s-mode latex-preview-pane lsp-pyright lsp-treemacs lsp-ui marginalia
                    mermaid-mode multi-vterm multiple-cursors nerd-icons-completion nerd-icons-dired nerd-icons-ibuffer orderless org-download org-make-toc
                    org-modern org-noter org-preview-html org-projectile org-roam-ql org-roam-ui ox-hugo pdf-tools py-isort python-mode pyvenv quelpa-use-package
@@ -2719,6 +2719,10 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package systemd
   :ensure t)
+
+(use-package dotenv-mode
+  :ensure t
+  :mode ("\\.env\\'" "\\.env\\..*\\'"))
 
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)

@@ -202,16 +202,6 @@ alias c1='ssh k8s-control-01'
 alias w1='ssh k8s-worker-01'
 alias w2='ssh k8s-worker-02'
 
-# watcher aliases
-alias ccbs='cd $HOME/git/cbsi-cbscom'
-alias scbs='qcd $HOME/git/cbsi-cbscom'
-alias fcbs=scbs
-
-# ?
-alias cans='cd $HOME/git/ansi-anscom'
-alias sans='qcd $HOME/git/ansi-anscom'
-alias fans=sans
-
 # system/admin
 alias s='sudo systemctl'
 

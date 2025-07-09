@@ -499,7 +499,7 @@
   :init
   (electric-pair-mode 1)
   :config
-  (add-to-list 'electric-pair-pairs '(?` . ?`))
+  ;; (add-to-list 'electric-pair-pairs '(?` . ?`))
   (setq electric-pair-preserve-balance nil
         electric-pair-delete-adjacent-pairs t
         electric-pair-open-newline-between-pairs nil))
@@ -747,25 +747,24 @@ If the side window is being created, it prompts for the source buffer."
  '(centaur-tabs-bar-height 22)
  '(column-number-mode 1)
  '(custom-safe-themes
-   '("f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33" "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294"
-     "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb" "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8"
-     "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77" "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da"
-     "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a" "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d"
-     "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae" "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4"
-     "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561" "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350" default))
+   '("f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33"
+     "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294"
+     "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb"
+     "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8"
+     "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77"
+     "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da"
+     "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a"
+     "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d"
+     "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae"
+     "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4"
+     "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561"
+     "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350"
+     default))
  '(frame-background-mode nil)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files '("~/git/personal/notes/agenda/notes.org"))
- '(package-selected-packages
-   '(all-the-icons anki-editor atomic-chrome blacken centaur-tabs company-box company-quickhelp consult-flycheck consult-gh-forge consult-lsp consult-org-roam
-                   consult-projectile consult-yasnippet copilot corfu dashboard demap diff-hl dockerfile-mode doom-modeline doom-themes dotenv-mode dumb-jump
-                   emojify eterm-256color expand-region flycheck-posframe flyspell-correct fzf google-this gptel groovy-mode helpful highlight-indent-guides
-                   ibuffer-projectile idle-highlight-mode imenu-list jinja2-mode k8s-mode latex-preview-pane lsp-pyright lsp-treemacs lsp-ui marginalia
-                   mermaid-mode multi-vterm multiple-cursors nerd-icons-completion nerd-icons-dired nerd-icons-ibuffer orderless org-download org-make-toc
-                   org-modern org-noter org-preview-html org-projectile org-roam-ql org-roam-ui ox-hugo pdf-tools py-isort python-mode pyvenv quelpa-use-package
-                   rainbow-mode systemd terraform-mode textile-mode treemacs-magit treemacs-nerd-icons treemacs-projectile vertico-posframe visual-fill-column
-                   whitespace-cleanup-mode yasnippet yasnippet-snippets))
+ '(package-selected-packages nil)
  '(tramp-default-method "ssh")
  '(warning-suppress-types '((lsp-mode) (comp)))
  '(window-divider-default-right-width 2)

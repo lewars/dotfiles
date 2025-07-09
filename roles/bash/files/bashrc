@@ -241,6 +241,10 @@ alias aroma='ssh aroma'
 # Wayland
 alias wp="waypipe -c lz4=9 ssh aroma"
 
+# security
+alias dhi="dnf history info"
+alias dhl="dnf history list | fzf --preview 'dnf history info {1}' --preview-window=right:50% | awk '{print $1}' | xargs -I {} dnf history info {}"
+alias scan='sudo freshclam; clamscan'
 
 # functions
 ## A function that changes the k8 namespace

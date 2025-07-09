@@ -36,6 +36,7 @@
 
 
 ;; Global settings
+(setq gc-cons-threshold 100000000)
 (setq fill-column 120)
 (setq tab-bar-show nil)
 (setq scroll-up-aggressively 0.5)

@@ -950,17 +950,17 @@ If the side window is being created, it prompts for the source buffer."
   :ensure t
   :init
   (projectile-mode +1)
-  :bind (:map projectile-mode-map
-              ("C-c p" . projectile-command-map)
-              :map projectile-command-map
-              ("A" . projectile-add-known-project))
+  ;; :bind (:map projectile-mode-map
+  ;;             ("C-c p" . projectile-command-map)
+  ;;             :map projectile-command-map
+  ;;             ("A" . projectile-add-known-project))
   :init
   ;; nested keymap for 'p' prefix (projectile)
   (let ((projectile-map (make-sparse-keymap)))
     (define-key projectile-map "f" #'consult-projectile-find-file)
     (define-key projectile-map "o" #'consult-projectile-find-file-other-window)
     (define-key projectile-map "r" #'consult-projectile-recentf)
-    (define-key projectile-map "p" #'consult-projectile-switch-project)
+    ;; (define-key projectile-map "p" #'consult-projectile-switch-project)
     (define-key projectile-map "b" #'consult-projectile-switch-to-buffer)
     (define-key projectile-map "d" #'consult-projectile-find-dir)
     projectile-map)
@@ -1759,6 +1759,8 @@ If the side window is being created, it prompts for the source buffer."
    ("C-c i" . consult-info)
    ([remap Info-search] . consult-info)
 
+   ("C-c p p" . consult-projectile-switch-project)
+
    ;; C-x bindings in `ctl-x-map'
    ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
    ("C-x b"   . consult-buffer)              ;; orig. switch-to-buffer
@@ -1838,6 +1840,7 @@ If the side window is being created, it prompts for the source buffer."
   (setq
    consult-narrow-key "<")
   (setq consult-projectile-source-projectile-project-action #'dired))
+
 
 (use-package consult-yasnippet
   :ensure t

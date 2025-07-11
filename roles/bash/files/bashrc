@@ -186,8 +186,8 @@ unalias p
 unalias d
 
 # aliases
+alias a=alias
 alias fcd=qcd
-
 alias fem="fzf --preview 'bat --color=always {}' --preview-window '~3' --bind 'enter:become(emacs {})'"
 alias fh="history | fzf"
 alias fpv="fzf --preview 'bat --color=always {}' --preview-window '~3'"
@@ -201,6 +201,11 @@ alias jmp='ssh k8s-jumpserver'
 alias c1='ssh k8s-control-01'
 alias w1='ssh k8s-worker-01'
 alias w2='ssh k8s-worker-02'
+
+alias open='xdg-open'
+alias di='sudo dnf install'
+alias diy='sudo dnf install -y'
+alias fa='alias|fzf'
 
 # system/admin
 alias s='sudo systemctl'
@@ -232,11 +237,32 @@ alias aroma='ssh aroma'
 alias wp="waypipe -c lz4=9 ssh aroma"
 
 # security
+alias check="dnf check-update --refresh"
+alias update="sudo dnf update --refresh"
 alias dhi="dnf history info"
 alias dhl="dnf history list | fzf --preview 'dnf history info {1}' --preview-window=right:50% | awk '{print $1}' | xargs -I {} dnf history info {}"
 alias scan='sudo freshclam; clamscan'
 
 # functions
+las(){
+    local -r pflg="$1"
+    local cmd='echo {} | awk -F"[^[:alnum:]]+" "{print \$2}"'
+
+    if [[ "$pflg" == 'a' ]];then
+        local bindcmd="enter:become(echo {})"
+    else
+        local bindcmd="enter:become($cmd)"
+    fi
+
+    local alias=$(alias | fzf --preview 'bat --color=always {}' --preview-window '~3' --bind "$bindcmd")
+
+    if [[ "$pflg" =~ (a|p) ]] ;then
+        echo "$alias"
+    else
+        eval "$alias"
+    fi
+}
+
 ## A function that changes the k8 namespace
 function k8cluster() {
     if [ -z "$1" ]; then

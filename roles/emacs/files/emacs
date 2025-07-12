@@ -439,6 +439,13 @@
 ;; Bind it to a key of your choice, for example C-c s
 (global-set-key (kbd "C-c s") 'le/search-web)
 
+;; Display ansi color codes
+(defun display-ansi-colors ()
+  (interactive)
+  (let ((inhibit-read-only t))
+    (ansi-color-apply-on-region (point-min) (point-max))))
+(add-hook 'ansible-doc 'display-ansi-colors)
+
 (use-package help
   :bind
   (:map help-mode-map

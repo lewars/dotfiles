@@ -1,5 +1,5 @@
 ;;; .emacs --- Emacs initialization file -*- mode: emacs-lisp; lexical-binding: t; -*-
-;; Copyright (C) 1996-2024 Alistair Y. Lewars
+;; Copyright (C) 1996-2025 Alistair Y. Lewars
 
 ;; Author: Alistair Y. Lewars
 
@@ -1409,12 +1409,7 @@ If the side window is being created, it prompts for the source buffer."
 ;;   (setq-local show-trailing-whitespace nil)
 ;;   (setq-local hl-line-mode nil))
 
-;; Always a good practice at the top of your init file
-;;; -*- lexical-binding: t; -*-
-
-;;; -*- lexical-binding: t; -*-
-
-
+;; Org-mode visual line and padding setup
 (defun le/my-org-mode-visual-line-setup ()
   "Enable visual line wrapping at 120 characters for Org mode."
   (setq-local visual-fill-column-width 120)
@@ -1425,6 +1420,7 @@ If the side window is being created, it prompts for the source buffer."
   "Add a bit of left and right padding to Org mode buffers."
   (setq-local left-margin-width 100))
 
+;; Org-mode core configuration
 (use-package org
   :ensure t
   :bind
@@ -1434,12 +1430,12 @@ If the side window is being created, it prompts for the source buffer."
   :config
   (setq
    org-startup-with-inline-images t
-   org-image-actual-width nil
-   org-image-max-width 300
-   org-hide-emphasis-markers t   ; Hide * / _ = ~
-   org-startup-indented t        ; Start Org buffers with indentation
-   org-edit-src-code t           ; Enable editing source code blocks in separate buffer
-   org-ellipsis " !!!"           ; Set symbole when folding
+   org-image-actual-width nil ; Display images at their actual width, or nil to scale down
+   org-image-max-width 300    ; Max width for images when scaled
+   org-hide-emphasis-markers t    ; Hide * / _ = ~
+   org-startup-indented t         ; Start Org buffers with indentation
+   org-edit-src-code t            ; Enable editing source code blocks in separate buffer
+   org-ellipsis " !!!"             ; Set symbole when folding
    org-catch-invisible-edits 'show-and-error ; Check if in invisible region before modification
    org-hide-block-properties nil ; Don't hide :PROPERTIES: and :END: lines when folded
    )
@@ -1473,64 +1469,97 @@ If the side window is being created, it prompts for the source buffer."
    Converts spaces to hyphens, removes non-alphanumeric characters,
    and lowercases the string.
    Prioritizes `slug.el` if available, falls back to basic regex."
-  (interactive "sText to slugify: ") ; Added for testing this function directly
-  (if (fboundp 'slug-code) ; Check if slug.el package is loaded
+  (interactive "sText to slugify: ")
+  (if (fboundp 'slug-code)
       (slug-code text)
-    ;; Fallback if slug.el is not installed/loaded
     (let ((slug (downcase text)))
-      (setq slug (replace-regexp-in-string "[^a-zA-Z0-9_-]+" "-" slug)) ; Replace non-alphanum with hyphen
-      (setq slug (replace-regexp-in-string "--+" "-" slug))          ; Collapse multiple hyphens
-      (setq slug (string-trim slug "-"))                             ; Trim leading/trailing hyphens
+      (setq slug (replace-regexp-in-string "[^a-zA-Z0-9_-]+" "-" slug))
+      (setq slug (replace-regexp-in-string "--+" "-" slug))
+      (setq slug (string-trim slug "-"))
       slug)))
 
 (defun le/org-roam-select-node (prompt &optional tags)
-  "Prompt user to select an Org-roam node with an optional list of TAGS.
+  "Prompt user to select a single Org-roam node with an optional list of TAGS.
    Returns an Org-roam link (e.g., [[id:UUID][TITLE]]) to the selected node.
    If TAGS is nil, allows selection from all nodes.
    If TAGS is a list, only allows selection from nodes matching all tags.
    If user cancels, returns nil."
   (interactive (list (read-from-minibuffer "Select node for: ")
                      (read-from-minibuffer "Filter by tags (comma-separated, optional): ")))
-  (let* ((parsed-tags (when tags (split-string tags "," t "[ ]*"))) ; Parse comma-separated tags
+  (let* ((parsed-tags (when tags (split-string tags "," t "[ ]*")))
          (node (org-roam-node-read prompt parsed-tags)))
     (when node
       (format "[[id:%s][%s]]" (org-roam-node-id node) (org-roam-node-title node)))))
 
-;; --- End Custom Helper Functions ---
+(defun le/org-roam-select-nodes (prompt &optional tags)
+  "Prompt user to select multiple Org-roam nodes with an optional list of TAGS.
+   Returns a space-separated string of Org-roam links.
+   If TAGS is nil, allows selection from all nodes.
+   If TAGS is a list, only allows selection from nodes matching all tags.
+   If user cancels or selects none, returns an empty string."
+  (interactive (list (read-from-minibuffer "Select nodes for: ")
+                     (read-from-minibuffer "Filter by tags (comma-separated, optional): ")))
+  (let* ((parsed-tags (when tags (split-string tags "," t "[ ]*")))
+         ;; org-roam-node-list doesn't take arguments - get all nodes first
+         (all-nodes (org-roam-node-list))
+         ;; Then filter by tags if needed
+         (available-nodes (if parsed-tags
+                              (cl-remove-if-not
+                               (lambda (node)
+                                 (cl-every (lambda (tag)
+                                             (member tag (org-roam-node-tags node)))
+                                           parsed-tags))
+                               all-nodes)
+                            all-nodes))
+         (node-titles (mapcar #'org-roam-node-title available-nodes))
+         (selected-titles (completing-read-multiple prompt node-titles nil t)))
+    (if selected-titles
+        (mapconcat (lambda (title)
+                     (let ((node (cl-find title available-nodes :key #'org-roam-node-title :test #'string=)))
+                       (when node
+                         (format "[[id:%s][%s]]" (org-roam-node-id node) (org-roam-node-title node)))))
+                   selected-titles
+                   " ")
+      "")))
 
 ;; --- Org-roam Configuration ---
 (use-package org-roam
   :ensure t
-  :after org ; Ensure org is loaded
+  :after org
   :init
-  ;; These variables are set early, before org-roam is fully loaded,
-  ;; which is the correct phase for them.
   (setq org-roam-directory "~/org/kb/"
-        org-roam-dailies-directory "daily/" ; Relative to org-roam-directory
+        org-roam-dailies-directory "daily/"
         org-roam-db-location "~/.emacs.d/org-roam.db")
-  ;; *** IMPORTANT UPDATE: Activate autosync mode via a hook ***
-  ;; This ensures it runs after Emacs has fully initialized.
-  ;; :bind (:map org-roam-mode-map
-  ;;             (c . org-roam-capture))
   :hook (after-init . org-roam-db-autosync-mode)
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-	     ("C-c n f" . org-roam-node-find)
-	     ("C-c n g" . org-roam-graph)
-	     ("C-c n i" . org-roam-node-insert)
-	     ("C-c n c" . org-roam-capture)
-	     ("C-c n j" . org-roam-dailies-capture-today))
+  :bind (;; Core org-roam functions
+         ("C-c n c" . org-roam-capture)
+         ("C-c n i" . org-roam-node-insert)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n g" . org-roam-graph)
+         ;; Daily note navigation and capture
+         ("C-c n d n" . org-roam-dailies-capture-today)
+         ("C-c n d Y" . org-roam-dailies-capture-yesterday)
+         ("C-c n d T" . org-roam-dailies-capture-tomorrow)
+         ("C-c n d c" . org-roam-dailies-goto-date)
+         ("C-c n d v" . org-roam-dailies-capture-date)
+         ("C-c n d y" . org-roam-dailies-goto-yesterday)
+         ("C-c n d t" . org-roam-dailies-goto-tomorrow)
+         ("C-c n d b" . org-roam-dailies-go-to-previous-note)
+         ("C-c n d f" . org-roam-dailies-go-to-next-note)
+         )
   )
 
-;; --- Org-roam UI Configuration (moved to its own block for clarity) ---
+;; --- Org-roam UI Configuration (optional, uncomment to enable) ---
 ;; (use-package org-roam-ui
-;;   :ensure t
-;;   :after org-roam ; Ensures org-roam is loaded before org-roam-ui
-;;   :config
-;;   (setq org-roam-ui-open-on-start t ; Open browser on Emacs start
-;;         org-roam-ui-update-interval 5) ; Update graph every 5 seconds
-;;   (org-roam-ui-mode +1))
+;;    :ensure t
+;;    :after org-roam
+;;    :config
+;;    (setq org-roam-ui-open-on-start t
+;;          org-roam-ui-update-interval 5)
+;;    (org-roam-ui-mode +1))
 
-;; --- Org-roam Capture Templates (Existing code, place after org-roam-ui if not already) ---
+;; --- Org-roam Capture Templates ---
 (use-package org-roam-capture
   :after org-roam
   :config
@@ -1538,144 +1567,349 @@ If the side window is being created, it prompts for the source buffer."
         '(
           ;; General Meeting (m)
           ("m" "General Meeting" plain
-           (function (lambda ()
-                       (let* ((template-file (expand-file-name "org-roam/general-meeting-skeleton.org" "~/.emacs.d/templates/"))
-                              (content (with-temp-buffer (insert-file-contents template-file) (buffer-string)))
-                              (title (read-from-minibuffer "Meeting Title: "))
-                              (current-date (format-time-string "%Y-%m-%d"))
-                              (current-datetime (format-time-string "%Y-%m-%d %H:%M"))
-                              (attendees (le/org-roam-select-node "Attendees (select multiple people, comma-separated): " :person))
-                              (project (le/org-roam-select-node "Project (optional): " :project))
-                              (node-id (org-roam-node-id)))
+           "* Raw Notes / Transcript (Paste here)
+%?
 
-                         (setq content (format content
-                                               title current-date
-                                               node-id current-datetime attendees project
-                                               "%?"))
+* AI Synthesized Summary & Action Items
 
-                         (list (format "%s/meetings/%s-%s.org" org-roam-directory current-date (le/org-roam-slugify title))
-                               content))))
+
+* Discussion Points
+
+
+* Decisions
+
+
+* Action Items
+"
+           :target (file+head "meetings/%<%Y-%m-%d>-${slug}.org"
+                              "#+TITLE: ${title} %<%Y-%m-%d>
+#+ROAM_TAGS: meeting:general, meeting
+#+FILETAGS: :meeting:general:meeting:
+:DATE: %<%Y-%m-%d %H:%M>
+:ATTENDEES: %(or (le/org-roam-select-nodes \"Attendees (select multiple people): \" \"person\") \"\")
+:PROJECT: %(or (le/org-roam-select-node \"Project (optional): \" \"project\") \"\")")
            :unnarrowed t)
 
           ;; Project Meeting (j)
           ("j" "Project Meeting" plain
-           (function (lambda ()
-                       (let* ((template-file (expand-file-name "org-roam/project-meeting-skeleton.org" "~/.emacs.d/templates/"))
-                              (content (with-temp-buffer (insert-file-contents template-file) (buffer-string)))
-                              (title (read-from-minibuffer "Meeting Title: "))
-                              (project-node (le/org-roam-select-node "Project (required): " :project))
-                              (current-date (format-time-string "%Y-%m-%d"))
-                              (current-datetime (format-time-string "%Y-%m-%d %H:%M"))
-                              (attendees (le/org-roam-select-node "Attendees (select multiple people, comma-separated): " :person))
-                              (node-id (org-roam-node-id)))
+           "* Raw Notes / Transcript (Paste here)
+%?
 
-                         (unless project-node (error "Project is required for a Project Meeting. Please select one."))
+* AI Synthesized Summary & Action Items
 
-                         (setq content (format content
-                                               title current-date
-                                               node-id current-datetime attendees project-node
-                                               "%?"))
 
-                         (list (format "%s/meetings/%s-%s.org" org-roam-directory current-date (le/org-roam-slugify title))
-                               content))))
+* Discussion Points
+
+
+* Decisions
+
+
+* Action Items
+"
+           :target (file+head "meetings/%<%Y-%m-%d>-${slug}.org"
+                              "#+TITLE: ${title} %<%Y-%m-%d>
+#+ROAM_TAGS: meeting:project, meeting, project
+#+FILETAGS: :meeting:project:meeting:project:
+:DATE: %<%Y-%m-%d %H:%M>
+:ATTENDEES: %(or (le/org-roam-select-nodes \"Attendees (select multiple people): \" \"person\") \"\")
+:PROJECT: %(let ((project (le/org-roam-select-node \"Project (required): \" \"project\"))) (unless project (error \"Project is required for a Project Meeting\")) project)")
            :unnarrowed t)
 
           ;; One-on-One Meeting (o)
           ("o" "One-on-One Meeting" plain
-           (function (lambda ()
-                       (let* ((template-file (expand-file-name "org-roam/one-on-one-meeting-skeleton.org" "~/.emacs.d/templates/"))
-                              (content (with-temp-buffer (insert-file-contents template-file) (buffer-string)))
-                              (person-node (le/org-roam-select-node "Person (required): " :person))
-                              (title (format "1:1 with %s" (org-roam-node-title person-node)))
-                              (current-date (format-time-string "%Y-%m-%d"))
-                              (current-datetime (format-time-string "%Y-%m-%d %H:%M"))
-                              (node-id (org-roam-node-id)))
+           "* Raw Notes / Discussion Points (Paste here)
+%?
 
-                         (unless person-node (error "Person is required for a 1:1 Meeting."))
+* AI Synthesized Summary & Action Items
 
-                         (setq content (format content
-                                               (org-roam-node-title person-node) current-date
-                                               node-id current-datetime person-node
-                                               "%?"))
 
-                         (list (format "%s/meetings/%s-%s.org" org-roam-directory current-date (le/org-roam-slugify title))
-                               content))))
+* Action Items
+"
+           :target (file+head "meetings/1on1-%<%Y-%m-%d>-${slug}.org"
+                              "#+TITLE: 1:1 with %(let ((person (le/org-roam-select-node \"Person (required): \" \"person\"))) (unless person (error \"Person is required for a 1:1 Meeting\")) (org-roam-node-title person)) %<%Y-%m-%d>
+#+ROAM_TAGS: meeting:1on1, meeting, person
+#+FILETAGS: :meeting:1on1:meeting:person:
+:DATE: %<%Y-%m-%d %H:%M>
+:PERSON: %(let ((person (le/org-roam-select-node \"Person (required): \" \"person\"))) person)")
            :unnarrowed t)
 
           ;; Topic (t)
-          ("t" "Topic (General Knowledge)" plain
-           (function (lambda ()
-                       (let* ((template-file (expand-file-name "org-roam/topic-skeleton.org" "~/.emacs.d/templates/"))
-                              (content (with-temp-buffer (insert-file-contents template-file) (buffer-string)))
-                              (title (read-from-minibuffer "Topic Title: "))
-                              (node-id (org-roam-node-id))
-                              (current-date (format-time-string "%Y-%m-%d"))
-                              (roam-tags "knowledge:concept, knowledge")
-                              (file-tags "knowledge:concept:knowledge:"))
+          ("t" "Topic (General Knowledge/Concept)" plain
+           "* Introduction
+%?
 
-                         (setq content (format content
-                                               title
-                                               node-id current-date
-                                               "%?"))
+* Key Concepts
+- 
 
-                         (list (format "%s/topics/%s.org" org-roam-directory (le/org-roam-slugify title))
-                               content))))
+* Related Topics
+- 
+
+* Resources
+- "
+           :target (file+head "topics/${slug}.org"
+                              "#+TITLE: ${title}
+#+ROAM_TAGS: knowledge:concept, knowledge
+#+FILETAGS: :knowledge:concept:knowledge:
+:DATE: %<%Y-%m-%d>")
            :unnarrowed t)
 
           ;; Work Topic (w)
-          ("w" "Work Topic" plain
-           (function (lambda ()
-                       (let* ((template-file (expand-file-name "org-roam/work-topic-skeleton.org" "~/.emacs.d/templates/"))
-                              (content (with-temp-buffer (insert-file-contents template-file) (buffer-string)))
-                              (title (read-from-minibuffer "Work Topic Title: "))
-                              (company (completing-read "Company (stninc/discovery): " '("stninc" "discovery") nil t))
-                              (project (le/org-roam-select-node "Related Project (optional): " :project))
-                              (node-id (org-roam-node-id))
-                              (current-date (format-time-string "%Y-%m-%d"))
-                              (company-roam-tag (format "%s,work-topic" (downcase company)))
-                              (company-file-tag (format ":%s:work-topic:" (downcase company))))
+          ("w" "Work Topic (Company Specific)" plain
+           "* Overview
+%?
 
-                         (setq content (format content
-                                               title
-                                               company-roam-tag company-file-tag
-                                               node-id current-date project
-                                               "%?"))
+* Context
 
-                         (list (format "%s/work-topics/%s-%s.org" org-roam-directory (downcase company) (le/org-roam-slugify title))
-                               content))))
+
+* Relevant Resources
+
+
+* Key Stakeholders
+- "
+           :target (file+head "work-topics/%(let ((company (completing-read \"Company (stninc/discovery): \" '(\"stninc\" \"discovery\") nil t))) (downcase company))-${slug}.org"
+                              "#+TITLE: ${title}
+#+ROAM_TAGS: %(let ((company (completing-read \"Company (stninc/discovery): \" '(\"stninc\" \"discovery\") nil t))) (format \"%s,work-topic\" (downcase company)))
+#+FILETAGS: :%(let ((company (completing-read \"Company (stninc/discovery): \" '(\"stninc\" \"discovery\") nil t))) (format \"%s:work-topic\" (downcase company))):
+:DATE: %<%Y-%m-%d>
+:PROJECT: %(or (le/org-roam-select-node \"Related Project (optional): \" \"project\") \"\")")
            :unnarrowed t)
 
           ;; Learn Topic (l)
-          ("l" "Learn Topic" plain
-           (function (lambda ()
-                       (let* ((template-file (expand-file-name "org-roam/learn-topic-skeleton.org" "~/.emacs.d/templates/"))
-                              (content (with-temp-buffer (insert-file-contents template-file) (buffer-string)))
-                              (title (read-from-minibuffer "Learning Topic Title: "))
-                              (type (completing-read "Type (skill/tool/concept): " '("skill" "tool" "concept") nil t))
-                              (source (read-from-minibuffer "Source (e.g., Book, Course, Blog): "))
-                              (node-id (org-roam-node-id))
-                              (current-date (format-time-string "%Y-%m-%d"))
-                              (type-roam-tag (format "learning:%s,learning" (downcase type)))
-                              (type-file-tag (format ":learning:%s:learning:" (downcase type))))
+          ("l" "Learn Topic (Skill/Tool Focused)" plain
+           "* My Notes
+%?
 
-                         (setq content (format content
-                                               title
-                                               type-roam-tag type-file-tag
-                                               node-id current-date source
-                                               "%?"))
+* Key Takeaways
 
-                         (list (format "%s/learning/%s-%s.org" org-roam-directory (downcase type) (le/org-roam-slugify title))
-                               content))))
+
+* Practice Exercises / Next Steps
+
+
+* Resources
+- "
+           :target (file+head "learning/%(let ((type (completing-read \"Type (skill/tool/concept): \" '(\"skill\" \"tool\" \"concept\") nil t))) (downcase type))-${slug}.org"
+                              "#+TITLE: ${title}
+#+ROAM_TAGS: learning:%(let ((type (completing-read \"Type (skill/tool/concept): \" '(\"skill\" \"tool\" \"concept\") nil t))) (downcase type)), learning
+#+FILETAGS: :learning:%(let ((type (completing-read \"Type (skill/tool/concept): \" '(\"skill\" \"tool\" \"concept\") nil t))) (downcase type)):learning:
+:DATE: %<%Y-%m-%d>
+:SOURCE: %(read-from-minibuffer \"Source (e.g., Book, Course, Blog): \")")
            :unnarrowed t)
 
-          ;; Other org-roam capture templates will go here (Person, Project, Incident Log, Tech Issue)
+          ;; Person Capture Template (p)
+          ("p" "Person" plain
+           "* Work Context
+** Professional Background
+%?
+
+** Current Projects
+- 
+
+** Skills & Expertise
+- 
+
+** Working Style
+- 
+
+* Interaction History
+** Meeting History
+#+BEGIN_QUERY
+{ :query [:and [:from \"file\"] [:filetags \"meeting\"] [:or [:id \"${id}\"] [:in-alias \"${id}\"]]] }
+#+END_QUERY
+
+** 1:1 Notes
+#+BEGIN_QUERY
+{ :query [:and [:from \"file\"] [:filetags \"meeting:1on1\"] [:or [:id \"${id}\"] [:in-alias \"${id}\"]]] }
+#+END_QUERY
+
+** Action Items (from/for this person)
+- 
+
+** Personal Notes
+- 
+
+** Strategy
+- 
+
+** Issue Log
+#+BEGIN_QUERY
+{ :query [:and [:from \"file\"] [:filetags \"issue:incident\"] [:or [:id \"${id}\"] [:in-alias \"${id}\"]]] }
+#+END_QUERY"
+           :target (file+head "people/${slug}.org"
+                              "#+TITLE: ${title}
+#+ROAM_TAGS: person
+#+FILETAGS: :person:
+:DATE: %<%Y-%m-%d>
+:FULL_NAME: ${title}
+:ROLE: %(read-from-minibuffer \"Role: \")
+:TEAM: %(read-from-minibuffer \"Team: \")
+:EMAIL: %(read-from-minibuffer \"Email: \")
+:MANAGER: %(or (le/org-roam-select-node \"Manager (optional): \" \"person\") \"\")
+:LOCATION: %(read-from-minibuffer \"Location: \")
+:START_DATE: %(read-from-minibuffer \"Start Date (YYYY-MM-DD): \")
+:SLACK: %(read-from-minibuffer \"Slack Handle: \")
+:PHONE: %(read-from-minibuffer \"Phone: \")
+:JIRA_PROFILE: %(read-from-minibuffer \"JIRA Profile URL: \")
+:CONFLUENCE_SPACE: %(read-from-minibuffer \"Confluence Personal Space URL: \")")
+           :unnarrowed t)
+
+          ;; Project Capture Template (P)
+          ("P" "Project" plain
+           "* Project Overview
+%?
+
+* Goals & Objectives
+
+
+* Key Deliverables
+
+
+* Risks & Mitigations
+
+
+* Resources
+
+
+* Meeting History
+#+BEGIN_QUERY
+{ :query [:and [:from \"file\"] [:filetags \"meeting:project\"] [:or [:id \"${id}\"] [:in-alias \"${id}\"]]] }
+#+END_QUERY
+
+* Tasks & Roadmap
+"
+           :target (file+head "projects/${slug}.org"
+                              "#+TITLE: ${title}
+#+ROAM_TAGS: project
+#+FILETAGS: :project:
+:DATE: %<%Y-%m-%d>
+:PROJECT_NAME: ${title}
+:STATUS: %(completing-read \"Status (Planning/In Progress/On Hold/Completed): \" '(\"Planning\" \"In Progress\" \"On Hold\" \"Completed\") nil t)
+:PRIORITY: %(completing-read \"Priority (High/Medium/Low): \" '(\"High\" \"Medium\" \"Low\") nil t)
+:TEAM: %(read-from-minibuffer \"Team/Department: \")
+:START_DATE: %(read-from-minibuffer \"Start Date (YYYY-MM-DD): \")
+:TARGET_DATE: %(read-from-minibuffer \"Target Date (YYYY-MM-DD, optional): \")
+:ACTUAL_DATE: %(read-from-minibuffer \"Actual Completion Date (YYYY-MM-DD, optional): \")
+:PROJECT_MANAGER: %(or (le/org-roam-select-node \"Project Manager (optional): \" \"person\") \"\")
+:TECH_LEAD: %(or (le/org-roam-select-node \"Tech Lead (optional): \" \"person\") \"\")
+:STAKEHOLDERS: %(or (le/org-roam-select-nodes \"Stakeholders (select multiple people, optional): \" \"person\") \"\")
+:SLACK_CHANNEL: %(read-from-minibuffer \"Slack Channel: \")
+:REPOSITORY: %(read-from-minibuffer \"Repository URL: \")
+:JIRA_PROJECT: %(read-from-minibuffer \"JIRA Project Key: \")
+:BUDGET: %(read-from-minibuffer \"Budget: \")")
+           :unnarrowed t)
+
+          ;; Incident Log with Person Capture Template (i)
+          ("i" "Incident Log (with Person)" plain
+           "* Incident Details (ENCRYPTED SECTION)
+#+BEGIN_SRC org :crypt t
+%?
+#+END_SRC
+
+* Resolution / Follow-up (Clear Text)
+"
+           :target (file+head "incidents/%<%Y-%m-%d>-%(let ((person (le/org-roam-select-node \"Person Involved (required): \" \"person\"))) (le/org-roam-slugify (org-roam-node-title person)))-%(let ((type (completing-read \"Incident Type: \" '(\"communication\" \"behavior\" \"performance\" \"policy\" \"harassment\" \"discrimination\") nil t))) (le/org-roam-slugify type)).org"
+                              "#+TITLE: Incident with %(let ((person (le/org-roam-select-node \"Person Involved (required): \" \"person\"))) (org-roam-node-title person)) (%(let ((type (completing-read \"Incident Type: \" '(\"communication\" \"behavior\" \"performance\" \"policy\" \"harassment\" \"discrimination\") nil t))) type)) - %<%Y-%m-%d>
+#+ROAM_TAGS: issue:incident, person
+#+FILETAGS: :issue:incident:person:
+:DATE: %<%Y-%m-%d>
+:PERSON: %(let ((person (le/org-roam-select-node \"Person Involved (required): \" \"person\"))) person)
+:INCIDENT_TYPE: %(let ((type (completing-read \"Incident Type: \" '(\"communication\" \"behavior\" \"performance\" \"policy\" \"harassment\" \"discrimination\") nil t))) type)
+:SEVERITY: %(completing-read \"Severity (Low/Medium/High/Critical): \" '(\"Low\" \"Medium\" \"High\" \"Critical\") nil t)
+:STATUS: %(completing-read \"Status (Open/Investigating/Resolved/Closed): \" '(\"Open\" \"Investigating\" \"Resolved\" \"Closed\") nil t)
+:WITNESSES: %(or (le/org-roam-select-nodes \"Witnesses (select multiple people, optional): \" \"person\") \"\")
+:REPORTED_TO: %(or (le/org-roam-select-nodes \"Reported To (select multiple people, optional): \" \"person\") \"\")
+:FOLLOW_UP_DATE: %(read-from-minibuffer \"Follow-up Date (YYYY-MM-DD, optional): \")")
+           :unnarrowed t)
+
+          ;; Technical Issue Troubleshooting Capture Template (I)
+          ("I" "Technical Issue Troubleshooting" plain
+           "* Initial Observation & Symptoms
+%?
+
+* Investigative Ideas to Take
+- [ ] Idea 1...
+- [ ] Idea 2...
+- [ ] Idea 3...
+
+* Troubleshooting Steps Taken
+- 
+
+* Analysis & Hypothesis
+
+
+* Root Cause Identified
+
+
+* Resolution Steps
+
+
+* Verification
+
+
+* Lessons Learned
+
+
+* Relevant Logs/Traces
+#+BEGIN_SRC bash
+# Your log snippets here
+#+END_SRC
+
+* Related Tickets / Documentation
+"
+           :target (file+head "issues/%<%Y-%m-%d>-${slug}.org"
+                              "#+TITLE: ${title}
+#+ROAM_TAGS: %(let* ((system-categories (completing-read-multiple \"System Categories (space-separated, e.g., linux k8s): \" '(\"linux\" \"gpu\" \"slurm\" \"container\" \"k8s\" \"ci\" \"iac\" \"artifactory\" \"github\" \"storage\" \"network\" \"code\") nil t)) (additional-tags (completing-read-multiple \"Additional Tags (space-separated, e.g., performance security): \" '(\"performance\" \"security\" \"infrastructure\" \"ai-training\" \"ai-inference\") nil t))) (mapconcat 'identity (append (mapcar (lambda (x) (format \"issue:%s\" x)) system-categories) (mapcar (lambda (x) (format \"issue:%s\" x)) additional-tags) '(\"issue\")) \",\"))
+#+FILETAGS: :%(let* ((system-categories (completing-read-multiple \"System Categories (space-separated, e.g., linux k8s): \" '(\"linux\" \"gpu\" \"slurm\" \"container\" \"k8s\" \"ci\" \"iac\" \"artifactory\" \"github\" \"storage\" \"network\" \"code\") nil t)) (additional-tags (completing-read-multiple \"Additional Tags (space-separated, e.g., performance security): \" '(\"performance\" \"security\" \"infrastructure\" \"ai-training\" \"ai-inference\") nil t))) (mapconcat 'identity (append (mapcar (lambda (x) (format \"issue:%s\" x)) system-categories) (mapcar (lambda (x) (format \"issue:%s\" x)) additional-tags) '(\"issue\")) \":\"))::
+:DATE: %<%Y-%m-%d>
+:ISSUE_TITLE: ${title}
+:DATE_REPORTED: %<%Y-%m-%d>
+:DATE_RESOLVED: %(read-from-minibuffer \"Date Resolved (YYYY-MM-DD, optional): \")
+:STATUS: %(completing-read \"Status (Open/In Progress/Awaiting Info/Resolved/Closed): \" '(\"Open\" \"In Progress\" \"Awaiting Info\" \"Resolved\" \"Closed\") nil t)
+:SEVERITY: %(completing-read \"Severity (Minor/Major/Critical/Blocker): \" '(\"Minor\" \"Major\" \"Critical\" \"Blocker\") nil t)
+:SYSTEMS_AFFECTED: %(read-from-minibuffer \"Systems Affected (comma-separated): \")
+:RELATED_PROJECT: %(or (le/org-roam-select-node \"Related Project (optional): \" \"project\") \"\")
+:REPORTED_BY: %(or (le/org-roam-select-node \"Reported By (optional): \" \"person\") \"\")")
+           :unnarrowed t)
           )))
 
-(use-package org-bullets
-  :ensure t
-  :hook (org-mode . org-bullets-mode)
+;; Org-crypt configuration (part of Org-mode, no :ensure t)
+(use-package org-crypt
+  :after org
   :config
-  (setq org-bullets-bullet-list '("●" "○" "●" "▸" "▹" "►")))
+  ;; It's crucial to set up your GPG key for org-crypt. This is a placeholder.
+  ;; Example: (setq org-crypt-gpg-recipients '("your-gpg-key-id"))
+  ;; Consult org-crypt documentation for secure key management.
+  (setq org-crypt-enable-encryption t)
+  (setq org-crypt-key nil) ; Set to your GPG key ID or email if using GPG, otherwise for simple password
+  )
+
+;; Org-babel language configuration
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((python . t)
+   (shell . t)
+   (emacs-lisp . t)
+   (groovy . t)
+   (sed . t)
+   (js . t)
+   (sql . t)
+   (sqlite . t)
+   (dot . t) ; For Graphviz diagrams
+   ))
+
+(setq org-confirm-babel-evaluate nil)
+;; You might need to set specific interpreter paths if they are not in your PATH
+;; (setq org-babel-python-command "python3")
+;; (setq org-babel-shell-command "bash")
+
+;; ob-mermaid configuration
+(use-package ob-mermaid
+  :ensure t
+  :after org-babel
+  :hook (org-mode . ob-mermaid-mode)
+  :config
+  ;; You might need to configure the path to the 'mmdc' executable
+  ;; (setq ob-mermaid-executable "/usr/bin/mmdc")
+  )
 
 ;; (use-package org-appear
 ;;   :ensure t

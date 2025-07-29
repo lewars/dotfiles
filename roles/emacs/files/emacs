@@ -1566,7 +1566,8 @@ If the side window is being created, it prompts for the source buffer."
         '(
           ;; General Meeting (m)
           ("m" "General Meeting" plain
-           "* Raw Notes / Transcript (Paste here)
+           "
+* Raw Notes / Transcript (Paste here)
 %?
 
 * AI Synthesized Summary & Action Items
@@ -1582,16 +1583,17 @@ If the side window is being created, it prompts for the source buffer."
 "
            :target (file+head "meetings/%<%Y-%m-%d>-${slug}.org"
                               "#+TITLE: ${title} %<%Y-%m-%d>
-#+ROAM_TAGS: meeting:general, meeting
+#+ROAM_TAGS: meeting:general,meeting
 #+FILETAGS: :meeting:general:meeting:
-:DATE: %<%Y-%m-%d %H:%M>
-:ATTENDEES: %(or (le/org-roam-select-nodes \"Attendees (select multiple people): \" \"person\") \"\")
-:PROJECT: %(or (le/org-roam-select-node \"Project (optional): \" \"project\") \"\")")
+#+DATE: %<%Y-%m-%d %H:%M>
+#+ATTENDEES: %(le/org-roam-select-nodes \"Attendees (select multiple people): \" \"person\")
+#+PROJECT: %(le/org-roam-select-node \"Project (optional): \" \"project\")")
            :unnarrowed t)
 
           ;; Project Meeting (j)
           ("j" "Project Meeting" plain
-           "* Raw Notes / Transcript (Paste here)
+           "
+* Raw Notes / Transcript (Paste here)
 %?
 
 * AI Synthesized Summary & Action Items
@@ -1607,16 +1609,17 @@ If the side window is being created, it prompts for the source buffer."
 "
            :target (file+head "meetings/%<%Y-%m-%d>-${slug}.org"
                               "#+TITLE: ${title} %<%Y-%m-%d>
-#+ROAM_TAGS: meeting:project, meeting, project
+#+ROAM_TAGS: meeting:project,meeting,project
 #+FILETAGS: :meeting:project:meeting:project:
-:DATE: %<%Y-%m-%d %H:%M>
-:ATTENDEES: %(or (le/org-roam-select-nodes \"Attendees (select multiple people): \" \"person\") \"\")
-:PROJECT: %(or (let (project (le/org-roam-select-nodes \"Project (required): \" ))) \"\")")
+#+DATE: %<%Y-%m-%d %H:%M>
+#+ATTENDEES: %(le/org-roam-select-nodes \"Attendees (select multiple people): \" \"person\")
+#+PROJECT: %(le/org-roam-select-node \"Project (required): \" \"project\")")
            :unnarrowed t)
 
           ;; One-on-One Meeting (o)
           ("o" "One-on-One Meeting" plain
-           "* Raw Notes / Discussion Points (Paste here)
+           "
+* Raw Notes / Discussion Points (Paste here)
 %?
 
 * AI Synthesized Summary & Action Items
@@ -1625,16 +1628,17 @@ If the side window is being created, it prompts for the source buffer."
 * Action Items
 "
            :target (file+head "meetings/1on1-%<%Y-%m-%d>-${slug}.org"
-                              "#+TITLE: 1:1 with %(let ((person (le/org-roam-select-node \"Person (required): \" \"person\"))) (unless person (error \"Person is required for a 1:1 Meeting\")) (org-roam-node-title person)) %<%Y-%m-%d>
-#+ROAM_TAGS: meeting:1on1, meeting, person
+                              "#+TITLE: 1:1 with %(progn (setq temp-person (le/org-roam-select-node \"Person (required): \" \"person\")) (if (string-empty-p temp-person) (error \"Person is required for a 1:1 Meeting\") (replace-regexp-in-string \"\\[\\[.*?\\]\\[\\(.*?\\)\\]\\]\" \"\\1\" temp-person))) %<%Y-%m-%d>
+#+ROAM_TAGS: meeting:1on1,meeting,person
 #+FILETAGS: :meeting:1on1:meeting:person:
-:DATE: %<%Y-%m-%d %H:%M>
-:PERSON: %(let ((person (le/org-roam-select-node \"Person (required): \" \"person\"))) person)")
+#+DATE: %<%Y-%m-%d %H:%M>
+#+PERSON: %(le/org-roam-select-node \"Person (required): \" \"person\")")
            :unnarrowed t)
 
           ;; Topic (t)
           ("t" "Topic (General Knowledge/Concept)" plain
-           "* Introduction
+           "
+* Introduction
 %?
 
 * Key Concepts
@@ -1647,14 +1651,14 @@ If the side window is being created, it prompts for the source buffer."
 - "
            :target (file+head "topics/${slug}.org"
                               "#+TITLE: ${title}
-#+ROAM_TAGS: knowledge:concept, knowledge
+#+ROAM_TAGS: knowledge:concept,knowledge
 #+FILETAGS: :knowledge:concept:knowledge:
-:DATE: %<%Y-%m-%d>")
+#+DATE: %<%Y-%m-%d>")
            :unnarrowed t)
 
           ;; Work Topic (w)
           ("w" "Work Topic (Company Specific)" plain
- "* Overview
+           "* Overview
 %?
 
 * Context
@@ -1663,17 +1667,17 @@ If the side window is being created, it prompts for the source buffer."
 
 * Key Stakeholders
 -"
- :target (file+head "work-topics/%(progn (setq temp-company (completing-read \"Company (stninc/discovery): \" '(\"stninc\" \"discovery\") nil t)) (downcase temp-company))-${slug}.org"
-                    "#+TITLE: ${title}
+           :target (file+head "work-topics/%(progn (setq temp-company (completing-read \"Company (stninc/discovery): \" '(\"stninc\" \"discovery\") nil t)) (downcase temp-company))-${slug}.org"
+                              "#+TITLE: ${title}
 #+ROAM_TAGS: %(format \"%s,work-topic\" (downcase temp-company))
 #+FILETAGS: :%(format \"%s:work-topic\" (downcase temp-company)):
 #+DATE: %<%Y-%m-%d>
-#+PROJECT: %(or (le/org-roam-select-node \"Related Project (optional): \" \"project\") \"\")")
- :unnarrowed t)
+#+PROJECT: %(le/org-roam-select-node \"Related Project (optional): \" \"project\")")
+           :unnarrowed t)
 
           ;; Learn Topic (l)
           ("l" "Learn Topic (Skill/Tool Focused)" plain
- "* My Notes
+           "* My Notes
 
 %?
 
@@ -1683,17 +1687,18 @@ If the side window is being created, it prompts for the source buffer."
 
 * Resources
 - "
- :target (file+head "learning/%(progn (setq temp-type (completing-read \"Type (skill/tool/concept): \" '(\"skill\" \"tool\" \"concept\") nil t)) (downcase temp-type))-${slug}.org"
-                    "#+TITLE: ${title}
+           :target (file+head "learning/%(progn (setq temp-type (completing-read \"Type (skill/tool/concept): \" '(\"skill\" \"tool\" \"concept\") nil t)) (downcase temp-type))-${slug}.org"
+                              "#+TITLE: ${title}
 #+ROAM_TAGS: %(format \"learning,%s\" (downcase temp-type))
 #+FILETAGS: :learning:%(downcase temp-type):
 #+DATE: %<%Y-%m-%d>
 #+SOURCE: %(read-from-minibuffer \"Source (e.g., Book, Course, Blog): \")")
- :unnarrowed t)
+           :unnarrowed t)
 
           ;; Person Capture Template (p)
           ("p" "Person" plain
-           "* Work Context
+           "
+* Work Context
 ** Professional Background
 %?
 
@@ -1734,22 +1739,23 @@ If the side window is being created, it prompts for the source buffer."
                               "#+TITLE: ${title}
 #+ROAM_TAGS: person
 #+FILETAGS: :person:
-:DATE: %<%Y-%m-%d>
-:FULL_NAME: ${title}
-:ROLE: %(read-from-minibuffer \"Role: \")
-:TEAM: %(read-from-minibuffer \"Team: \")
-:EMAIL: %(read-from-minibuffer \"Email: \")
-:MANAGER: %(read-from-minibuffer \"Manager: \")
-:LOCATION: %(read-from-minibuffer \"Location: \")
-:START_DATE: %(read-from-minibuffer \"Start Date (General Year or Exact Date: YYYY-MM-DD): \")
-:SLACK: %(read-from-minibuffer \"Slack Handle: \")
-:JIRA_PROFILE: %(read-from-minibuffer \"JIRA Profile URL: \")
-:CONFLUENCE_SPACE: %(read-from-minibuffer \"Confluence Personal Space URL: \")")
+#+DATE: %<%Y-%m-%d>
+#+FULL_NAME: ${title}
+#+ROLE: %(read-from-minibuffer \"Role: \")
+#+TEAM: %(read-from-minibuffer \"Team: \")
+#+EMAIL: %(read-from-minibuffer \"Email: \")
+#+MANAGER: %(read-from-minibuffer \"Manager: \")
+#+LOCATION: %(read-from-minibuffer \"Location: \")
+#+START_DATE: %(read-from-minibuffer \"Start Date (General Year or Exact Date: YYYY-MM-DD): \")
+#+SLACK: %(read-from-minibuffer \"Slack Handle: \")
+#+JIRA_PROFILE: %(read-from-minibuffer \"JIRA Profile URL: \")
+#+CONFLUENCE_SPACE: %(read-from-minibuffer \"Confluence Personal Space URL: \")")
            :unnarrowed t)
 
           ;; Project Capture Template (P)
           ("P" "Project" plain
-           "* Project Overview
+           "
+* Project Overview
 %?
 
 * Goals & Objectives
@@ -1775,48 +1781,51 @@ If the side window is being created, it prompts for the source buffer."
                               "#+TITLE: ${title}
 #+ROAM_TAGS: project
 #+FILETAGS: :project:
-:DATE: %<%Y-%m-%d>
-:PROJECT_NAME: ${title}
-:STATUS: %(completing-read \"Status (Planning/In Progress/On Hold/Completed): \" '(\"Planning\" \"In Progress\" \"On Hold\" \"Completed\") nil t)
-:PRIORITY: %(completing-read \"Priority (High/Medium/Low): \" '(\"High\" \"Medium\" \"Low\") nil t)
-:TEAM: %(read-from-minibuffer \"Team/Department: \")
-:START_DATE: %(read-from-minibuffer \"Start Date (YYYY-MM-DD): \")
-:TARGET_DATE: %(read-from-minibuffer \"Target Date (YYYY-MM-DD, optional): \")
-:ACTUAL_DATE: %(read-from-minibuffer \"Actual Completion Date (YYYY-MM-DD, optional): \")
-:PROJECT_MANAGER: %(or (le/org-roam-select-nodes \"Project Manager (optional): \" ) \"\")
-:TECH_LEAD: %(or (le/org-roam-select-nodes \"Tech Lead (optional): \" ) \"\")
-:STAKEHOLDERS: %(or (le/org-roam-select-nodes \"Stakeholders (select multiple people, optional): \" ) \"\")
-:SLACK_CHANNEL: %(read-from-minibuffer \"Slack Channel: \")
-:REPOSITORY: %(read-from-minibuffer \"Repository URL: \")
-:JIRA_PROJECT: %(read-from-minibuffer \"JIRA Project Key: \")
-:BUDGET: %(read-from-minibuffer \"Budget: \")")
+#+DATE: %<%Y-%m-%d>
+#+PROJECT_NAME: ${title}
+#+STATUS: %(completing-read \"Status (Planning/In Progress/On Hold/Completed): \" '(\"Planning\" \"In Progress\" \"On Hold\" \"Completed\") nil t)
+#+PRIORITY: %(completing-read \"Priority (High/Medium/Low): \" '(\"High\" \"Medium\" \"Low\") nil t)
+#+TEAM: %(read-from-minibuffer \"Team/Department: \")
+#+START_DATE: %(read-from-minibuffer \"Start Date (YYYY-MM-DD): \")
+#+TARGET_DATE: %(read-from-minibuffer \"Target Date (YYYY-MM-DD, optional): \")
+#+ACTUAL_DATE: %(read-from-minibuffer \"Actual Completion Date (YYYY-MM-DD, optional): \")
+#+PROJECT_MANAGER: %(le/org-roam-select-nodes \"Project Manager (optional): \" \"person\")
+#+TECH_LEAD: %(le/org-roam-select-nodes \"Tech Lead (optional): \" \"person\")
+#+STAKEHOLDERS: %(le/org-roam-select-nodes \"Stakeholders (select multiple people, optional): \" \"person\")
+#+SLACK_CHANNEL: %(read-from-minibuffer \"Slack Channel: \")
+#+REPOSITORY: %(read-from-minibuffer \"Repository URL: \")
+#+JIRA_PROJECT: %(read-from-minibuffer \"JIRA Project Key: \")
+#+BUDGET: %(read-from-minibuffer \"Budget: \")")
            :unnarrowed t)
 
-;; Incident Log with Person Capture Template (i)
-("i" "Incident Log (with Person)" plain
- "* Incident Details (ENCRYPTED SECTION)
-#+BEGIN_SRC org :crypt t
+          ;; Incident Log with Person Capture Template (i)
+          ("I" "Incident Log (with Person)" plain
+
+           "
+* Incident Details (ENCRYPTED SECTION) :crypt:
+
 %?
-#+END_SRC
+
 * Resolution / Follow-up (Clear Text)
 "
- :target (file+head "incidents/incident-%<%Y-%m-%d>-${slug}.org"
-                    "#+TITLE: ${title}
+           :target (file+head "incidents/incident-%<%Y-%m-%d>-${slug}.org"
+                              "#+TITLE: ${title}
 #+ROAM_TAGS: issue:incident,person
 #+FILETAGS: :issue:incident:person:
 #+DATE: %<%Y-%m-%d>
-#+PERSON: %(or (le/org-roam-select-node \"Person Involved (required): \" \"person\") \"\")
+#+PERSON: %(le/org-roam-select-node \"Person Involved (required): \" \"person\")
 #+INCIDENT_TYPE: %(completing-read \"Incident Type: \" '(\"communication\" \"behavior\" \"performance\" \"policy\" \"harassment\" \"discrimination\") nil t)
 #+SEVERITY: %(completing-read \"Severity (Low/Medium/High/Critical): \" '(\"Low\" \"Medium\" \"High\" \"Critical\") nil t)
 #+STATUS: %(completing-read \"Status (Open/Investigating/Resolved/Closed): \" '(\"Open\" \"Investigating\" \"Resolved\" \"Closed\") nil t)
-#+WITNESSES: %(or (le/org-roam-select-nodes \"Witnesses (select multiple people, optional): \" \"person\") \"\")
-#+REPORTED_TO: %(or (le/org-roam-select-nodes \"Reported To (select multiple people, optional): \" \"person\") \"\")
+#+WITNESSES: %(le/org-roam-select-nodes \"Witnesses (select multiple people, optional): \" \"person\")
+#+REPORTED_TO: %(le/org-roam-select-nodes \"Reported To (select multiple people, optional): \" \"person\")
 #+FOLLOW_UP_DATE: %(read-from-minibuffer \"Follow-up Date (YYYY-MM-DD, optional): \")")
- :unnarrowed t)
+           :unnarrowed t)
 
-          ;; Troobleshooting Capture Template (I)
-          ("I" "Technical Issue Troubleshooting" plain
- "* Initial Observation & Symptoms
+          ;; Technical Issue Troubleshooting (I)
+          ("i" "Technical Issue Troubleshooting" plain
+
+           "* Initial Observation & Symptoms
 %?
 
 * Investigative Ideas to Take
@@ -1845,8 +1854,8 @@ If the side window is being created, it prompts for the source buffer."
 
 * Related Tickets / Documentation
 "
- :target (file+head "issues/%<%Y-%m-%d>-${slug}.org"
-                    "#+TITLE: ${title}
+           :target (file+head "issues/%<%Y-%m-%d>-${slug}.org"
+                              "#+TITLE: ${title}
 #+ROAM_TAGS: %(progn (setq temp-system-categories (completing-read-multiple \"System Categories (space-separated, e.g., linux k8s): \" '(\"linux\" \"gpu\" \"slurm\" \"container\" \"k8s\" \"ci\" \"iac\" \"artifactory\" \"github\" \"storage\" \"network\" \"code\") nil t)) (setq temp-additional-tags (completing-read-multiple \"Additional Tags (space-separated, e.g., performance security): \" '(\"performance\" \"security\" \"infrastructure\" \"ai-training\" \"ai-inference\") nil t)) (mapconcat 'identity (append (mapcar (lambda (x) (format \"issue:%s\" x)) temp-system-categories) (mapcar (lambda (x) (format \"issue:%s\" x)) temp-additional-tags) '(\"issue\")) \",\"))
 #+FILETAGS: :%(mapconcat 'identity (append (mapcar (lambda (x) (format \"issue:%s\" x)) temp-system-categories) (mapcar (lambda (x) (format \"issue:%s\" x)) temp-additional-tags) '(\"issue\")) \":\"):
 #+DATE: %<%Y-%m-%d>
@@ -1856,10 +1865,10 @@ If the side window is being created, it prompts for the source buffer."
 #+STATUS: %(completing-read \"Status (Open/In Progress/Awaiting Info/Resolved/Closed): \" '(\"Open\" \"In Progress\" \"Awaiting Info\" \"Resolved\" \"Closed\") nil t)
 #+SEVERITY: %(completing-read \"Severity (Minor/Major/Critical/Blocker): \" '(\"Minor\" \"Major\" \"Critical\" \"Blocker\") nil t)
 #+SYSTEMS_AFFECTED: %(read-from-minibuffer \"Systems Affected (comma-separated): \")
-#+RELATED_PROJECT: %(or (le/org-roam-select-node \"Related Project (optional): \" \"project\") \"\")
-#+REPORTED_BY: %(or (le/org-roam-select-node \"Reported By (optional): \" \"person\") \"\")")
- :unnarrowed t)
-)))
+#+RELATED_PROJECT: %(le/org-roam-select-node \"Related Project (optional): \" \"project\")
+#+REPORTED_BY: %(le/org-roam-select-node \"Reported By (optional): \" \"person\")")
+           :unnarrowed t)
+          )))
 
 ;; Org-crypt configuration (part of Org-mode, no :ensure t)
 (use-package org-crypt

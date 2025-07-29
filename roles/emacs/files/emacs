@@ -1479,30 +1479,24 @@ If the side window is being created, it prompts for the source buffer."
       slug)))
 
 (defun le/org-roam-select-node (prompt &optional tags)
-  "Prompt user to select a single Org-roam node with an optional list of TAGS.
-   Returns an Org-roam link (e.g., [[id:UUID][TITLE]]) to the selected node.
-   If TAGS is nil, allows selection from all nodes.
-   If TAGS is a list, only allows selection from nodes matching all tags.
-   If user cancels, returns nil."
-  (interactive (list (read-from-minibuffer "Select node for: ")
-                     (read-from-minibuffer "Filter by tags (comma-separated, optional): ")))
-  (let* ((parsed-tags (when tags (split-string tags "," t "[ ]*")))
-         (node (org-roam-node-read prompt parsed-tags)))
-    (when node
-      (format "[[id:%s][%s]]" (org-roam-node-id node) (org-roam-node-title node)))))
+  "Prompt user to select a single Org-roam node with an optional list of TAGS."
+  (let* ((parsed-tags (when (and tags (stringp tags) (not (string-empty-p tags)))
+                        (split-string tags "," t "[ ]*")))
+         (node (condition-case err
+                   (org-roam-node-read prompt parsed-tags)
+                 (error
+                  (message "Error in org-roam-node-read: %s" err)
+                  nil)
+                 (quit nil))))
+    (if node
+        (format "[[id:%s][%s]]" (org-roam-node-id node) (org-roam-node-title node))
+      "")))  ; Return empty string instead of nil
 
 (defun le/org-roam-select-nodes (prompt &optional tags)
-  "Prompt user to select multiple Org-roam nodes with an optional list of TAGS.
-   Returns a space-separated string of Org-roam links.
-   If TAGS is nil, allows selection from all nodes.
-   If TAGS is a list, only allows selection from nodes matching all tags.
-   If user cancels or selects none, returns an empty string."
-  (interactive (list (read-from-minibuffer "Select nodes for: ")
-                     (read-from-minibuffer "Filter by tags (comma-separated, optional): ")))
-  (let* ((parsed-tags (when tags (split-string tags "," t "[ ]*")))
-         ;; org-roam-node-list doesn't take arguments - get all nodes first
+  "Prompt user to select multiple Org-roam nodes with an optional list of TAGS."
+  (let* ((parsed-tags (when (and tags (stringp tags) (not (string-empty-p tags)))
+                        (split-string tags "," t "[ ]*")))
          (all-nodes (org-roam-node-list))
-         ;; Then filter by tags if needed
          (available-nodes (if parsed-tags
                               (cl-remove-if-not
                                (lambda (node)
@@ -1512,7 +1506,12 @@ If the side window is being created, it prompts for the source buffer."
                                all-nodes)
                             all-nodes))
          (node-titles (mapcar #'org-roam-node-title available-nodes))
-         (selected-titles (completing-read-multiple prompt node-titles nil t)))
+         (selected-titles (condition-case err
+                              (completing-read-multiple prompt node-titles nil t)
+                            (error
+                             (message "Error in completing-read-multiple: %s" err)
+                             nil)
+                            (quit nil))))
     (if selected-titles
         (mapconcat (lambda (title)
                      (let ((node (cl-find title available-nodes :key #'org-roam-node-title :test #'string=)))
@@ -1612,7 +1611,7 @@ If the side window is being created, it prompts for the source buffer."
 #+FILETAGS: :meeting:project:meeting:project:
 :DATE: %<%Y-%m-%d %H:%M>
 :ATTENDEES: %(or (le/org-roam-select-nodes \"Attendees (select multiple people): \" \"person\") \"\")
-:PROJECT: %(let ((project (le/org-roam-select-node \"Project (required): \" \"project\"))) (unless project (error \"Project is required for a Project Meeting\")) project)")
+:PROJECT: %(or (let (project (le/org-roam-select-nodes \"Project (required): \" ))) \"\")")
            :unnarrowed t)
 
           ;; One-on-One Meeting (o)
@@ -1639,10 +1638,10 @@ If the side window is being created, it prompts for the source buffer."
 %?
 
 * Key Concepts
-- 
+-
 
 * Related Topics
-- 
+-
 
 * Resources
 - "
@@ -1655,45 +1654,42 @@ If the side window is being created, it prompts for the source buffer."
 
           ;; Work Topic (w)
           ("w" "Work Topic (Company Specific)" plain
-           "* Overview
+ "* Overview
 %?
 
 * Context
 
-
 * Relevant Resources
 
-
 * Key Stakeholders
-- "
-           :target (file+head "work-topics/%(let ((company (completing-read \"Company (stninc/discovery): \" '(\"stninc\" \"discovery\") nil t))) (downcase company))-${slug}.org"
-                              "#+TITLE: ${title}
-#+ROAM_TAGS: %(let ((company (completing-read \"Company (stninc/discovery): \" '(\"stninc\" \"discovery\") nil t))) (format \"%s,work-topic\" (downcase company)))
-#+FILETAGS: :%(let ((company (completing-read \"Company (stninc/discovery): \" '(\"stninc\" \"discovery\") nil t))) (format \"%s:work-topic\" (downcase company))):
-:DATE: %<%Y-%m-%d>
-:PROJECT: %(or (le/org-roam-select-node \"Related Project (optional): \" \"project\") \"\")")
-           :unnarrowed t)
+-"
+ :target (file+head "work-topics/%(progn (setq temp-company (completing-read \"Company (stninc/discovery): \" '(\"stninc\" \"discovery\") nil t)) (downcase temp-company))-${slug}.org"
+                    "#+TITLE: ${title}
+#+ROAM_TAGS: %(format \"%s,work-topic\" (downcase temp-company))
+#+FILETAGS: :%(format \"%s:work-topic\" (downcase temp-company)):
+#+DATE: %<%Y-%m-%d>
+#+PROJECT: %(or (le/org-roam-select-node \"Related Project (optional): \" \"project\") \"\")")
+ :unnarrowed t)
 
           ;; Learn Topic (l)
           ("l" "Learn Topic (Skill/Tool Focused)" plain
-           "* My Notes
+ "* My Notes
+
 %?
 
 * Key Takeaways
 
-
 * Practice Exercises / Next Steps
-
 
 * Resources
 - "
-           :target (file+head "learning/%(let ((type (completing-read \"Type (skill/tool/concept): \" '(\"skill\" \"tool\" \"concept\") nil t))) (downcase type))-${slug}.org"
-                              "#+TITLE: ${title}
-#+ROAM_TAGS: learning:%(let ((type (completing-read \"Type (skill/tool/concept): \" '(\"skill\" \"tool\" \"concept\") nil t))) (downcase type)), learning
-#+FILETAGS: :learning:%(let ((type (completing-read \"Type (skill/tool/concept): \" '(\"skill\" \"tool\" \"concept\") nil t))) (downcase type)):learning:
-:DATE: %<%Y-%m-%d>
-:SOURCE: %(read-from-minibuffer \"Source (e.g., Book, Course, Blog): \")")
-           :unnarrowed t)
+ :target (file+head "learning/%(progn (setq temp-type (completing-read \"Type (skill/tool/concept): \" '(\"skill\" \"tool\" \"concept\") nil t)) (downcase temp-type))-${slug}.org"
+                    "#+TITLE: ${title}
+#+ROAM_TAGS: %(format \"learning,%s\" (downcase temp-type))
+#+FILETAGS: :learning:%(downcase temp-type):
+#+DATE: %<%Y-%m-%d>
+#+SOURCE: %(read-from-minibuffer \"Source (e.g., Book, Course, Blog): \")")
+ :unnarrowed t)
 
           ;; Person Capture Template (p)
           ("p" "Person" plain
@@ -1702,13 +1698,13 @@ If the side window is being created, it prompts for the source buffer."
 %?
 
 ** Current Projects
-- 
+-
 
 ** Skills & Expertise
-- 
+-
 
 ** Working Style
-- 
+-
 
 * Interaction History
 ** Meeting History
@@ -1722,13 +1718,13 @@ If the side window is being created, it prompts for the source buffer."
 #+END_QUERY
 
 ** Action Items (from/for this person)
-- 
+-
 
 ** Personal Notes
-- 
+-
 
 ** Strategy
-- 
+-
 
 ** Issue Log
 #+BEGIN_QUERY
@@ -1743,11 +1739,10 @@ If the side window is being created, it prompts for the source buffer."
 :ROLE: %(read-from-minibuffer \"Role: \")
 :TEAM: %(read-from-minibuffer \"Team: \")
 :EMAIL: %(read-from-minibuffer \"Email: \")
-:MANAGER: %(or (le/org-roam-select-node \"Manager (optional): \" \"person\") \"\")
+:MANAGER: %(read-from-minibuffer \"Manager: \")
 :LOCATION: %(read-from-minibuffer \"Location: \")
-:START_DATE: %(read-from-minibuffer \"Start Date (YYYY-MM-DD): \")
+:START_DATE: %(read-from-minibuffer \"Start Date (General Year or Exact Date: YYYY-MM-DD): \")
 :SLACK: %(read-from-minibuffer \"Slack Handle: \")
-:PHONE: %(read-from-minibuffer \"Phone: \")
 :JIRA_PROFILE: %(read-from-minibuffer \"JIRA Profile URL: \")
 :CONFLUENCE_SPACE: %(read-from-minibuffer \"Confluence Personal Space URL: \")")
            :unnarrowed t)
@@ -1788,41 +1783,40 @@ If the side window is being created, it prompts for the source buffer."
 :START_DATE: %(read-from-minibuffer \"Start Date (YYYY-MM-DD): \")
 :TARGET_DATE: %(read-from-minibuffer \"Target Date (YYYY-MM-DD, optional): \")
 :ACTUAL_DATE: %(read-from-minibuffer \"Actual Completion Date (YYYY-MM-DD, optional): \")
-:PROJECT_MANAGER: %(or (le/org-roam-select-node \"Project Manager (optional): \" \"person\") \"\")
-:TECH_LEAD: %(or (le/org-roam-select-node \"Tech Lead (optional): \" \"person\") \"\")
-:STAKEHOLDERS: %(or (le/org-roam-select-nodes \"Stakeholders (select multiple people, optional): \" \"person\") \"\")
+:PROJECT_MANAGER: %(or (le/org-roam-select-nodes \"Project Manager (optional): \" ) \"\")
+:TECH_LEAD: %(or (le/org-roam-select-nodes \"Tech Lead (optional): \" ) \"\")
+:STAKEHOLDERS: %(or (le/org-roam-select-nodes \"Stakeholders (select multiple people, optional): \" ) \"\")
 :SLACK_CHANNEL: %(read-from-minibuffer \"Slack Channel: \")
 :REPOSITORY: %(read-from-minibuffer \"Repository URL: \")
 :JIRA_PROJECT: %(read-from-minibuffer \"JIRA Project Key: \")
 :BUDGET: %(read-from-minibuffer \"Budget: \")")
            :unnarrowed t)
 
-          ;; Incident Log with Person Capture Template (i)
-          ("i" "Incident Log (with Person)" plain
-           "* Incident Details (ENCRYPTED SECTION)
+;; Incident Log with Person Capture Template (i)
+("i" "Incident Log (with Person)" plain
+ "* Incident Details (ENCRYPTED SECTION)
 #+BEGIN_SRC org :crypt t
 %?
 #+END_SRC
-
 * Resolution / Follow-up (Clear Text)
 "
-           :target (file+head "incidents/%<%Y-%m-%d>-%(let ((person (le/org-roam-select-node \"Person Involved (required): \" \"person\"))) (le/org-roam-slugify (org-roam-node-title person)))-%(let ((type (completing-read \"Incident Type: \" '(\"communication\" \"behavior\" \"performance\" \"policy\" \"harassment\" \"discrimination\") nil t))) (le/org-roam-slugify type)).org"
-                              "#+TITLE: Incident with %(let ((person (le/org-roam-select-node \"Person Involved (required): \" \"person\"))) (org-roam-node-title person)) (%(let ((type (completing-read \"Incident Type: \" '(\"communication\" \"behavior\" \"performance\" \"policy\" \"harassment\" \"discrimination\") nil t))) type)) - %<%Y-%m-%d>
-#+ROAM_TAGS: issue:incident, person
+ :target (file+head "incidents/incident-%<%Y-%m-%d>-${slug}.org"
+                    "#+TITLE: ${title}
+#+ROAM_TAGS: issue:incident,person
 #+FILETAGS: :issue:incident:person:
-:DATE: %<%Y-%m-%d>
-:PERSON: %(let ((person (le/org-roam-select-node \"Person Involved (required): \" \"person\"))) person)
-:INCIDENT_TYPE: %(let ((type (completing-read \"Incident Type: \" '(\"communication\" \"behavior\" \"performance\" \"policy\" \"harassment\" \"discrimination\") nil t))) type)
-:SEVERITY: %(completing-read \"Severity (Low/Medium/High/Critical): \" '(\"Low\" \"Medium\" \"High\" \"Critical\") nil t)
-:STATUS: %(completing-read \"Status (Open/Investigating/Resolved/Closed): \" '(\"Open\" \"Investigating\" \"Resolved\" \"Closed\") nil t)
-:WITNESSES: %(or (le/org-roam-select-nodes \"Witnesses (select multiple people, optional): \" \"person\") \"\")
-:REPORTED_TO: %(or (le/org-roam-select-nodes \"Reported To (select multiple people, optional): \" \"person\") \"\")
-:FOLLOW_UP_DATE: %(read-from-minibuffer \"Follow-up Date (YYYY-MM-DD, optional): \")")
-           :unnarrowed t)
+#+DATE: %<%Y-%m-%d>
+#+PERSON: %(or (le/org-roam-select-node \"Person Involved (required): \" \"person\") \"\")
+#+INCIDENT_TYPE: %(completing-read \"Incident Type: \" '(\"communication\" \"behavior\" \"performance\" \"policy\" \"harassment\" \"discrimination\") nil t)
+#+SEVERITY: %(completing-read \"Severity (Low/Medium/High/Critical): \" '(\"Low\" \"Medium\" \"High\" \"Critical\") nil t)
+#+STATUS: %(completing-read \"Status (Open/Investigating/Resolved/Closed): \" '(\"Open\" \"Investigating\" \"Resolved\" \"Closed\") nil t)
+#+WITNESSES: %(or (le/org-roam-select-nodes \"Witnesses (select multiple people, optional): \" \"person\") \"\")
+#+REPORTED_TO: %(or (le/org-roam-select-nodes \"Reported To (select multiple people, optional): \" \"person\") \"\")
+#+FOLLOW_UP_DATE: %(read-from-minibuffer \"Follow-up Date (YYYY-MM-DD, optional): \")")
+ :unnarrowed t)
 
-          ;; Technical Issue Troubleshooting Capture Template (I)
+          ;; Troobleshooting Capture Template (I)
           ("I" "Technical Issue Troubleshooting" plain
-           "* Initial Observation & Symptoms
+ "* Initial Observation & Symptoms
 %?
 
 * Investigative Ideas to Take
@@ -1831,45 +1825,41 @@ If the side window is being created, it prompts for the source buffer."
 - [ ] Idea 3...
 
 * Troubleshooting Steps Taken
-- 
+-
 
 * Analysis & Hypothesis
 
-
 * Root Cause Identified
-
 
 * Resolution Steps
 
-
 * Verification
-
 
 * Lessons Learned
 
-
 * Relevant Logs/Traces
+
 #+BEGIN_SRC bash
 # Your log snippets here
 #+END_SRC
 
 * Related Tickets / Documentation
 "
-           :target (file+head "issues/%<%Y-%m-%d>-${slug}.org"
-                              "#+TITLE: ${title}
-#+ROAM_TAGS: %(let* ((system-categories (completing-read-multiple \"System Categories (space-separated, e.g., linux k8s): \" '(\"linux\" \"gpu\" \"slurm\" \"container\" \"k8s\" \"ci\" \"iac\" \"artifactory\" \"github\" \"storage\" \"network\" \"code\") nil t)) (additional-tags (completing-read-multiple \"Additional Tags (space-separated, e.g., performance security): \" '(\"performance\" \"security\" \"infrastructure\" \"ai-training\" \"ai-inference\") nil t))) (mapconcat 'identity (append (mapcar (lambda (x) (format \"issue:%s\" x)) system-categories) (mapcar (lambda (x) (format \"issue:%s\" x)) additional-tags) '(\"issue\")) \",\"))
-#+FILETAGS: :%(let* ((system-categories (completing-read-multiple \"System Categories (space-separated, e.g., linux k8s): \" '(\"linux\" \"gpu\" \"slurm\" \"container\" \"k8s\" \"ci\" \"iac\" \"artifactory\" \"github\" \"storage\" \"network\" \"code\") nil t)) (additional-tags (completing-read-multiple \"Additional Tags (space-separated, e.g., performance security): \" '(\"performance\" \"security\" \"infrastructure\" \"ai-training\" \"ai-inference\") nil t))) (mapconcat 'identity (append (mapcar (lambda (x) (format \"issue:%s\" x)) system-categories) (mapcar (lambda (x) (format \"issue:%s\" x)) additional-tags) '(\"issue\")) \":\"))::
-:DATE: %<%Y-%m-%d>
-:ISSUE_TITLE: ${title}
-:DATE_REPORTED: %<%Y-%m-%d>
-:DATE_RESOLVED: %(read-from-minibuffer \"Date Resolved (YYYY-MM-DD, optional): \")
-:STATUS: %(completing-read \"Status (Open/In Progress/Awaiting Info/Resolved/Closed): \" '(\"Open\" \"In Progress\" \"Awaiting Info\" \"Resolved\" \"Closed\") nil t)
-:SEVERITY: %(completing-read \"Severity (Minor/Major/Critical/Blocker): \" '(\"Minor\" \"Major\" \"Critical\" \"Blocker\") nil t)
-:SYSTEMS_AFFECTED: %(read-from-minibuffer \"Systems Affected (comma-separated): \")
-:RELATED_PROJECT: %(or (le/org-roam-select-node \"Related Project (optional): \" \"project\") \"\")
-:REPORTED_BY: %(or (le/org-roam-select-node \"Reported By (optional): \" \"person\") \"\")")
-           :unnarrowed t)
-          )))
+ :target (file+head "issues/%<%Y-%m-%d>-${slug}.org"
+                    "#+TITLE: ${title}
+#+ROAM_TAGS: %(progn (setq temp-system-categories (completing-read-multiple \"System Categories (space-separated, e.g., linux k8s): \" '(\"linux\" \"gpu\" \"slurm\" \"container\" \"k8s\" \"ci\" \"iac\" \"artifactory\" \"github\" \"storage\" \"network\" \"code\") nil t)) (setq temp-additional-tags (completing-read-multiple \"Additional Tags (space-separated, e.g., performance security): \" '(\"performance\" \"security\" \"infrastructure\" \"ai-training\" \"ai-inference\") nil t)) (mapconcat 'identity (append (mapcar (lambda (x) (format \"issue:%s\" x)) temp-system-categories) (mapcar (lambda (x) (format \"issue:%s\" x)) temp-additional-tags) '(\"issue\")) \",\"))
+#+FILETAGS: :%(mapconcat 'identity (append (mapcar (lambda (x) (format \"issue:%s\" x)) temp-system-categories) (mapcar (lambda (x) (format \"issue:%s\" x)) temp-additional-tags) '(\"issue\")) \":\"):
+#+DATE: %<%Y-%m-%d>
+#+ISSUE_TITLE: ${title}
+#+DATE_REPORTED: %<%Y-%m-%d>
+#+DATE_RESOLVED: %(read-from-minibuffer \"Date Resolved (YYYY-MM-DD, optional): \")
+#+STATUS: %(completing-read \"Status (Open/In Progress/Awaiting Info/Resolved/Closed): \" '(\"Open\" \"In Progress\" \"Awaiting Info\" \"Resolved\" \"Closed\") nil t)
+#+SEVERITY: %(completing-read \"Severity (Minor/Major/Critical/Blocker): \" '(\"Minor\" \"Major\" \"Critical\" \"Blocker\") nil t)
+#+SYSTEMS_AFFECTED: %(read-from-minibuffer \"Systems Affected (comma-separated): \")
+#+RELATED_PROJECT: %(or (le/org-roam-select-node \"Related Project (optional): \" \"project\") \"\")
+#+REPORTED_BY: %(or (le/org-roam-select-node \"Reported By (optional): \" \"person\") \"\")")
+ :unnarrowed t)
+)))
 
 ;; Org-crypt configuration (part of Org-mode, no :ensure t)
 (use-package org-crypt

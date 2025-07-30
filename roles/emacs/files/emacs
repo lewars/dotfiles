@@ -393,8 +393,7 @@
 (unless (server-running-p)
   (server-start))
 
-(when (fboundp 'windmove-default-keybindings)
-  (windmove-default-keybindings))
+(windmove-default-keybindings)
 (global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
 (global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
 (global-set-key (kbd "S-C-<down>") 'shrink-window)
@@ -403,7 +402,6 @@
 (global-set-key (read-kbd-macro "M-S-<right>") 'windmove-swap-states-right)
 (global-set-key (read-kbd-macro "M-S-<up>") 'windmove-swap-states-up)
 (global-set-key (read-kbd-macro "M-S-<down>") 'windmove-swap-states-down)
-;; (global-set-key (read-kbd-macro "C-x f") 'find-file-at-point)
 
 ;; Setup keybinding for eww
 (defun le/my-eww-config ()
@@ -457,14 +455,14 @@
                            space-mark tab-mark
                            missing-newline-at-eof)))
 
-;; (use-package whitespace-cleanup-mode
-;;   :ensure t
-;;   :after whitespace
-;;   :bind
-;;   ("C-c C" . whitespace-cleanup)
-;;   :init (setq whitespace-cleanup-mode-ignore-modes '(special-mode))
-;;   :hook ((prog-mode . whitespace-cleanup-mode)
-;;          (org-mode . whitespace-cleanup-mode)))
+(use-package whitespace-cleanup-mode
+  :ensure t
+  :after whitespace
+  :bind
+  ("C-c w" . whitespace-cleanup)
+  :init (setq whitespace-cleanup-mode-ignore-modes '(special-mode))
+  :hook ((prog-mode . whitespace-cleanup-mode)
+         (org-mode . whitespace-cleanup-mode)))
 
 (use-package paren
   :ensure nil
@@ -1161,8 +1159,6 @@ If the side window is being created, it prompts for the source buffer."
 (use-package flycheck
   :ensure t
   ;; :init (global-flycheck-mode)
-  :bind (("M-n" . flycheck-next-error)
-         ("M-p" . flycheck-previous-error))
   :config (setq-default flycheck-checker-error-threshold 2048)
   ;; add a lambda for flycheck-rror-list-mode-hook
   (add-hook 'flycheck-error-list-mode-hook
@@ -1357,18 +1353,6 @@ If the side window is being created, it prompts for the source buffer."
             #'(lambda ()
                 (ibuffer-switch-to-saved-filter-groups "default"))))
 
-;; (defun le/org-mode-visual-fill ()
-;;   "Setup visual-fill-mode."
-;;   (setq visual-fill-column-width 80)
-;;   ;; (setq visual-fill-column-width 80
-;;   ;;       visual-fill-column-center-text t)
-;;   (visual-fill-column-mode 1))
-
-;; (use-package visual-fill-column
-;;   :ensure t
-;;   :defer t
-;;   :hook (org-mode . le/org-mode-visual-fill))
-
 (add-hook 'visual-line-mode-hook #'visual-fill-column-mode)
 
 (defun le/what-face (pos)
@@ -1380,53 +1364,49 @@ If the side window is being created, it prompts for the source buffer."
         (message "Face: %s" face)
       (message "No face at %d" pos))))
 
-;; (defun le/org-mode-return ()
-;;   "Insert a new heading or continue list item on RET, depending on context."
-;;   (interactive)
-;;   (if (org-at-heading-p)
-;;       (org-return)
-;;     (let ((line-start (buffer-substring-no-properties
-;;                        (line-beginning-position)
-;;                        (line-end-position))))
-;;       (cond
-;;        ((string-match "^ *\\(\\-\\|\\+\\|\\*\\) \\[ \\]" line-start) ; Checkbox items
-;;         (org-insert-item t))
-;;        ((string-match "^ *\\(\\-\\|\\+\\|\\*\\) " line-start) ; Unordered list items
-;;         (org-insert-item))
-;;        ((string-match "^ *\\([0-9]+\\)\\(\\.\\|)\\) " line-start) ; Ordered list items
-;;         (org-insert-item nil))
-;;        ((string-match "^ *\\(\\-\\|\\+\\|\\*\\) .* :: " line-start) ; Term/Description
-;;         (org-insert-item))
-;;        (t
-;;         (org-return))))))
-
-;; (defun le/org-mode-basic-setup ()
-;;   "Perform some basic non-org-mode configuration setup at hook execution."
-;;   (variable-pitch-mode 1)
-;;   (setq-local line-spacing 0.2)
-;;   (auto-fill-mode 0)
-;;   (visual-line-mode t)
-;;   (setq-local show-trailing-whitespace nil)
-;;   (setq-local hl-line-mode nil))
-
 ;; Org-mode visual line and padding setup
 (defun le/my-org-mode-visual-line-setup ()
   "Enable visual line wrapping at 120 characters for Org mode."
-  (setq-local visual-fill-column-width 120)
-  (setq-default visual-fill-column-center-text t)
-  (visual-fill-column-mode 1))
+  (setq-local visual-fill-column-width 120)          ; Set line wrap width of characters for this buffer
+  (setq-local line-spacing 0.1)                      ; Add extra spacing between lines
+  (setq-default visual-fill-column-center-text t)    ; Center text globally (affects all buffers)
+  (visual-fill-column-mode 1))                       ; Enable visual-fill-column mode
+
+;; Define functions before use-package
+(defun le/my-org-mode-setup-yasnippet ()
+  "Setup yasnippet for Org mode."
+  (setq-local yas-trigger-key [tab])
+  (define-key yas-keymap [tab] 'yas-next-field-or-maybe-expand)
+  (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
 
 (defun le/my-org-mode-add-padding ()
   "Add a bit of left and right padding to Org mode buffers."
   (setq-local left-margin-width 100))
 
+;; Define the windmove setup function
+(defun le/my-org-mode-windmove-setup ()
+  "Configure windmove to use S-s-<cursor> in org-mode."
+  ;; Disable windmove's S-<cursor> bindings in org-mode
+  (local-unset-key (kbd "S-<left>"))
+  (local-unset-key (kbd "S-<right>"))
+  (local-unset-key (kbd "S-<up>"))
+  (local-unset-key (kbd "S-<down>"))
+  windmove-mode -1)
+
 ;; Org-mode core configuration
 (use-package org
   :ensure t
-  :bind
-  ("C-c c" . org-capture)
-  :hook ((org-mode . le/my-org-mode-visual-line-setup)
-         (org-mode . le/my-org-mode-add-padding))
+  :bind (("C-c c" . org-capture)
+         :map org-mode-map
+         ("S-<left>" . org-shiftleft)
+         ("S-<right>" . org-shiftright)
+         ("S-<up>" . org-shiftup)
+         ("S-<down>" . org-shiftdown))
+  :hook ( ;; org-mode hooks
+         (org-mode . le/my-org-mode-visual-line-setup)
+         (org-mode . le/my-org-mode-setup-yasnippet)
+         (org-mode . le/my-org-mode-windmove-setup)
+         )
   :config
   (setq
    org-startup-with-inline-images t
@@ -1438,7 +1418,22 @@ If the side window is being created, it prompts for the source buffer."
    org-ellipsis " !!!"             ; Set symbole when folding
    org-catch-invisible-edits 'show-and-error ; Check if in invisible region before modification
    org-hide-block-properties nil ; Don't hide :PROPERTIES: and :END: lines when folded
-   )
+   org-clock-sound "~/.emacs.d/org/media/alarm.mp3" ; Sound for timeout - promodoro
+   org-special-ctrl-a/e t        ; Enable special behavior for C-a and C-e in Org mode
+
+   ;; TODO workflow configuration
+   org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "REVIEW" "REPEAT" "BLOCKED" "|" "DONE" "CANCELED"))
+
+   ;; TODO keyword faces with darker, less saturated background colors
+   org-todo-keyword-faces '(
+                            ("TODO" . (:foreground "white" :background "#26449d" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("IN-PROGRESS" . (:foreground "black" :background "#d5ad2a" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("REVIEW" . (:foreground "white" :background "#9369d9" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("REPEAT" . (:foreground "black" :background "#89b5d9" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("BLOCKED" . (:foreground "white" :background "#d95252" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("DONE" . (:foreground "black" :background "#89d989" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("CANCELED" . (:foreground "#4a4a4a" :background "#bdbdbd" :weight normal :height 0.88 :box (:line-width 3 :style nil :color "#263238"))))
+  )
 
   (custom-set-faces
    '(org-document-title
@@ -1463,21 +1458,6 @@ If the side window is being created, it prompts for the source buffer."
      ((t (:inherit (bold variable-pitch) :foreground "gray90"))))))
 
 ;; --- Custom Helper Functions for Capture Templates ---
-
-(defun le/org-roam-slugify (text)
-  "Slugify TEXT for use in filenames.
-   Converts spaces to hyphens, removes non-alphanumeric characters,
-   and lowercases the string.
-   Prioritizes `slug.el` if available, falls back to basic regex."
-  (interactive "sText to slugify: ")
-  (if (fboundp 'slug-code)
-      (slug-code text)
-    (let ((slug (downcase text)))
-      (setq slug (replace-regexp-in-string "[^a-zA-Z0-9_-]+" "-" slug))
-      (setq slug (replace-regexp-in-string "--+" "-" slug))
-      (setq slug (string-trim slug "-"))
-      slug)))
-
 (defun le/org-roam-select-node (prompt &optional tags)
   "Prompt user to select a single Org-roam node with an optional list of TAGS."
   (let* ((parsed-tags (when (and tags (stringp tags) (not (string-empty-p tags)))
@@ -1549,14 +1529,18 @@ If the side window is being created, it prompts for the source buffer."
          )
   )
 
-;; --- Org-roam UI Configuration (optional, uncomment to enable) ---
-;; (use-package org-roam-ui
-;;    :ensure t
-;;    :after org-roam
-;;    :config
-;;    (setq org-roam-ui-open-on-start t
-;;          org-roam-ui-update-interval 5)
-;;    (org-roam-ui-mode +1))
+(use-package org-bullets
+  :ensure t
+  :hook (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("◉" "●" "○" "●" "○" "●")))
+
+
+(use-package org-roam-ui
+   :ensure t
+   :after org-roam
+   :config
+   (setq org-roam-ui-sync-theme t))
 
 ;; --- Org-roam Capture Templates ---
 (use-package org-roam-capture
@@ -1910,245 +1894,15 @@ If the side window is being created, it prompts for the source buffer."
   ;; (setq ob-mermaid-executable "/usr/bin/mmdc")
   )
 
-;; (use-package org-appear
-;;   :ensure t
-;;   :hook (org-mode . org-appear-mode)
-;;   :custom
-;;   (org-appear-autoemphasis t)
-;;   (org-appear-autolinks t)
-;;   (org-appear-sutosudmarkers t)
-;;   (org-appear-trigger 'always)
-;;   (org-appear-delay 0.5))
-
-
-
-;; start of "use-package org" for the main org-mode section
-;; (use-package org
-;;   :defer t
-;;   :pin gnu
-;;   :init
-;;   ;; :hook
-;;   ;; (org-mode . le/org-mode-basic-setup)
-;;   ;; (org-mode . le/org-mode-visual-fill)
-;;   :mode (("\\.org$" . org-mode))
-;;   :custom
-;;   (org-startup-indented t)
-;;   (org-log-done 'time)
-;;   (org-log-into-drawer t)
-;;   :config
-;;   (add-hook 'org-mode-hook
-;;           (lambda ()
-;;             (setq-local yas/trigger-key [tab])
-;;             (define-key yas/keymap [tab] 'yas/next-field-or-maybe-expand)
-;;             (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t)))
-;;   (define-key org-mode-map (kbd "RET")  #'le/org-mode-return)
-;;   ;; (setq
-;;   ;;  org-auto-align-tags t
-;;   ;;  org-blank-before-new-entry '((heading . nil) (plain-list-item . nil))
-;;   ;;  org-catch-invisible-edits 'show-and-error
-;;   ;;  org-cycle-separator-lines 2
-;;   ;;  org-fontify-quote-and-verse-blocks t
-;;   ;;  org-hide-emphasis-markers t
-;;   ;;  org-insert-heading-respect-content nil
-;;   ;;  org-list-indent-offset 2
-;;   ;;  org-log-repeat t
-;;   ;;  org-pretty-entities t
-;;   ;;  org-return-follows-link  t
-;;   ;;  org-special-ctrl-a/e t
-;;   ;;  org-support-shift-select nil
-;;   ;;  org-startup-with-inline-images t
-;;   ;;  org-image-actual-width nil
-;;   ;;  org-image-max-width 300
-
-;;   ;;  org-ellipsis "  🡇"
-;;   ;;  org-clock-sound "~/.emacs.d/org/media/alarm.wav"
-;;   ;;  ;; TODO keywords setup
-;;   ;;  org-todo-keywords
-;;   ;;  '((sequence "TODO(t)" "IN-PROGRESS(p)" "IN-REVIEW(r)" "WAITING(w)" "BLOCKED(b)" "WONT-DO(x)" "|" "DONE(d)" "DELEGATE(D)")
-;;   ;;    (sequence "REPEAT(R)" "|" "DONE(d)"))
-
-;;   ;;  ;; ("TODO" . (:background "#c3e88d" :foreground "white" :weight extra-bold))
-;;   ;;  ;; TODO face setup;
-;;   ;;  ;; org-modern-todo-faces
-;;   ;;  ;; '(("IN-PROGRESS" . (:background "DarkOrange" :foreground "white" :weight extra-bold))
-;;   ;;  ;;   ("REPEAT" . (:background "DarkViolet" :foreground "white" :weight extra-bold))
-;;   ;;  ;;   ("IN-REVIEW" . (:background "RoyalBlue" :foreground "white" :weight extra-bold))
-;;   ;;  ;;   ("WAITING" . (:background "DarkOrange3" :foreground "white" :weight extra-bold))
-;;   ;;  ;;   ("BLOCKED" . (:background "red" :foreground "white" :weight extra-bold))
-;;   ;;  ;;   ("WONT-DO" . (:background "plum" :foreground "black" :weight extra-bold))
-;;   ;;  ;;   ("DELEGATE" . (:background "DimGrey" :foreground "white" :weight extra-bold))
-;;   ;;  ;;   ("DONE" . (:background "DarkGreen" :foreground "white" :weight extra-bold)))
-
-;;   ;;  org-tag-faces
-;;   ;;  '(("pin" . (:foreground "red" :weight bold)))
-
-;;   ;;  ;; Agenda styling
-;;   ;;  ;; org-agenda-tags-column -80
-;;   ;;  ;; org-agenda-block-separator ?─
-;;   ;;  ;; org-agenda-time-grid
-;;   ;;  ;; '((daily today require-timed)
-;;   ;;  ;;   (800 1000 1200 1400 1600 1800 2000)
-;;   ;;  ;;   " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
-;;   ;;  ;; org-agenda-current-time-string
-;;   ;;  ;; "⭠ now ─────────────────────────────────────────────────"
-;;   ;;  )
-
-;;   ;; (setq org-modules
-;;   ;;       '(org-habit
-;;   ;;         org-bookmark))
-
-;;   ;; (setq org-refile-targets '((nil :maxlevel . 1)
-;;   ;;                            (org-agenda-files :maxlevel . 1)))
-
-;;   ;; (setq org-outline-path-complete-in-steps nil)
-;;   ;; (setq org-refile-use-outline-path t)
-
-;;   ;; (setq org-replace-disputed-keys t)
-
-;;   ;; (org-babel-do-load-languages
-;;   ;;  'org-babel-load-languages
-;;   ;;  '((emacs-lisp . t)
-;;   ;;    (python . t)
-;;   ;;    (makefile . t)
-;;   ;;    (css . t)
-;;   ;;    (eshell . t)
-;;   ;;    (dot . t)
-;;   ;;    (java . t)
-;;   ;;    (js . t)
-;;   ;;    (perl . t)
-;;   ;;    (processing . t)
-;;   ;;    (sql . t)
-;;   ;;    (sqlite . t)
-;;   ;;    (org . t)
-;;   ;;    (shell . t)
-;;   ;;    (C . t)
-;;   ;;    (sed . t)))
-;;   ;; (push '("conf-unix" . conf-unix) org-src-lang-modes)
-;;   ) ;; org-mode. End of "use-package org"
-
-
-;; (require 'org-protocol)
-;; (setq org-direcotry "~/note/")
-;; (defun transform-square-brackets-to-round-ones (string-to-transform)
-;;   "Transforms [ into ( and ] into ), other chars left unchanged."
-;;   (concat
-;;    (mapcar (lambda (c)
-;;              (cond ((equal c ?[) ?\()
-;;                    ((equal c ?]) ?\))
-;;                    (t c)))
-;;            string-to-transform)))
-
-;; (setq org-capture-templates
-;;       `(
-;;         ("p" "Protocol" entry (file+headline ,(concat org-directory "/" "notes.org") "Inbox")
-;;          "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
-;;         ("L" "Protocol Link" entry (file+headline ,(concat org-directory "/" "notes.org") "Inbox")
-;;          "* %? [[%:link][%(transform-square-brackets-to-round-ones \"%:description\")]]\n")
-;;         )
-;;   )
-
-;; (use-package org-modern
-;;   :ensure t
-;;   :after org
-;;   :custom
-;;   (org-modern-hide-stars nil)
-;;   (org-modern-hide-properties nil)
-;;   (org-modern-property nil)
-;;   (org-modern-keyword nil)
-;;   (org-modern-footnote nil)
-;;   (org-modern-property nil)
-;;   (org-modern-block-name nil)
-;;   (org-modern-star 'replace)
-;;   ;;(org-modern-replace-stars "◉○●○●○●")
-;;   (org-modern-replace-stars "●●●")
-;;   :hook
-;;   (org-mode . org-modern-mode)
-;;   (org-agenda-finalize . org-modern-agenda))
-
-;; (use-package org-roam
-;;   :ensure t
-;;   :disabled)
-
-;; (use-package org-roam-ql
-;;   :ensure t
-;;   :disabled
-;;   :after (org-roam))
-
-;; ;; org-download configuration for images
-;; (use-package org-download
-;;   :ensure t
-;;   :disabled
-;;   :after org
-;;   :custom
-;;   (org-download-method 'directory)
-;;   (org-download-image-dir "~/git/personal/notes/media/img")
-;;   (org-download-heading-lvl nil)
-;;   (org-download-timestamp "%Y%m%d-%H%M%S_")
-;;   :bind
-;;   (:map org-mode-map
-;;         (("C-c d s" . org-download-screenshot)
-;;          ("C-c d d" . org-download-delete)))
-;;   :config
-;;   (make-directory "~/git/personal/notes/media/img" t))
-
-;; ;; org-noter for PDF annotations
-;; (use-package org-noter
-;;   :ensure t
-;;   :disabled
-;;   :after org
-;;   :custom
-;;   (org-noter-notes-search-path '("~/git/personal/notes/linked"))
-;;   (org-noter-default-notes-file-names '("notes.org"))
-;;   (org-noter-separate-notes-from-heading t))
-
-;; ;; org-roam-ui configuration
-;; (use-package org-roam-ui
-;;   :ensure t
-;;   :disabled
-;;   :after org-roam
-;;   :custom
-;;   (org-roam-ui-sync-theme t)
-;;   (org-roam-ui-follow t)
-;;   (org-roam-ui-update-on-save t)
-;;   (org-roam-ui-open-on-start t))
-
-;; ;; PDF Tools (recommended for org-noter)
-;; (use-package pdf-tools
-;;   :ensure t
-;;   :custom
-;;   (pdf-view-display-size 'fit-page)
-;;   :config
-;;   (pdf-tools-install :no-query))
-
-;; (use-package org-make-toc
-;;   :ensure t
-;;   :hook (org-mode . org-make-toc-mode))
-
-;; (require 'ox-publish)
-
-;; (require 'ox-md)
-
-;; (use-package ox-hugo
-;;   :ensure t
-;;   :after org
-;;   :config
-;;   (setq org-hugo-base-dir (expand-file-name "~/git/kb/"))
-;;   (setq org-hugo-default-section-directory "docs"))
-
-;; (use-package org-projectile
-;;   :ensure t
-;;   :after org
-;;   :bind (("C-c n p" . org-projectile-project-todo-completing-read)
-;;          ("C-c l" . org-store-link)
-;;          ("C-c a" . org-agenda)
-;;          ("C-c c" . org-capture))
-  ;; :config
-  ;; (progn
-  ;;   (setq org-projectile-projects-file
-  ;;         (expand-file-name "~/git/personal/notes/projects/notes.org"))
-  ;;  (setq (or )rg-agenda-files (append org-agenda-files (org-projectile-todo-files)))
-  ;;  (push (org-projectile-project-todo-entry) org-capture-templates))
-  ;;)
+(use-package org-appear
+  :ensure t
+  :hook (org-mode . org-appear-mode)
+  :custom
+  (org-appear-autoemphasis t)      ; Show emphasis markers (*bold*, /italic/, etc.) when cursor is on them
+  (org-appear-autolinks t)         ; Show full link syntax when cursor is on links
+  (org-appear-sutosudmarkers t)    ; Show sub/superscript markers (^{} and _{}) when cursor is on them
+  (org-appear-trigger 'always)     ; Always trigger appearance changes (alternative: 'manual)
+  (org-appear-delay 0.5))          ; Wait 0.5 seconds before showing/hiding markup
 
 (use-package magit
   :ensure t
@@ -2341,25 +2095,6 @@ If the side window is being created, it prompts for the source buffer."
   :init
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref)
-  ;; (defvar consult-command-map
-  ;;   (let ((map (make-sparse-keymap)))
-  ;;     (define-key map "b" #'consult-buffer)
-  ;;     (define-key map "B" #'consult-bookmark)
-  ;;     (define-key map "l" #'consult-line)
-  ;;     (define-key map "i" #'consult-imenu)
-  ;;     (define-key map "r" #'consult-ripgrep)
-  ;;     (define-key map "f" #'consult-find)
-  ;;     (define-key map "F" #'consult-focus-lines)
-  ;;     (define-key map "G" #'consult-global-mark)
-  ;;     (define-key map "y" #'consult-yasnippet)
-
-  ;;     ;; nested keymap for 'g' prefix (git)
-  ;;     (let ((git-map (make-sparse-keymap)))
-  ;;       (define-key git-map "g" #'consult-git-grep)
-  ;;       (define-key git-map "l" #'consult-ls-git)
-  ;;       (define-key git-map "L" #'consult-ls-git-other-window)
-  ;;       (define-key map "g" git-map))
-  ;;     map))
   :config
   (consult-customize
    consult-ripgrep consult-git-grep consult-grep)
@@ -3055,8 +2790,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
           ("localhost" . textile-mode)))
   (setq atomic-chrome-buffer-open-style 'full))
 
-;; (use-package lorem-ipsum
-;;   :ensure t)
+(use-package lorem-ipsum
+  :ensure t)
 
 (use-package flyspell-correct
   :ensure t
@@ -3108,9 +2843,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (setq consult-gh-forge-timeout-seconds 20))
 
 
-;; (use-package consult-ls-git
-;;   :ensure t)
-
 ;; (use-package consult-org-roam
 ;;   :ensure t
 ;;   :disabled
@@ -3140,17 +2872,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 ;;   (consult-customize
 ;;    consult-org-roam-forward-links
 ;;    :preview-key "M-."))
-
-
-;; (use-package tree-sitter
-;;   ;; :ensure t
-;;   :config
-;;   (add-hook 'json-mode-hook #'tree-sitter-mode)
-;;   (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
-
-;; (use-package tree-sitter-langs
-;;   :ensure t
-;;   :after tree-sitter)
 
 
 ;; TODO: revert to C-c / g

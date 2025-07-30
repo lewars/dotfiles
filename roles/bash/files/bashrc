@@ -167,8 +167,11 @@ export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 export TODO_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/todo"
 export HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S  "
 
+source "${HOME}/.bashrc.secrets"
+
 # shopts
 set +o noclobber
+
 # if macosx disable autocd and dirspell
 if [[ "$OSTYPE" != "darwin"* ]]; then
   shopt -s autocd

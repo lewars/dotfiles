@@ -45,12 +45,6 @@
 
 ;; TODO: Improve scrolling
 (setq fast-but-imprecise-scrolling t)
-;; (setq jit-lock-defer-time 0.1)
-;; (setq redisplay-skip-fontification-on-input t)
-;; Enable jit-lock-stealth-time for background fontification
-;; (setq jit-lock-stealth-time 1)
-;; (setq jit-lock-stealth-nice 0.5)
-;; (setq jit-lock-chunk-size 100000000)
 
 ;; Increase read buffer size
 (setq read-buffer-size (* 8 1024 1024 1024))
@@ -368,13 +362,6 @@
 (setq explicit-shell-file-name "/bin/bash")
 (eval-after-load "term"
   '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
-
-;; Only vailable in emacs 29.1
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (setq auto-save-visited-predicate          ;;
-;;       (lambda () (eq major-mode 'org-mode) ;;
-;;         auto-save-visited-interval 5))     ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun le/my-c-mode-hook ()
   "This hook define hooks for 'c-mode'."
@@ -2286,9 +2273,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :hook (company-mode . company-quickhelp-mode)
   :config
   (setq company-quickhelp-delay 3))
-
-;; (require 'tree-sitter)
-;; (require 'tree-sitter-langs)
 
 (use-package corfu
   :ensure t

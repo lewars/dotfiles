@@ -1,5 +1,5 @@
 ;;; .emacs --- Emacs initialization file -*- mode: emacs-lisp; lexical-binding: t; -*-
-;; Copyright (C) 1996-2024 Alistair Y. Lewars
+;; Copyright (C) 1996-2025 Alistair Y. Lewars
 
 ;; Author: Alistair Y. Lewars
 
@@ -34,7 +34,6 @@
          (height (nth 3 geometry)))
     (and (> width 3840) (> height 2400))))
 
-
 ;; Global settings
 (setq gc-cons-threshold 100000000)
 (setq fill-column 120)
@@ -46,15 +45,67 @@
 
 ;; TODO: Improve scrolling
 (setq fast-but-imprecise-scrolling t)
-;; (setq jit-lock-defer-time 0.1)
-;; (setq redisplay-skip-fontification-on-input t)
-;; Enable jit-lock-stealth-time for background fontification
-;; (setq jit-lock-stealth-time 1)
-;; (setq jit-lock-stealth-nice 0.5)
-;; (setq jit-lock-chunk-size 100000000)
 
 ;; Increase read buffer size
 (setq read-buffer-size (* 8 1024 1024 1024))
+
+;; Additional settings for specific file types
+(add-to-list 'auto-mode-alist '("\\.log\\'" . fundamental-mode))
+(add-to-list 'auto-mode-alist '("\\.sql\\'" . fundamental-mode))
+(add-to-list 'auto-mode-alist '("\\.odt\\'" . docview-mode))
+
+(setq ispell-dictionary "english")
+(setq ispell-silently-savep t)
+(setq ispell-personal-dictionary (expand-file-name "~/.ispell_english"))
+
+(if (string-equal system-type "gnu/linux")
+    (if (le/monitor-name-is-eDP-1)
+        (setq my-default-font-height 150)
+      (setq my-default-font-height 100))
+    (setq my-default-font-height 108))
+
+;; Set fonts
+;;;
+(set-face-attribute 'default nil
+                    :height my-default-font-height
+                    :foundry "ADBO"
+                    :family "Source Code Pro")
+(set-face-attribute 'fixed-pitch nil
+                    :height my-default-font-height
+                    :foundry "ADBO"
+                    :family "Source Code Pro")
+(set-face-attribute 'variable-pitch nil
+                    :family "Atkinson Hyperlegible"
+                    :height 1.40)
+
+(require 'package)
+(setq package-archives
+      '(("gnu" . "https://elpa.gnu.org/packages/")
+        ("melpa" . "https://melpa.org/packages/")
+        ("melpa-stable" . "https://stable.melpa.org/packages/")
+        ))
+
+(setq package-archive-priorities
+      '(("gnu" . 30)
+        ("melpa-stable" . 20)
+        ("melpa" . 40)))
+
+(package-initialize)
+(package-refresh-contents)
+(package-install 'quelpa)
+(require 'use-package-ensure)
+(quelpa '(quelpa-use-package
+          :fetcher git
+          :url "https://github.com/quelpa/quelpa-use-package.git"))
+(require 'quelpa-use-package)
+
+;; Misc configs
+(delete-selection-mode 1)
+(require 'recentf)
+(recentf-mode t)
+(setq recentf-max-menu-items 50)
+(setq recentf-max-saved-items 50)
+(run-at-time nil (* 5 60) 'recentf-save-list)
 
 ;; A few more useful configurations...
 (use-package emacs
@@ -80,6 +131,47 @@
 ;; Handle large file
 ;; Enable so-long mode globally (built into Emacs 27+)
 ;; (global-so-long-mode 1)
+
+;; prog-mode settings and hooks
+(defun le/my-prog-mode-settings ()
+  (display-line-numbers-mode)
+  ;; (hl-line-mode)
+  (hs-minor-mode) ;; hideshow
+  (outline-minor-mode)
+  (setq auto-fill-mode 0)
+  (setq toggle-word-wrap 1)
+  (setq fill-column 160)
+  (setq display-fill-column-indicator 1)
+  (setq display-fill-column-indicator-column 80)
+  (setq indent-tabs-mode nil)
+  (setq tab-width 4)
+  (setq show-trailing-whitespace t)
+  (setq whitespace-style '(face
+                         tabs spaces trailing lines space-before-tab newline
+                         indentation empty space-after-tab
+                         space-mark tab-mark
+                         missing-newline-at-eof))
+  (local-set-key (kbd "C-c C-c") 'compile))
+
+(add-hook 'prog-mode-hook 'le/my-prog-mode-settings)
+(add-hook 'prog-mode-hook 'display-fill-column-indicator-mode t)
+
+;; text-mode settings and hooks
+(defun le/my-text-mode-settings ()
+  (setq-local show-trailing-whitespace nil)
+  (visual-line-mode)
+  (setq fill-column 220)
+  (setq sentence-end-double-space nil)
+  (flyspell-mode)
+  (setq show-trailing-whitespace t)
+  (setq whitespace-style '(face
+                         tabs spaces trailing lines space-before-tab newline
+                         indentation empty space-after-tab
+                         space-mark tab-mark
+                         missing-newline-at-eof))
+  (local-set-key (kbd "C-c C-w") 'count-words))
+
+(add-hook 'text-mode-hook 'le/my-text-mode-settings)
 
 (defun le/setup-large-file-handling-high-mem ()
   "Configure settings for better large file handling in Emacs on
@@ -158,107 +250,6 @@
 
 ;; Initialize the configuration
 ;; (le/setup-large-file-handling-high-mem)
-
-;; Additional settings for specific file types
-(add-to-list 'auto-mode-alist '("\\.log\\'" . fundamental-mode))
-(add-to-list 'auto-mode-alist '("\\.sql\\'" . fundamental-mode))
-(add-to-list 'auto-mode-alist '("\\.odt\\'" . docview-mode))
-
-;; prog-mode settings and hooks
-(defun le/my-prog-mode-settings ()
-  (display-line-numbers-mode)
-  ;; (hl-line-mode)
-  (hs-minor-mode) ;; hideshow
-  (outline-minor-mode)
-  (setq auto-fill-mode 0)
-  (setq toggle-word-wrap 1)
-  (setq fill-column 160)
-  (setq display-fill-column-indicator 1)
-  (setq display-fill-column-indicator-column 80)
-  (setq indent-tabs-mode nil)
-  (setq tab-width 4)
-  (setq show-trailing-whitespace t)
-  (setq whitespace-style '(face
-                         tabs spaces trailing lines space-before-tab newline
-                         indentation empty space-after-tab
-                         space-mark tab-mark
-                         missing-newline-at-eof))
-  (local-set-key (kbd "C-c C-c") 'compile))
-
-(add-hook 'prog-mode-hook 'le/my-prog-mode-settings)
-(add-hook 'prog-mode-hook 'display-fill-column-indicator-mode t)
-
-;; text-mode settings and hooks
-(defun le/my-text-mode-settings ()
-  (setq-local show-trailing-whitespace nil)
-  (visual-line-mode)
-  (setq fill-column 220)
-  (setq sentence-end-double-space nil)
-  (flyspell-mode)
-  (setq show-trailing-whitespace t)
-  (setq whitespace-style '(face
-                         tabs spaces trailing lines space-before-tab newline
-                         indentation empty space-after-tab
-                         space-mark tab-mark
-                         missing-newline-at-eof))
-  (local-set-key (kbd "C-c C-w") 'count-words))
-
-(add-hook 'text-mode-hook 'le/my-text-mode-settings)
-
-(setq ispell-dictionary "english")
-(setq ispell-silently-savep t)
-(setq ispell-personal-dictionary (expand-file-name "~/.ispell_english"))
-
-(if (string-equal system-type "gnu/linux")
-    (if (le/monitor-name-is-eDP-1)
-        (setq my-default-font-height 150)
-      (setq my-default-font-height 100))
-    (setq my-default-font-height 108))
-
-;; Set fonts
-;;;
-(set-face-attribute 'default nil
-                    :height my-default-font-height
-                    :foundry "ADBO"
-                    :family "Source Code Pro")
-(set-face-attribute 'fixed-pitch nil
-                    :height my-default-font-height
-                    :foundry "ADBO"
-                    :family "Source Code Pro")
-
-
-(set-face-attribute 'variable-pitch nil
-                    :family "Atkinson Hyperlegible"
-                    :height 1.28)
-
-(require 'package)
-(setq package-archives
-      '(("gnu" . "https://elpa.gnu.org/packages/")
-        ("melpa" . "https://melpa.org/packages/")
-        ("melpa-stable" . "https://stable.melpa.org/packages/")
-        ))
-
-(setq package-archive-priorities
-      '(("gnu" . 30)
-        ("melpa-stable" . 20)
-        ("melpa" . 40)))
-
-(package-initialize)
-(package-refresh-contents)
-(package-install 'quelpa)
-(require 'use-package-ensure)
-(quelpa '(quelpa-use-package
-          :fetcher git
-          :url "https://github.com/quelpa/quelpa-use-package.git"))
-(require 'quelpa-use-package)
-
-;; Misc configs
-(delete-selection-mode 1)
-(require 'recentf)
-(recentf-mode t)
-(setq recentf-max-menu-items 50)
-(setq recentf-max-saved-items 50)
-(run-at-time nil (* 5 60) 'recentf-save-list)
 
 ;; ffap
 (require 'ffap)
@@ -372,13 +363,6 @@
 (eval-after-load "term"
   '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
 
-;; Only vailable in emacs 29.1
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (setq auto-save-visited-predicate          ;;
-;;       (lambda () (eq major-mode 'org-mode) ;;
-;;         auto-save-visited-interval 5))     ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (defun le/my-c-mode-hook ()
   "This hook define hooks for 'c-mode'."
   (setq indent-tabs-mode nil))
@@ -396,8 +380,7 @@
 (unless (server-running-p)
   (server-start))
 
-(when (fboundp 'windmove-default-keybindings)
-  (windmove-default-keybindings))
+(windmove-default-keybindings)
 (global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
 (global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
 (global-set-key (kbd "S-C-<down>") 'shrink-window)
@@ -406,7 +389,6 @@
 (global-set-key (read-kbd-macro "M-S-<right>") 'windmove-swap-states-right)
 (global-set-key (read-kbd-macro "M-S-<up>") 'windmove-swap-states-up)
 (global-set-key (read-kbd-macro "M-S-<down>") 'windmove-swap-states-down)
-;; (global-set-key (read-kbd-macro "C-x f") 'find-file-at-point)
 
 ;; Setup keybinding for eww
 (defun le/my-eww-config ()
@@ -439,6 +421,13 @@
 ;; Bind it to a key of your choice, for example C-c s
 (global-set-key (kbd "C-c s") 'le/search-web)
 
+;; Display ansi color codes
+(defun display-ansi-colors ()
+  (interactive)
+  (let ((inhibit-read-only t))
+    (ansi-color-apply-on-region (point-min) (point-max))))
+(add-hook 'ansible-doc 'display-ansi-colors)
+
 (use-package help
   :bind
   (:map help-mode-map
@@ -457,7 +446,7 @@
   :ensure t
   :after whitespace
   :bind
-  ("C-c C" . whitespace-cleanup)
+  ("C-c w" . whitespace-cleanup)
   :init (setq whitespace-cleanup-mode-ignore-modes '(special-mode))
   :hook ((prog-mode . whitespace-cleanup-mode)
          (org-mode . whitespace-cleanup-mode)))
@@ -529,15 +518,19 @@
          (window-height . 0.2)
          (side . bottom)
          (slot . -1))
-        ("\\*\\([Hh]elp.*\\|[Ii]nfo\\|.*[Ff]inder.*\\|Apropos\\)\\*"
+        ("\\*\\([Hh]elp.*\\|[Ii]nfo\\|.*[Ff]inder.*\\|Apropos\\|.*ansible-doc.*\\)\\*"
          ;; todo - have matched buffers use the same window
          (display-buffer-reuse-mode-window
+          display-buffer-reuse-window
           ;; display-buffer-use-some-window
           display-buffer-in-direction)
          (mode . '(help-mode Info-mode))
          (window . root)
          (direction . right)
-         (window-width . 0.48))
+         (window-width . 0.48)
+         (action . (lambda (buffer alist)
+                     (with-selected-window (display-buffer-same-window buffer alist)
+                       (define-key (current-local-map) (kbd "q") 'quit-window)))))
         ("\\*\\(ChatGPT\\|Ollama\\)\\*"
          (display-buffer-reuse-mode-window
           display-buffer-in-direction)
@@ -559,7 +552,7 @@
 ;; ------------------------------- feature/info-side-windows -------------------------------
 
 
-(defvar my-info-buffer-font-spec '(:family "Liberation Mono" :height 90)
+(defvar my-info-buffer-font-spec '(:family "Atkinson Hyperlegible" :height 90)
   "Font specification for the custom info buffers.
 Height is in 1/10th of a point, so 90 means 9.0 points.")
 
@@ -800,33 +793,16 @@ If the side window is being created, it prompts for the source buffer."
  '(mode-line ((t (:background "#093159" :foreground "#dde4eb" :box nil))))
  '(mode-line-inactive ((t (:background "#394c55" :foreground "#a4aeba" :box nil))))
  '(nerd-icons-orange ((t (:foreground "steel blue"))))
- '(org-agenda-dimmed-todo-face ((t (:foreground "dark gray"))))
- '(org-block ((t (:inherit fixed-pitch :height 0.9))))
- '(org-code ((t (:inherit fixed-pitch))))
- '(org-document-info ((t (:height 1.0))))
- '(org-document-info-keyword ((t (:foreground "SlateGray4" :weight light :height 1.0))))
- '(org-document-title ((t (:foreground "#a3C3E3" :weight bold :height 1.7))))
- '(org-drawer ((t (:foreground "SlateGray4" :weight light :height 0.8))))
- '(org-ellipsis ((t (:background unspecified :foreground "#546e7a" :weight semi-bold :height 0.9 :underline unspecified))))
- '(org-headline-done ((t (:foreground "gray"))))
- '(org-level-1 ((t (:inherit outline-1 :foreground "#81A1C1" :weight bold :height 1.45))))
- '(org-level-2 ((t (:inherit outline-2 :foreground "#81A1C1" :weight bold :height 1.3))))
- '(org-level-3 ((t (:inherit outline-3 :foreground "#6b88a5" :weight bold :height 1.2))))
- '(org-level-4 ((t (:inherit outline-4 :foreground "#6b88a5" :weight normal :height 1.1))))
- '(org-level-5 ((t (:inherit outline-5 :foreground "#546e7a" :weight normal :height 1.1))))
- '(org-meta-line ((t (:foreground "SlateGray4" :weight light :height 1.0))))
- '(org-modern-block-name ((t (:weight semi-light :height 0.8))))
- '(org-modern-bullet ((t (:foreground "#6b88a5"))))
- '(org-modern-label ((t (:box t (:line-width (0 . -3) :color "#263238") :underline nil :weight extra-bold :height 0.95 :width condensed))))
- '(org-modern-todo ((t (:inherit (org-todo org-modern-label) :inverse-video t :underline nil :weight extra-bold :height 0.95 :width condensed))))
- '(org-property-value ((t (:foreground "SlateGray3" :weight light :height 0.8))))
- '(org-scheduled-today ((t (:foreground "dark gray"))))
- '(org-special-keyword ((t (:foreground "SlateGray3" :weight light :height 0.8))))
- '(org-table ((t (:inherit fixed-pitch :height 0.8))))
- '(org-tag ((t (:foreground "cyan3" :weight normal))))
- '(org-time-grid ((t (:foreground "gray80"))))
- '(org-upcoming-distant-deadline ((t (:foreground "red1"))))
- '(org-verbatim ((t (:inherit fixed-pitch))))
+ '(org-document-info-keyword ((t (:inherit (org-drawer)))))
+ '(org-document-title ((t (:inherit (bold variable-pitch) :height 1.1 :foreground "gray95"))))
+ '(org-level-1 ((t (:inherit (bold variable-pitch) :height 1.0 :foreground "gray90"))))
+ '(org-level-2 ((t (:inherit (bold variable-pitch) :height 0.9 :foreground "gray90"))))
+ '(org-level-3 ((t (:inherit (bold variable-pitch) :height 0.9 :foreground "gray90"))))
+ '(org-level-4 ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
+ '(org-level-5 ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
+ '(org-level-6 ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
+ '(org-level-7 ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
+ '(org-level-8 ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
  '(region ((t (:extend t :background "IndianRed4"))))
  '(shadow ((t (:foreground "rosy brown"))))
  '(show-paren-match ((t (:background "dim gray" :foreground "cyan" :weight ultra-bold))))
@@ -1170,8 +1146,6 @@ If the side window is being created, it prompts for the source buffer."
 (use-package flycheck
   :ensure t
   ;; :init (global-flycheck-mode)
-  :bind (("M-n" . flycheck-next-error)
-         ("M-p" . flycheck-previous-error))
   :config (setq-default flycheck-checker-error-threshold 2048)
   ;; add a lambda for flycheck-rror-list-mode-hook
   (add-hook 'flycheck-error-list-mode-hook
@@ -1366,17 +1340,6 @@ If the side window is being created, it prompts for the source buffer."
             #'(lambda ()
                 (ibuffer-switch-to-saved-filter-groups "default"))))
 
-(defun le/org-mode-visual-fill ()
-  "Setup visual-fill-mode."
-  (setq visual-fill-column-width 80
-        visual-fill-column-center-text t)
-  (visual-fill-column-mode 1))
-
-(use-package visual-fill-column
-  :ensure t
-  :defer t
-  :hook (org-mode . le/org-mode-visual-fill))
-
 (add-hook 'visual-line-mode-hook #'visual-fill-column-mode)
 
 (defun le/what-face (pos)
@@ -1388,241 +1351,545 @@ If the side window is being created, it prompts for the source buffer."
         (message "Face: %s" face)
       (message "No face at %d" pos))))
 
-(defun le/org-mode-return ()
-  "Insert a new heading or continue list item on RET, depending on context."
-  (interactive)
-  (if (org-at-heading-p)
-      (org-return)
-    (let ((line-start (buffer-substring-no-properties
-                       (line-beginning-position)
-                       (line-end-position))))
-      (cond
-       ((string-match "^ *\\(\\-\\|\\+\\|\\*\\) \\[ \\]" line-start) ; Checkbox items
-        (org-insert-item t))
-       ((string-match "^ *\\(\\-\\|\\+\\|\\*\\) " line-start) ; Unordered list items
-        (org-insert-item))
-       ((string-match "^ *\\([0-9]+\\)\\(\\.\\|)\\) " line-start) ; Ordered list items
-        (org-insert-item nil))
-       ((string-match "^ *\\(\\-\\|\\+\\|\\*\\) .* :: " line-start) ; Term/Description
-        (org-insert-item))
-       (t
-        (org-return))))))
+;; Org-mode visual line and padding setup
+(defun le/my-org-mode-visual-line-setup ()
+  "Enable visual line wrapping at 120 characters for Org mode."
+  (setq-local visual-fill-column-width 120)          ; Set line wrap width of characters for this buffer
+  (setq-local line-spacing 0.1)                      ; Add extra spacing between lines
+  (setq-default visual-fill-column-center-text t)    ; Center text globally (affects all buffers)
+  (visual-fill-column-mode 1))                       ; Enable visual-fill-column mode
 
-(defun le/org-mode-basic-setup ()
-  "Perform some basic non-org-mode configuration setup at hook execution."
-  (variable-pitch-mode 1)
-  (setq-local line-spacing 0.2)
-  (auto-fill-mode 0)
-  (visual-line-mode t)
-  (setq-local show-trailing-whitespace nil)
-  (setq-local hl-line-mode nil))
+;; Define functions before use-package
+(defun le/my-org-mode-setup-yasnippet ()
+  "Setup yasnippet for Org mode."
+  (setq-local yas-trigger-key [tab])
+  (define-key yas-keymap [tab] 'yas-next-field-or-maybe-expand)
+  (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
 
-;; start of "use-package org" for the main org-mode section
+(defun le/my-org-mode-add-padding ()
+  "Add a bit of left and right padding to Org mode buffers."
+  (setq-local left-margin-width 100))
+
+;; Define the windmove setup function
+(defun le/my-org-mode-windmove-setup ()
+  "Configure windmove to use S-s-<cursor> in org-mode."
+  ;; Disable windmove's S-<cursor> bindings in org-mode
+  (local-unset-key (kbd "S-<left>"))
+  (local-unset-key (kbd "S-<right>"))
+  (local-unset-key (kbd "S-<up>"))
+  (local-unset-key (kbd "S-<down>"))
+  windmove-mode -1)
+
+;; Org-mode core configuration
 (use-package org
-  :defer t
-  :pin gnu
-  :init
-  :hook
-  (org-mode . le/org-mode-basic-setup)
-  (org-mode . le/org-mode-visual-fill)
-  :mode (("\\.org$" . org-mode))
-  :custom
-  (org-startup-indented t)
-  (org-log-done 'time)
-  (org-log-into-drawer t)
-  :config
-  (add-hook 'org-mode-hook
-          (lambda ()
-            (setq-local yas/trigger-key [tab])
-            (define-key yas/keymap [tab] 'yas/next-field-or-maybe-expand)
-            (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t)))
-  (define-key org-mode-map (kbd "RET")  #'le/org-mode-return)
-  (setq
-   org-auto-align-tags t
-   org-blank-before-new-entry '((heading . nil) (plain-list-item . nil))
-   org-catch-invisible-edits 'show-and-error
-   org-cycle-separator-lines 2
-   org-fontify-quote-and-verse-blocks t
-   org-hide-emphasis-markers t
-   org-insert-heading-respect-content nil
-   org-list-indent-offset 2
-   org-log-repeat t
-   org-pretty-entities t
-   org-return-follows-link  t
-   org-special-ctrl-a/e t
-   org-support-shift-select nil
-   org-startup-with-inline-images t
-   org-image-actual-width nil
-   org-image-max-width 300
-
-   org-ellipsis "  🡇"
-   org-clock-sound "~/.emacs.d/org/media/alarm.wav"
-   ;; TODO keywords setup
-   org-todo-keywords
-   '((sequence "TODO(t)" "IN-PROGRESS(p)" "IN-REVIEW(r)" "WAITING(w)" "BLOCKED(b)" "WONT-DO(x)" "|" "DONE(d)" "DELEGATE(D)")
-     (sequence "REPEAT(R)" "|" "DONE(d)"))
-
-   ;; ("TODO" . (:background "#c3e88d" :foreground "white" :weight extra-bold))
-   ;; TODO face setup;
-   org-modern-todo-faces
-   '(("IN-PROGRESS" . (:background "DarkOrange" :foreground "white" :weight extra-bold))
-     ("REPEAT" . (:background "DarkViolet" :foreground "white" :weight extra-bold))
-     ("IN-REVIEW" . (:background "RoyalBlue" :foreground "white" :weight extra-bold))
-     ("WAITING" . (:background "DarkOrange3" :foreground "white" :weight extra-bold))
-     ("BLOCKED" . (:background "red" :foreground "white" :weight extra-bold))
-     ("WONT-DO" . (:background "plum" :foreground "black" :weight extra-bold))
-     ("DELEGATE" . (:background "DimGrey" :foreground "white" :weight extra-bold))
-     ("DONE" . (:background "DarkGreen" :foreground "white" :weight extra-bold)))
-
-   org-tag-faces
-   '(("pin" . (:foreground "red" :weight bold)))
-
-   ;; Agenda styling
-   org-agenda-tags-column -80
-   org-agenda-block-separator ?─
-   org-agenda-time-grid
-   '((daily today require-timed)
-     (800 1000 1200 1400 1600 1800 2000)
-     " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
-   org-agenda-current-time-string
-   "⭠ now ─────────────────────────────────────────────────"
-   )
-
-  (setq org-modules
-        '(org-habit
-          org-bookmark))
-
-  (setq org-refile-targets '((nil :maxlevel . 1)
-                             (org-agenda-files :maxlevel . 1)))
-
-  (setq org-outline-path-complete-in-steps nil)
-  (setq org-refile-use-outline-path t)
-
-  (setq org-replace-disputed-keys t)
-
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((emacs-lisp . t)
-     (python . t)
-     (makefile . t)
-     (css . t)
-     (eshell . t)
-     (dot . t)
-     (java . t)
-     (js . t)
-     (perl . t)
-     (processing . t)
-     (sql . t)
-     (sqlite . t)
-     (org . t)
-     (shell . t)
-     (C . t)
-     (sed . t)))
-  (push '("conf-unix" . conf-unix) org-src-lang-modes)
-  ) ;; org-mode. End of "use-package org"
-
-(use-package org-modern
   :ensure t
-  :after org
-  :custom
-  (org-modern-hide-stars nil)
-  (org-modern-hide-properties nil)
-  (org-modern-property nil)
-  (org-modern-keyword nil)
-  (org-modern-footnote nil)
-  (org-modern-property nil)
-  (org-modern-block-name nil)
-  (org-modern-star 'replace)
-  (org-modern-replace-stars "◉○●○●○●")
-  :hook
-  (org-mode . org-modern-mode)
-  (org-agenda-finalize . org-modern-agenda))
+  :bind (("C-c c" . org-capture)
+         :map org-mode-map
+         ("S-<left>" . org-shiftleft)
+         ("S-<right>" . org-shiftright)
+         ("S-<up>" . org-shiftup)
+         ("S-<down>" . org-shiftdown))
+  :hook ( ;; org-mode hooks
+         (org-mode . le/my-org-mode-visual-line-setup)
+         (org-mode . le/my-org-mode-setup-yasnippet)
+         (org-mode . le/my-org-mode-windmove-setup)
+         )
+  :config
+  (setq
+   org-startup-with-inline-images t
+   org-image-actual-width nil ; Display images at their actual width, or nil to scale down
+   org-image-max-width 300    ; Max width for images when scaled
+   org-hide-emphasis-markers t    ; Hide * / _ = ~
+   org-startup-indented t         ; Start Org buffers with indentation
+   org-edit-src-code t            ; Enable editing source code blocks in separate buffer
+   org-ellipsis " !!!"             ; Set symbole when folding
+   org-catch-invisible-edits 'show-and-error ; Check if in invisible region before modification
+   org-hide-block-properties nil ; Don't hide :PROPERTIES: and :END: lines when folded
+   org-clock-sound "~/.emacs.d/org/media/alarm.mp3" ; Sound for timeout - promodoro
+   org-special-ctrl-a/e t        ; Enable special behavior for C-a and C-e in Org mode
 
+   ;; TODO workflow configuration
+   org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "REVIEW" "REPEAT" "BLOCKED" "|" "DONE" "CANCELED"))
+
+   ;; TODO keyword faces with darker, less saturated background colors
+   org-todo-keyword-faces '(
+                            ("TODO" . (:foreground "white" :background "#26449d" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("IN-PROGRESS" . (:foreground "black" :background "#d5ad2a" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("REVIEW" . (:foreground "white" :background "#9369d9" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("REPEAT" . (:foreground "black" :background "#89b5d9" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("BLOCKED" . (:foreground "white" :background "#d95252" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("DONE" . (:foreground "black" :background "#89d989" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("CANCELED" . (:foreground "#4a4a4a" :background "#bdbdbd" :weight normal :height 0.88 :box (:line-width 3 :style nil :color "#263238"))))
+  )
+
+  (custom-set-faces
+   '(org-document-title
+     ((t (:inherit (bold variable-pitch) :height 1.1 :foreground "gray95"))))
+   '(org-document-info-keyword
+     ((t (:inherit (org-drawer)))))
+   '(org-level-1
+     ((t (:inherit (bold variable-pitch) :height 0.95 :foreground "gray90"))))
+   '(org-level-2
+     ((t (:inherit (bold variable-pitch) :height 0.9 :foreground "gray90"))))
+   '(org-level-3
+     ((t (:inherit (bold variable-pitch) :height 0.9 :foreground "gray90"))))
+   '(org-level-4
+     ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
+   '(org-level-5
+     ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
+   '(org-level-6
+     ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
+   '(org-level-7
+     ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
+   '(org-level-8
+     ((t (:inherit (bold variable-pitch) :foreground "gray90"))))))
+
+;; --- Custom Helper Functions for Capture Templates ---
+(defun le/org-roam-select-node (prompt &optional tags)
+  "Prompt user to select a single Org-roam node with an optional list of TAGS."
+  (let* ((parsed-tags (when (and tags (stringp tags) (not (string-empty-p tags)))
+                        (split-string tags "," t "[ ]*")))
+         (node (condition-case err
+                   (org-roam-node-read prompt parsed-tags)
+                 (error
+                  (message "Error in org-roam-node-read: %s" err)
+                  nil)
+                 (quit nil))))
+    (if node
+        (format "[[id:%s][%s]]" (org-roam-node-id node) (org-roam-node-title node))
+      "")))  ; Return empty string instead of nil
+
+(defun le/org-roam-select-nodes (prompt &optional tags)
+  "Prompt user to select multiple Org-roam nodes with an optional list of TAGS."
+  (let* ((parsed-tags (when (and tags (stringp tags) (not (string-empty-p tags)))
+                        (split-string tags "," t "[ ]*")))
+         (all-nodes (org-roam-node-list))
+         (available-nodes (if parsed-tags
+                              (cl-remove-if-not
+                               (lambda (node)
+                                 (cl-every (lambda (tag)
+                                             (member tag (org-roam-node-tags node)))
+                                           parsed-tags))
+                               all-nodes)
+                            all-nodes))
+         (node-titles (mapcar #'org-roam-node-title available-nodes))
+         (selected-titles (condition-case err
+                              (completing-read-multiple prompt node-titles nil t)
+                            (error
+                             (message "Error in completing-read-multiple: %s" err)
+                             nil)
+                            (quit nil))))
+    (if selected-titles
+        (mapconcat (lambda (title)
+                     (let ((node (cl-find title available-nodes :key #'org-roam-node-title :test #'string=)))
+                       (when node
+                         (format "[[id:%s][%s]]" (org-roam-node-id node) (org-roam-node-title node)))))
+                   selected-titles
+                   " ")
+      "")))
+
+;; --- Org-roam Configuration ---
 (use-package org-roam
   :ensure t
-  :disabled)
-
-(use-package org-roam-ql
-  :ensure t
-  :disabled
-  :after (org-roam))
-
-;; org-download configuration for images
-(use-package org-download
-  :ensure t
-  :disabled
   :after org
-  :custom
-  (org-download-method 'directory)
-  (org-download-image-dir "~/git/personal/notes/media/img")
-  (org-download-heading-lvl nil)
-  (org-download-timestamp "%Y%m%d-%H%M%S_")
-  :bind
-  (:map org-mode-map
-        (("C-c d s" . org-download-screenshot)
-         ("C-c d d" . org-download-delete)))
-  :config
-  (make-directory "~/git/personal/notes/media/img" t))
+  :init
+  (setq org-roam-directory "~/org/kb/"
+        org-roam-dailies-directory "daily/"
+        org-roam-db-location "~/.emacs.d/org-roam.db")
+  :hook (after-init . org-roam-db-autosync-mode)
+  :bind (;; Core org-roam functions
+         ("C-c n c" . org-roam-capture)
+         ("C-c n i" . org-roam-node-insert)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n g" . org-roam-graph)
+         ;; Daily note navigation and capture
+         ("C-c n d n" . org-roam-dailies-capture-today)
+         ("C-c n d Y" . org-roam-dailies-capture-yesterday)
+         ("C-c n d T" . org-roam-dailies-capture-tomorrow)
+         ("C-c n d c" . org-roam-dailies-goto-date)
+         ("C-c n d v" . org-roam-dailies-capture-date)
+         ("C-c n d y" . org-roam-dailies-goto-yesterday)
+         ("C-c n d t" . org-roam-dailies-goto-tomorrow)
+         ("C-c n d b" . org-roam-dailies-go-to-previous-note)
+         ("C-c n d f" . org-roam-dailies-go-to-next-note)
+         )
+  )
 
-;; org-noter for PDF annotations
-(use-package org-noter
+(use-package org-bullets
   :ensure t
-  :disabled
-  :after org
+  :hook (org-mode . org-bullets-mode)
   :custom
-  (org-noter-notes-search-path '("~/git/personal/notes/linked"))
-  (org-noter-default-notes-file-names '("notes.org"))
-  (org-noter-separate-notes-from-heading t))
+  (org-bullets-bullet-list '("◉" "●" "○" "●" "○" "●")))
 
-;; org-roam-ui configuration
+
 (use-package org-roam-ui
-  :ensure t
-  :disabled
+   :ensure t
+   :after org-roam
+   :config
+   (setq org-roam-ui-sync-theme t))
+
+;; --- Org-roam Capture Templates ---
+(use-package org-roam-capture
   :after org-roam
-  :custom
-  (org-roam-ui-sync-theme t)
-  (org-roam-ui-follow t)
-  (org-roam-ui-update-on-save t)
-  (org-roam-ui-open-on-start t))
-
-;; PDF Tools (recommended for org-noter)
-(use-package pdf-tools
-  :ensure t
-  :custom
-  (pdf-view-display-size 'fit-page)
   :config
-  (pdf-tools-install :no-query))
+  (setq org-roam-capture-templates
+        '(
+          ;; General Meeting (m)
+          ("m" "General Meeting" plain
+           "
+* Raw Notes / Transcript (Paste here)
+%?
 
-(use-package org-make-toc
-  :ensure t
-  :hook (org-mode . org-make-toc-mode))
-
-(require 'ox-publish)
-
-(require 'ox-md)
+* AI Synthesized Summary & Action Items
 
 
+* Discussion Points
 
-(use-package ox-hugo
-  :ensure t
+
+* Decisions
+
+
+* Action Items
+"
+           :target (file+head "meetings/%<%Y-%m-%d>-${slug}.org"
+                              "#+TITLE: ${title} %<%Y-%m-%d>
+#+ROAM_TAGS: meeting:general,meeting
+#+FILETAGS: :meeting:general:meeting:
+#+DATE: %<%Y-%m-%d %H:%M>
+#+ATTENDEES: %(le/org-roam-select-nodes \"Attendees (select multiple people): \" \"person\")
+#+PROJECT: %(le/org-roam-select-node \"Project (optional): \" \"project\")")
+           :unnarrowed t)
+
+          ;; Project Meeting (j)
+          ("j" "Project Meeting" plain
+           "
+* Raw Notes / Transcript (Paste here)
+%?
+
+* AI Synthesized Summary & Action Items
+
+
+* Discussion Points
+
+
+* Decisions
+
+
+* Action Items
+"
+           :target (file+head "meetings/%<%Y-%m-%d>-${slug}.org"
+                              "#+TITLE: ${title} %<%Y-%m-%d>
+#+ROAM_TAGS: meeting:project,meeting,project
+#+FILETAGS: :meeting:project:meeting:project:
+#+DATE: %<%Y-%m-%d %H:%M>
+#+ATTENDEES: %(le/org-roam-select-nodes \"Attendees (select multiple people): \" \"person\")
+#+PROJECT: %(le/org-roam-select-node \"Project (required): \" \"project\")")
+           :unnarrowed t)
+
+          ;; One-on-One Meeting (o)
+          ("o" "One-on-One Meeting" plain
+           "
+* Raw Notes / Discussion Points (Paste here)
+%?
+
+* AI Synthesized Summary & Action Items
+
+
+* Action Items
+"
+           :target (file+head "meetings/1on1-%<%Y-%m-%d>-${slug}.org"
+                              "#+TITLE: 1:1 with %(progn (setq temp-person (le/org-roam-select-node \"Person (required): \" \"person\")) (if (string-empty-p temp-person) (error \"Person is required for a 1:1 Meeting\") (replace-regexp-in-string \"\\[\\[.*?\\]\\[\\(.*?\\)\\]\\]\" \"\\1\" temp-person))) %<%Y-%m-%d>
+#+ROAM_TAGS: meeting:1on1,meeting,person
+#+FILETAGS: :meeting:1on1:meeting:person:
+#+DATE: %<%Y-%m-%d %H:%M>
+#+PERSON: %(le/org-roam-select-node \"Person (required): \" \"person\")")
+           :unnarrowed t)
+
+          ;; Topic (t)
+          ("t" "Topic (General Knowledge/Concept)" plain
+           "
+* Introduction
+%?
+
+* Key Concepts
+-
+
+* Related Topics
+-
+
+* Resources
+- "
+           :target (file+head "topics/${slug}.org"
+                              "#+TITLE: ${title}
+#+ROAM_TAGS: knowledge:concept,knowledge
+#+FILETAGS: :knowledge:concept:knowledge:
+#+DATE: %<%Y-%m-%d>")
+           :unnarrowed t)
+
+          ;; Work Topic (w)
+          ("w" "Work Topic (Company Specific)" plain
+           "* Overview
+%?
+
+* Context
+
+* Relevant Resources
+
+* Key Stakeholders
+-"
+           :target (file+head "work-topics/%(progn (setq temp-company (completing-read \"Company (stninc/discovery): \" '(\"stninc\" \"discovery\") nil t)) (downcase temp-company))-${slug}.org"
+                              "#+TITLE: ${title}
+#+ROAM_TAGS: %(format \"%s,work-topic\" (downcase temp-company))
+#+FILETAGS: :%(format \"%s:work-topic\" (downcase temp-company)):
+#+DATE: %<%Y-%m-%d>
+#+PROJECT: %(le/org-roam-select-node \"Related Project (optional): \" \"project\")")
+           :unnarrowed t)
+
+          ;; Learn Topic (l)
+          ("l" "Learn Topic (Skill/Tool Focused)" plain
+           "* My Notes
+
+%?
+
+* Key Takeaways
+
+* Practice Exercises / Next Steps
+
+* Resources
+- "
+           :target (file+head "learning/%(progn (setq temp-type (completing-read \"Type (skill/tool/concept): \" '(\"skill\" \"tool\" \"concept\") nil t)) (downcase temp-type))-${slug}.org"
+                              "#+TITLE: ${title}
+#+ROAM_TAGS: %(format \"learning,%s\" (downcase temp-type))
+#+FILETAGS: :learning:%(downcase temp-type):
+#+DATE: %<%Y-%m-%d>
+#+SOURCE: %(read-from-minibuffer \"Source (e.g., Book, Course, Blog): \")")
+           :unnarrowed t)
+
+          ;; Person Capture Template (p)
+          ("p" "Person" plain
+           "
+* Work Context
+** Professional Background
+%?
+
+** Current Projects
+-
+
+** Skills & Expertise
+-
+
+** Working Style
+-
+
+* Interaction History
+** Meeting History
+#+BEGIN_QUERY
+{ :query [:and [:from \"file\"] [:filetags \"meeting\"] [:or [:id \"${id}\"] [:in-alias \"${id}\"]]] }
+#+END_QUERY
+
+** 1:1 Notes
+#+BEGIN_QUERY
+{ :query [:and [:from \"file\"] [:filetags \"meeting:1on1\"] [:or [:id \"${id}\"] [:in-alias \"${id}\"]]] }
+#+END_QUERY
+
+** Action Items (from/for this person)
+-
+
+** Personal Notes
+-
+
+** Strategy
+-
+
+** Issue Log
+#+BEGIN_QUERY
+{ :query [:and [:from \"file\"] [:filetags \"issue:incident\"] [:or [:id \"${id}\"] [:in-alias \"${id}\"]]] }
+#+END_QUERY"
+           :target (file+head "people/${slug}.org"
+                              "#+TITLE: ${title}
+#+ROAM_TAGS: person
+#+FILETAGS: :person:
+#+DATE: %<%Y-%m-%d>
+#+FULL_NAME: ${title}
+#+ROLE: %(read-from-minibuffer \"Role: \")
+#+TEAM: %(read-from-minibuffer \"Team: \")
+#+EMAIL: %(read-from-minibuffer \"Email: \")
+#+MANAGER: %(read-from-minibuffer \"Manager: \")
+#+LOCATION: %(read-from-minibuffer \"Location: \")
+#+START_DATE: %(read-from-minibuffer \"Start Date (General Year or Exact Date: YYYY-MM-DD): \")
+#+SLACK: %(read-from-minibuffer \"Slack Handle: \")
+#+JIRA_PROFILE: %(read-from-minibuffer \"JIRA Profile URL: \")
+#+CONFLUENCE_SPACE: %(read-from-minibuffer \"Confluence Personal Space URL: \")")
+           :unnarrowed t)
+
+          ;; Project Capture Template (P)
+          ("P" "Project" plain
+           "
+* Project Overview
+%?
+
+* Goals & Objectives
+
+
+* Key Deliverables
+
+
+* Risks & Mitigations
+
+
+* Resources
+
+
+* Meeting History
+#+BEGIN_QUERY
+{ :query [:and [:from \"file\"] [:filetags \"meeting:project\"] [:or [:id \"${id}\"] [:in-alias \"${id}\"]]] }
+#+END_QUERY
+
+* Tasks & Roadmap
+"
+           :target (file+head "projects/${slug}.org"
+                              "#+TITLE: ${title}
+#+ROAM_TAGS: project
+#+FILETAGS: :project:
+#+DATE: %<%Y-%m-%d>
+#+PROJECT_NAME: ${title}
+#+STATUS: %(completing-read \"Status (Planning/In Progress/On Hold/Completed): \" '(\"Planning\" \"In Progress\" \"On Hold\" \"Completed\") nil t)
+#+PRIORITY: %(completing-read \"Priority (High/Medium/Low): \" '(\"High\" \"Medium\" \"Low\") nil t)
+#+TEAM: %(read-from-minibuffer \"Team/Department: \")
+#+START_DATE: %(read-from-minibuffer \"Start Date (YYYY-MM-DD): \")
+#+TARGET_DATE: %(read-from-minibuffer \"Target Date (YYYY-MM-DD, optional): \")
+#+ACTUAL_DATE: %(read-from-minibuffer \"Actual Completion Date (YYYY-MM-DD, optional): \")
+#+PROJECT_MANAGER: %(le/org-roam-select-nodes \"Project Manager (optional): \" \"person\")
+#+TECH_LEAD: %(le/org-roam-select-nodes \"Tech Lead (optional): \" \"person\")
+#+STAKEHOLDERS: %(le/org-roam-select-nodes \"Stakeholders (select multiple people, optional): \" \"person\")
+#+SLACK_CHANNEL: %(read-from-minibuffer \"Slack Channel: \")
+#+REPOSITORY: %(read-from-minibuffer \"Repository URL: \")
+#+JIRA_PROJECT: %(read-from-minibuffer \"JIRA Project Key: \")
+#+BUDGET: %(read-from-minibuffer \"Budget: \")")
+           :unnarrowed t)
+
+          ;; Incident Log with Person Capture Template (i)
+          ("I" "Incident Log (with Person)" plain
+
+           "
+* Incident Details (ENCRYPTED SECTION) :crypt:
+
+%?
+
+* Resolution / Follow-up (Clear Text)
+"
+           :target (file+head "incidents/incident-%<%Y-%m-%d>-${slug}.org"
+                              "#+TITLE: ${title}
+#+ROAM_TAGS: issue:incident,person
+#+FILETAGS: :issue:incident:person:
+#+DATE: %<%Y-%m-%d>
+#+PERSON: %(le/org-roam-select-node \"Person Involved (required): \" \"person\")
+#+INCIDENT_TYPE: %(completing-read \"Incident Type: \" '(\"communication\" \"behavior\" \"performance\" \"policy\" \"harassment\" \"discrimination\") nil t)
+#+SEVERITY: %(completing-read \"Severity (Low/Medium/High/Critical): \" '(\"Low\" \"Medium\" \"High\" \"Critical\") nil t)
+#+STATUS: %(completing-read \"Status (Open/Investigating/Resolved/Closed): \" '(\"Open\" \"Investigating\" \"Resolved\" \"Closed\") nil t)
+#+WITNESSES: %(le/org-roam-select-nodes \"Witnesses (select multiple people, optional): \" \"person\")
+#+REPORTED_TO: %(le/org-roam-select-nodes \"Reported To (select multiple people, optional): \" \"person\")
+#+FOLLOW_UP_DATE: %(read-from-minibuffer \"Follow-up Date (YYYY-MM-DD, optional): \")")
+           :unnarrowed t)
+
+          ;; Technical Issue Troubleshooting (I)
+          ("i" "Technical Issue Troubleshooting" plain
+
+           "* Initial Observation & Symptoms
+%?
+
+* Investigative Ideas to Take
+- [ ] Idea 1...
+- [ ] Idea 2...
+- [ ] Idea 3...
+
+* Troubleshooting Steps Taken
+-
+
+* Analysis & Hypothesis
+
+* Root Cause Identified
+
+* Resolution Steps
+
+* Verification
+
+* Lessons Learned
+
+* Relevant Logs/Traces
+
+#+BEGIN_SRC bash
+# Your log snippets here
+#+END_SRC
+
+* Related Tickets / Documentation
+"
+           :target (file+head "issues/%<%Y-%m-%d>-${slug}.org"
+                              "#+TITLE: ${title}
+#+ROAM_TAGS: %(progn (setq temp-system-categories (completing-read-multiple \"System Categories (space-separated, e.g., linux k8s): \" '(\"linux\" \"gpu\" \"slurm\" \"container\" \"k8s\" \"ci\" \"iac\" \"artifactory\" \"github\" \"storage\" \"network\" \"code\") nil t)) (setq temp-additional-tags (completing-read-multiple \"Additional Tags (space-separated, e.g., performance security): \" '(\"performance\" \"security\" \"infrastructure\" \"ai-training\" \"ai-inference\") nil t)) (mapconcat 'identity (append (mapcar (lambda (x) (format \"issue:%s\" x)) temp-system-categories) (mapcar (lambda (x) (format \"issue:%s\" x)) temp-additional-tags) '(\"issue\")) \",\"))
+#+FILETAGS: :%(mapconcat 'identity (append (mapcar (lambda (x) (format \"issue:%s\" x)) temp-system-categories) (mapcar (lambda (x) (format \"issue:%s\" x)) temp-additional-tags) '(\"issue\")) \":\"):
+#+DATE: %<%Y-%m-%d>
+#+ISSUE_TITLE: ${title}
+#+DATE_REPORTED: %<%Y-%m-%d>
+#+DATE_RESOLVED: %(read-from-minibuffer \"Date Resolved (YYYY-MM-DD, optional): \")
+#+STATUS: %(completing-read \"Status (Open/In Progress/Awaiting Info/Resolved/Closed): \" '(\"Open\" \"In Progress\" \"Awaiting Info\" \"Resolved\" \"Closed\") nil t)
+#+SEVERITY: %(completing-read \"Severity (Minor/Major/Critical/Blocker): \" '(\"Minor\" \"Major\" \"Critical\" \"Blocker\") nil t)
+#+SYSTEMS_AFFECTED: %(read-from-minibuffer \"Systems Affected (comma-separated): \")
+#+RELATED_PROJECT: %(le/org-roam-select-node \"Related Project (optional): \" \"project\")
+#+REPORTED_BY: %(le/org-roam-select-node \"Reported By (optional): \" \"person\")")
+           :unnarrowed t)
+          )))
+
+;; Org-crypt configuration (part of Org-mode, no :ensure t)
+(use-package org-crypt
   :after org
   :config
-  (setq org-hugo-base-dir (expand-file-name "~/git/kb/"))
-  (setq org-hugo-default-section-directory "docs"))
+  ;; It's crucial to set up your GPG key for org-crypt. This is a placeholder.
+  ;; Example: (setq org-crypt-gpg-recipients '("your-gpg-key-id"))
+  ;; Consult org-crypt documentation for secure key management.
+  (setq org-crypt-enable-encryption t)
+  (setq org-crypt-key nil) ; Set to your GPG key ID or email if using GPG, otherwise for simple password
+  )
 
-(use-package org-projectile
+;; Org-babel language configuration
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((python . t)
+   (shell . t)
+   (emacs-lisp . t)
+   (groovy . t)
+   (sed . t)
+   (js . t)
+   (sql . t)
+   (sqlite . t)
+   (dot . t) ; For Graphviz diagrams
+   ))
+
+(setq org-confirm-babel-evaluate nil)
+;; You might need to set specific interpreter paths if they are not in your PATH
+;; (setq org-babel-python-command "python3")
+;; (setq org-babel-shell-command "bash")
+
+;; ob-mermaid configuration
+(use-package ob-mermaid
   :ensure t
-  :after org
-  :bind (("C-c n p" . org-projectile-project-todo-completing-read)
-         ("C-c l" . org-store-link)
-         ("C-c a" . org-agenda)
-         ("C-c c" . org-capture))
+  :after org-babel
+  :hook (org-mode . ob-mermaid-mode)
   :config
-  (progn
-    (setq org-projectile-projects-file
-          (expand-file-name "~/git/personal/notes/projects/notes.org"))
-   (setq (or )rg-agenda-files (append org-agenda-files (org-projectile-todo-files)))
-   (push (org-projectile-project-todo-entry) org-capture-templates)))
+  ;; You might need to configure the path to the 'mmdc' executable
+  ;; (setq ob-mermaid-executable "/usr/bin/mmdc")
+  )
+
+(use-package org-appear
+  :ensure t
+  :hook (org-mode . org-appear-mode)
+  :custom
+  (org-appear-autoemphasis t)      ; Show emphasis markers (*bold*, /italic/, etc.) when cursor is on them
+  (org-appear-autolinks t)         ; Show full link syntax when cursor is on links
+  (org-appear-sutosudmarkers t)    ; Show sub/superscript markers (^{} and _{}) when cursor is on them
+  (org-appear-trigger 'always)     ; Always trigger appearance changes (alternative: 'manual)
+  (org-appear-delay 0.5))          ; Wait 0.5 seconds before showing/hiding markup
 
 (use-package magit
   :ensure t
@@ -1815,25 +2082,6 @@ If the side window is being created, it prompts for the source buffer."
   :init
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref)
-  ;; (defvar consult-command-map
-  ;;   (let ((map (make-sparse-keymap)))
-  ;;     (define-key map "b" #'consult-buffer)
-  ;;     (define-key map "B" #'consult-bookmark)
-  ;;     (define-key map "l" #'consult-line)
-  ;;     (define-key map "i" #'consult-imenu)
-  ;;     (define-key map "r" #'consult-ripgrep)
-  ;;     (define-key map "f" #'consult-find)
-  ;;     (define-key map "F" #'consult-focus-lines)
-  ;;     (define-key map "G" #'consult-global-mark)
-  ;;     (define-key map "y" #'consult-yasnippet)
-
-  ;;     ;; nested keymap for 'g' prefix (git)
-  ;;     (let ((git-map (make-sparse-keymap)))
-  ;;       (define-key git-map "g" #'consult-git-grep)
-  ;;       (define-key git-map "l" #'consult-ls-git)
-  ;;       (define-key git-map "L" #'consult-ls-git-other-window)
-  ;;       (define-key map "g" git-map))
-  ;;     map))
   :config
   (consult-customize
    consult-ripgrep consult-git-grep consult-grep)
@@ -2007,29 +2255,28 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package company
   :ensure t
+  :init
+  (add-hook 'after-init-hook 'global-company-mode)
   :config
-  (setq company-minimum-prefix-length 1
-        company-idle-delay 0.0)
+  (setq company-minimum-prefix-length 2
+        company-idle-delay 0.5
+        company-selection-wrap-around t
+        company-require-match nil
+        company-tooltip-annotation-padding 5
+        company-tooltip-margin 3)
   (setq company-global-modes '(not text-mode fundamental-mode))
   (add-to-list 'company-backends 'company-ansible)
   )
 
-(use-package company-box
-  :ensure t
-  :hook (company-mode . company-box-mode)
-  :config (setq company-box-doc-enable t))
-
 (use-package company-quickhelp
   :ensure t
-  :hook (company-mode . company-quickhelp-mode))
-
-;; (require 'tree-sitter)
-;; (require 'tree-sitter-langs)
+  :hook (company-mode . company-quickhelp-mode)
+  :config
+  (setq company-quickhelp-delay 3))
 
 (use-package corfu
   :ensure t
-  :config
-  (add-to-list 'corfu-margin-formatters 'nerd-icons-corfu-formatter))
+  :disabled)
 
 (defun le/corfu-lsp-setup ()
   (corfu-mode)
@@ -2527,8 +2774,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
           ("localhost" . textile-mode)))
   (setq atomic-chrome-buffer-open-style 'full))
 
-;; (use-package lorem-ipsum
-;;   :ensure t)
+(use-package lorem-ipsum
+  :ensure t)
 
 (use-package flyspell-correct
   :ensure t
@@ -2580,49 +2827,35 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (setq consult-gh-forge-timeout-seconds 20))
 
 
-;; (use-package consult-ls-git
-;;   :ensure t)
-
-(use-package consult-org-roam
-  :ensure t
-  :disabled
-  :after org-roam
-  :bind-keymap
-  ("C-x c" . consult-command-map)
-  :init
-  (require 'consult-org-roam)
-  (consult-org-roam-mode 1)
-  (defvar consult-command-map
-    (let ((map (make-sparse-keymap)))
-      ;; nested keymap for 'n' prefix (projectile)
-      (let ((projectile-map (make-sparse-keymap)))
-        (define-key projectile-map "f" #'consult-org-roam-file-find)
-        (define-key projectile-map "b" #'consult-org-roam-backlinks)
-        (define-key projectile-map "B" #'consult-org-roam-backlinks-recursive)
-        (define-key projectile-map "l" #'consult-org-roam-forward-links)
-        (define-key projectile-map "r" #'consult-org-roam-search)
-        (define-key map "n" projectile-map))
-      map))
-  :custom
-  (consult-org-roam-grep-func #'consult-ripgrep)
-  (consult-org-roam-buffer-narrow-key ?r)
-  (consult-org-roam-buffer-after-buffers t)
-  :config
-  ;; Eventually suppress previewing for certain functions
-  (consult-customize
-   consult-org-roam-forward-links
-   :preview-key "M-."))
-
-
-;; (use-package tree-sitter
-;;   ;; :ensure t
-;;   :config
-;;   (add-hook 'json-mode-hook #'tree-sitter-mode)
-;;   (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
-
-;; (use-package tree-sitter-langs
+;; (use-package consult-org-roam
 ;;   :ensure t
-;;   :after tree-sitter)
+;;   :disabled
+;;   :after org-roam
+;;   :bind-keymap
+;;   ("C-x c" . consult-command-map)
+;;   :init
+;;   (require 'consult-org-roam)
+;;   (consult-org-roam-mode 1)
+;;   (defvar consult-command-map
+;;     (let ((map (make-sparse-keymap)))
+;;       ;; nested keymap for 'n' prefix (projectile)
+;;       (let ((projectile-map (make-sparse-keymap)))
+;;         (define-key projectile-map "f" #'consult-org-roam-file-find)
+;;         (define-key projectile-map "b" #'consult-org-roam-backlinks)
+;;         (define-key projectile-map "B" #'consult-org-roam-backlinks-recursive)
+;;         (define-key projectile-map "l" #'consult-org-roam-forward-links)
+;;         (define-key projectile-map "r" #'consult-org-roam-search)
+;;         (define-key map "n" projectile-map))
+;;       map))
+;;   :custom
+;;   (consult-org-roam-grep-func #'consult-ripgrep)
+;;   (consult-org-roam-buffer-narrow-key ?r)
+;;   (consult-org-roam-buffer-after-buffers t)
+;;   :config
+;;   ;; Eventually suppress previewing for certain functions
+;;   (consult-customize
+;;    consult-org-roam-forward-links
+;;    :preview-key "M-."))
 
 
 ;; TODO: revert to C-c / g

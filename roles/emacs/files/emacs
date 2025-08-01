@@ -756,7 +756,6 @@ If the side window is being created, it prompts for the source buffer."
  '(frame-background-mode nil)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
- '(org-agenda-files '("~/git/personal/notes/agenda/notes.org"))
  '(package-selected-packages nil)
  '(tramp-default-method "ssh")
  '(warning-suppress-types '((lsp-mode) (comp)))
@@ -1407,14 +1406,19 @@ If the side window is being created, it prompts for the source buffer."
    org-hide-block-properties nil ; Don't hide :PROPERTIES: and :END: lines when folded
    org-clock-sound "~/.emacs.d/org/media/alarm.mp3" ; Sound for timeout - promodoro
    org-special-ctrl-a/e t        ; Enable special behavior for C-a and C-e in Org mode
+   org-default-notes-file "~/org/gtd/inbox.org" ; Default org note file saved by org-capture
+   org-agenda-files (list "~/org/gtd/gtd.org" "~/org/gtd/inbox.org" "~/org/gtd/projects/")
+   org-refile-targets '((org-agenda-files :maxlevel . 3))
+
 
    ;; TODO workflow configuration
-   org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "REVIEW" "REPEAT" "BLOCKED" "|" "DONE" "CANCELED"))
+   org-todo-keywords '((sequence "TODO" "NEXT" "STARTED" "REVIEW" "REPEAT" "BLOCKED" "|" "DONE" "CANCELED"))
 
    ;; TODO keyword faces with darker, less saturated background colors
    org-todo-keyword-faces '(
-                            ("TODO" . (:foreground "white" :background "#26449d" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
-                            ("IN-PROGRESS" . (:foreground "black" :background "#d5ad2a" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("TODO" . (:foreground "black" :background "#6d97ba" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("NEXT" . (:foreground "black" :background "#f05133" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("STARTED" . (:foreground "black" :background "#d5ad2a" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("REVIEW" . (:foreground "white" :background "#9369d9" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("REPEAT" . (:foreground "black" :background "#89b5d9" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("BLOCKED" . (:foreground "white" :background "#d95252" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
@@ -1529,12 +1533,71 @@ If the side window is being created, it prompts for the source buffer."
    :config
    (setq org-roam-ui-sync-theme t))
 
+(defun le/org-multiline-property (property-name content)
+  "Convert multi-line CONTENT to org property format with PROPERTY-NAME.
+First line uses PROPERTY-NAME, subsequent lines use PROPERTY-NAME+."
+  (let ((lines (split-string content "\n" t)))
+    (if lines
+        (concat ":" (upcase property-name) ": " (car lines) "\n"
+                (mapconcat (lambda (line)
+                            (concat ":" (upcase property-name) "+: " line))
+                          (cdr lines) "\n"))
+      "")))
+
+(defun le/get-meeting-synthesizer-prompt ()
+  "Return the meeting synthesizer system prompt."
+  "You are an expert meeting note synthesizer. Your task is to analyze raw meeting notes and generate structured org-mode content.
+
+When given meeting notes, you must create content for two specific sections:
+
+1. **AI Synthesized Summary**: A concise summary capturing the main discussion themes, key decisions, and overall meeting context. Focus on the most important insights and outcomes.
+It must start with an org level 1 header titled \"Summary\", followed by a summary.
+
+2. **Action Items**: A list of specific, actionable tasks with owners and timeframes where identifiable. Format as \"** TODO Task description\".
+If there is a due date for a task, append a due date in the format \" (Due: timeframe)\"
+
+Always format your response as clean org-mode content that can be directly inserted under the appropriate headings.
+
+Extract implicit action items from conversational notes (e.g., \"John will follow up\" becomes an action item). Be specific and actionable in your task descriptions.")
+
+(defun le/get-topic-synthesizer-prompt ()
+  "Return the topic synthesizer system prompt."
+  "Transform the provided notes into well-structured Emacs Org-mode syntax. Follow these requirements:
+
+## Structure Requirements
+- Use proper Org heading hierarchy
+- Add relevant tags using :tag1:tag2: syntax
+- Use appropriate Org blocks (#+BEGIN_SRC, #+BEGIN_EXAMPLE, etc.) for code or examples
+
+## Content Enhancement
+1. **Extract and organize:**
+   - Key concepts as main headings
+   - Definitions in definition lists
+   - Procedures as numbered or bulleted lists
+
+2. **Correct and enhance:**
+   - Fix factual errors or inconsistencies
+   - Add missing context or explanations
+   - Expand abbreviated terms on first use
+   - Include relevant examples where helpful
+   - Add cross-references between related sections
+
+3. **Org-mode specific features:**
+   - Use tables for structured data comparisons
+   - Add property drawers for metadata
+")
+
+
+
 ;; --- Org-roam Capture Templates ---
 (use-package org-roam-capture
   :after org-roam
   :config
   (setq org-roam-capture-templates
         '(
+          ;; General TODO
+          ("t" "Todo" entry (file+headline "~/org/gtd/inbox.org" "Inbox")
+           "* TODO %?\n%i\n%a")
           ;; General Meeting (m)
           ("m" "General Meeting" plain
            "
@@ -1542,15 +1605,9 @@ If the side window is being created, it prompts for the source buffer."
 %?
 
 * AI Synthesized Summary & Action Items
-
-
-* Discussion Points
-
-
-* Decisions
-
-
-* Action Items
+:PROPERTIES:
+%(le/org-multiline-property \"gptel_system\" (le/get-meeting-synthesizer-prompt))
+:END:
 "
            :target (file+head "meetings/%<%Y-%m-%d>-${slug}.org"
                               "#+TITLE: ${title} %<%Y-%m-%d>
@@ -1564,19 +1621,13 @@ If the side window is being created, it prompts for the source buffer."
           ;; Project Meeting (j)
           ("j" "Project Meeting" plain
            "
-* Raw Notes / Transcript (Paste here)
+* Raw Notes / Transcript
 %?
 
-* AI Synthesized Summary & Action Items
-
-
-* Discussion Points
-
-
-* Decisions
-
-
-* Action Items
+* AI Synthesized Summary & Action Items as TODO Header
+:PROPERTIES:
+%(le/org-multiline-property \"gptel_system\" (le/get-meeting-synthesizer-prompt))
+:END:
 "
            :target (file+head "meetings/%<%Y-%m-%d>-${slug}.org"
                               "#+TITLE: ${title} %<%Y-%m-%d>
@@ -1594,9 +1645,9 @@ If the side window is being created, it prompts for the source buffer."
 %?
 
 * AI Synthesized Summary & Action Items
-
-
-* Action Items
+:PROPERTIES:
+%(le/org-multiline-property \"gptel_system\" (le/get-meeting-synthesizer-prompt))
+:END:
 "
            :target (file+head "meetings/1on1-%<%Y-%m-%d>-${slug}.org"
                               "#+TITLE: 1:1 with %(progn (setq temp-person (le/org-roam-select-node \"Person (required): \" \"person\")) (if (string-empty-p temp-person) (error \"Person is required for a 1:1 Meeting\") (replace-regexp-in-string \"\\[\\[.*?\\]\\[\\(.*?\\)\\]\\]\" \"\\1\" temp-person))) %<%Y-%m-%d>
@@ -1607,19 +1658,17 @@ If the side window is being created, it prompts for the source buffer."
            :unnarrowed t)
 
           ;; Topic (t)
-          ("t" "Topic (General Knowledge/Concept)" plain
+          ("T" "Topic (General Knowledge/Concept)" plain
            "
-* Introduction
+* Topic Notes: ${title}
+
 %?
 
-* Key Concepts
--
-
-* Related Topics
--
-
-* Resources
-- "
+* AI Synthesized Topic
+:PROPERTIES:
+%(le/org-multiline-property \"gptel_system\" (le/get-topic-synthesizer-prompt))
+:END:
+"
            :target (file+head "topics/${slug}.org"
                               "#+TITLE: ${title}
 #+ROAM_TAGS: knowledge:concept,knowledge
@@ -1629,15 +1678,16 @@ If the side window is being created, it prompts for the source buffer."
 
           ;; Work Topic (w)
           ("w" "Work Topic (Company Specific)" plain
-           "* Overview
+           "
+* Work Topic Notes: ${title}
+
 %?
+* AI Synthesized Topic
+:PROPERTIES:
+%(le/org-multiline-property \"gptel_system\" (le/get-topic-synthesizer-prompt))
+:END:
 
-* Context
-
-* Relevant Resources
-
-* Key Stakeholders
--"
+"
            :target (file+head "work-topics/%(progn (setq temp-company (completing-read \"Company (stninc/discovery): \" '(\"stninc\" \"discovery\") nil t)) (downcase temp-company))-${slug}.org"
                               "#+TITLE: ${title}
 #+ROAM_TAGS: %(format \"%s,work-topic\" (downcase temp-company))
@@ -1648,23 +1698,31 @@ If the side window is being created, it prompts for the source buffer."
 
           ;; Learn Topic (l)
           ("l" "Learn Topic (Skill/Tool Focused)" plain
-           "* My Notes
+           "
+* Topic Notes: ${title}
 
 %?
 
-* Key Takeaways
+* Topic
 
-* Practice Exercises / Next Steps
 
 * Resources
-- "
-           :target (file+head "learning/%(progn (setq temp-type (completing-read \"Type (skill/tool/concept): \" '(\"skill\" \"tool\" \"concept\") nil t)) (downcase temp-type))-${slug}.org"
-                              "#+TITLE: ${title}
-#+ROAM_TAGS: %(format \"learning,%s\" (downcase temp-type))
-#+FILETAGS: :learning:%(downcase temp-type):
+
+
+* AI Synthesized Topic
+:PROPERTIES:
+%(le/org-multiline-property \"gptel_system\" (le/get-topic-synthesizer-prompt))
+:END:
+
+"
+ :target (file+head "learning/${slug}.org"
+                    "#+TITLE: ${title}
+#+ROAM_TAGS: learning
+#+FILETAGS: :learning:
 #+DATE: %<%Y-%m-%d>
 #+SOURCE: %(read-from-minibuffer \"Source (e.g., Book, Course, Blog): \")")
-           :unnarrowed t)
+ :unnarrowed t)
+
 
           ;; Person Capture Template (p)
           ("p" "Person" plain
@@ -2550,20 +2608,24 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
  (setq-local show-trailing-whitespace nil)
  (setq gptel-track-response nil
        gptel-log-level 'info
-       gptel-model 'deepseek-r1:70b
-       gptel-backend (gptel-make-ollama "Ollama"
-                       :host "localhost:11434"
-                       :stream t
-                       :models '("deepseek-r1:70b"
-                                 "codegemma:7b-instruct-fp16"
-                                 "codegemma:latest"
-                                 "deepseek-coder-v2:16b-lite-instruct-fp16"
-                                 "deepseek-coder:33b-base-q8_0"
-                                 "dolphin-mixtral:8x22b"
-                                 "llama3.2-vision:90b"
-                                 "llama3.3:latest"
-                                 "qwen2.5-coder:32b"
-                                 "qwen2.5:72b")))
+       ;; gptel-model 'deepseek-r1:70b
+       gptel-model 'gemini-2.5-pro
+       gptel-backend (gptel-make-gemini "Gemini"
+                 :key (getenv "GEMINI_API_KEY")
+                 :stream t))
+       ;; gptel-backend (gptel-make-ollama "Ollama"
+       ;;                 :host "localhost:11434"
+       ;;                 :stream t
+       ;;                 :models '("deepseek-r1:70b"
+       ;;                           "codegemma:7b-instruct-fp16"
+       ;;                           "codegemma:latest"
+       ;;                           "deepseek-coder-v2:16b-lite-instruct-fp16"
+       ;;                           "deepseek-coder:33b-base-q8_0"
+       ;;                           "dolphin-mixtral:8x22b"
+       ;;                           "llama3.2-vision:90b"
+       ;;                           "llama3.3:latest"
+       ;;                           "qwen2.5-coder:32b"
+       ;;                           "qwen2.5:72b")))
 
  (add-to-list 'gptel-directives
               `(Ai-Expert . ,(concat
@@ -2678,6 +2740,44 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                              "8. Implement proper memory management to prevent leaks\n"
                              "9. Follow consistent naming conventions and formatting\n"
                              "10. Use forward declarations to minimize compilation dependencies\n")))
+(add-to-list 'gptel-directives
+             `(Anki-Card-Generator . ,(concat
+                             "You are an expert Anki flashcard creator specialized in generating high-quality spaced repetition cards from learning content in anki-editor format.\n"
+                             "\n"
+                             "ANALYSIS APPROACH:\n"
+                             "- Extract key concepts, definitions, procedures, and relationships from all sections\n"
+                             "- Focus on \"Topic Description, Details, and Key Takeaways\" section for primary content\n"
+                             "- Create cards that promote active recall and understanding\n"
+                             "\n"
+                             "CARD GENERATION RULES:\n"
+                             "- Generate as many cards as needed to cover all important concepts\n"
+                             "- Vary question types: definitions, applications, comparisons, examples, procedures\n"
+                             "- Make questions specific and answers comprehensive but concise\n"
+                             "- Include context when necessary for clarity\n"
+                             "- Do NOT analyze or reference any content under the \"Anki Cards Data\" section\n"
+                             "\n"
+                             "OUTPUT FORMAT (anki-editor compatible):\n"
+                             "Output notes only"
+                             "Make sure each note has a :ANKI_DECK: and :ANKI_NOTE_TYPE:, with the corrct values."
+                             ":ANKI_DECK: can get its value from the filename of the org node its in. :ANKI_NOTE_TYPE: should always the value of \"Basic\"."
+                             "Optionally a note may have a :ANKI_TAGS: with appropriate values"
+                             "Each card must follow this exact anki-editor structure with specific asterisk counts:\n"
+                             "\n"
+                             "* Note Name\n"
+                             ":PROPERTIES:\n"
+                             ":ANKI_NOTE_TYPE: Basic\n"
+                             ":ANKI_DECK: %FILENAME%\n"
+                             ":END:\n"
+                             "** Front\n"
+                             "Question content here\n"
+                             "** Back\n"
+                             "Answer content here\n"
+                             "\n"
+                             "IMPORTANT:\n"
+                             "- Keep note titles descriptive but concise\n"
+                             "- Ensure answers are complete and self-contained\n"
+                             "- Use the filename (without .org extension) as the ANKI_DECK value\n"
+                             "- NEVER analyze content from the \"Anki Cards Data\" section itself")))
 
 ;;;; gptel tool functions
 ;;;; ====================

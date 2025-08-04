@@ -3065,6 +3065,17 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :ensure t
   :mode ("\\.env\\'" "\\.env\\..*\\'"))
 
+(use-package casual
+  :ensure t
+  :after org-agenda
+  :bind ( ;; Configure casual menues for different contexts
+         (:map org-agenda-mode-map
+               ("C-o" . casual-agenda-tmenu))
+         (:map bookmark-bmenu-mode-map
+               ("C-o" . casual-bookmarks-tmenu))
+         )
+  )
+
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)
 ;;; emacs ends here

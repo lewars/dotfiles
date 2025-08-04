@@ -1383,6 +1383,7 @@ If the side window is being created, it prompts for the source buffer."
 (use-package org
   :ensure t
   :bind (("C-c c" . org-capture)
+         ("C-c a" . org-agenda)
          :map org-mode-map
          ("S-<left>" . org-shiftleft)
          ("S-<right>" . org-shiftright)
@@ -1407,7 +1408,8 @@ If the side window is being created, it prompts for the source buffer."
    org-clock-sound "~/.emacs.d/org/media/alarm.mp3" ; Sound for timeout - promodoro
    org-special-ctrl-a/e t        ; Enable special behavior for C-a and C-e in Org mode
    org-default-notes-file "~/org/gtd/inbox.org" ; Default org note file saved by org-capture
-   org-agenda-files (list "~/org/gtd/gtd.org" "~/org/gtd/inbox.org" "~/org/gtd/projects/")
+   ;; Configure Org to find all the Org Agenda files and directories
+   org-agenda-files (list "~/org/gtd/")
    org-refile-targets '((org-agenda-files :maxlevel . 3))
 
 
@@ -1417,8 +1419,8 @@ If the side window is being created, it prompts for the source buffer."
    ;; TODO keyword faces with darker, less saturated background colors
    org-todo-keyword-faces '(
                             ("TODO" . (:foreground "black" :background "#6d97ba" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
-                            ("NEXT" . (:foreground "black" :background "#f05133" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
-                            ("STARTED" . (:foreground "black" :background "#d5ad2a" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("NEXT" . (:foreground "black" :background "#f79000" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("STARTED" . (:foreground "black" :background "#f7f700" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("REVIEW" . (:foreground "white" :background "#9369d9" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("REPEAT" . (:foreground "black" :background "#89b5d9" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("BLOCKED" . (:foreground "white" :background "#d95252" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))

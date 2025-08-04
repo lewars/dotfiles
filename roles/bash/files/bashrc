@@ -210,6 +210,12 @@ alias di='sudo dnf install'
 alias diy='sudo dnf install -y'
 alias fa='alias|fzf'
 
+# ssh aliases
+alias sshp=sshp.sh
+alias getip=getip.sh
+alias m01='sshp m01'
+alias a01='ssh a01'
+
 # system/admin
 alias s='sudo systemctl'
 

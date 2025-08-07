@@ -20,12 +20,10 @@
     owner: '{{ user }}'
     state: link
   become: false
-- name: Create a symbolic link of a directory
-  file:
-    src: '{{ dotfiles_home }}/roles/emacs/files/emacs.d/snippets'
-    dest: '{{ dotfiles_user_home }}/.emacs.d/snippets'
-    owner: '{{ user }}'
-    state: link
+- name: Clone personal fork of yasnippets repo
+  ansible.builtin.git:
+    repo: 'https://github.com/lewars/yasnippet-snippets.git'
+    dest: '{{ dotfiles_user_home }}/contrib/yasnippet-snippets'
   become: false
 - name: Make sure org mode media directory exists
   file:

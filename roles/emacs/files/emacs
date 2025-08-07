@@ -495,18 +495,12 @@
 
 (use-package yasnippet
   :ensure t
-  :hook
-  (emacs-lisp-mode-hook . (lambda () (yas-minor-mode -1)))
-  :init
-  (add-to-list 'load-path "~/.emacs.d/elpa/yasnippet-20250403.1926")
-  (require 'yasnippet)
+  :hook (emacs-lisp-mode . (lambda () (yas-minor-mode -1)))
+  :bind ("M-/" . hippie-expand)
+  :config
   (setq yas-snippet-dirs '("~/git/contrib/yasnippet-snippets/snippets/")
         yas-wrap-around-region t
-        yas-triggers-in-field t
-        yas/triggers-in-field t)
-  :bind
-  ("M-/" . hippie-expand)
-  :config
+        yas-triggers-in-field t)
   (yas-global-mode 1)
   (yas-reload-all)
   (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand))

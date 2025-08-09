@@ -10,7 +10,7 @@
     mode: '0755'
   become: false
 - name: Back up .emacs configuration
-  command: mv ~/.emacs ~/.emacs.bak.{{ ansible_date_time.iso8601 }}
+  command: cp ~/.emacs ~/.emacs.bak.{{ ansible_date_time.iso8601 }}
   when: emacsconfig_stat.stat.exists
   become: false
 - name: Create a symbolic link of .emacs in home folder
@@ -55,4 +55,10 @@
   community.general.npm:
     name: "@mermaid-js/mermaid-cli"
     global: true
+  become: false
+- name: Install mermaid configuration file
+  ansible.builtin.copy:
+    src: 'mermaid-config.json'
+    dest: '{{ dotfiles_user_home }}/.config/mmdc/.mermaid-config.json'
+    owner: '{{ user }}'
   become: false

@@ -51,3 +51,8 @@
         - gh
     state: present
   become: true
+- name: Install mermaid command line interface
+  community.general.npm:
+    name: "@mermaid-js/mermaid-cli"
+    global: true
+  become: false

@@ -1919,6 +1919,7 @@ Extract implicit action items from conversational notes (e.g., \"John will follo
    (sql . t)
    (sqlite . t)
    (dot . t) ; For Graphviz diagrams
+   (mermaid . t)
    ))
 
 (setq org-confirm-babel-evaluate nil)
@@ -1932,9 +1933,8 @@ Extract implicit action items from conversational notes (e.g., \"John will follo
   :after org-babel
   :hook (org-mode . ob-mermaid-mode)
   :config
-  ;; You might need to configure the path to the 'mmdc' executable
-  ;; (setq ob-mermaid-executable "/usr/bin/mmdc")
-  )
+  (setq org-babel-show-process-buffer t)
+  (setq ob-mermaid-executable "~/.local/bin/mmdc"))
 
 (use-package org-appear
   :ensure t
@@ -3023,12 +3023,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 (use-package mermaid-mode
   :ensure t
   :defer t
-  :mode ("\\.mmd\\'" . mermaid-mode)
-  :config
-  ;; (setq mermaid-output-format "md")
-  (setq my-uid (user-uid))
-  (setq mermaid-mmdc-location "podman")
-  (setq mermaid-flags (format "run --userns keep-id --user %d --rm -v /tmp:/tmp:z ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:11.4.2" my-uid)))
+  :mode ("\\.mmd\\'" . mermaid-mode))
 
 (use-package diff-hl
   :ensure t

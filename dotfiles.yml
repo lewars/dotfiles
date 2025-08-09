@@ -34,7 +34,7 @@
     - role: node
       tags:
         - node
-      when: false
+      when: true
     - role: emacs
       become: false
       tags:

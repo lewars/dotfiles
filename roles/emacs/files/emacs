@@ -1415,7 +1415,8 @@ If the side window is being created, it prompts for the source buffer."
    org-clock-sound "~/.emacs.d/org/media/alarm.mp3" ; Sound for timeout - promodoro
    org-special-ctrl-a/e t        ; Enable special behavior for C-a and C-e in Org mode
    org-default-notes-file "~/org/gtd/inbox.org" ; Default org note file saved by org-capture
-   org-refile-targets '((org-agenda-files :maxlevel . 3))
+   org-refile-targets '((org-agenda-files :maxlevel . 4)) ;; only allow refiling to entries with the given levels of org-agenda-files
+   org-return-follows-link t     ; Follow link by using the return key
 
 
    ;; TODO workflow configuration

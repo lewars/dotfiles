@@ -1343,16 +1343,10 @@ If the side window is being created, it prompts for the source buffer."
 (defun le/my-org-buffer-setup ()
   "Apply all buffer-local visual and minor-mode settings for Org."
   ;; --- Visuals and Layout ---
-  (setq-local visual-fill-column-width 120)            ; Set visual line wrap width to 120 characters.
-  (setq-local line-spacing 0.1)                        ; Add a small vertical gap between lines for readability.
-  (visual-fill-column-mode 1)
-  (setq-local left-margin-width 100)                   ; Create a wide padding area on the left side of the text.
-
-  ;; --- Org-Specific Buffer Settings (moved from :config) ---
-  (setq-local org-hide-emphasis-markers t)             ; Hide the markup characters, e.g., show "bold" instead of "*bold*".
-  (setq-local org-ellipsis " !!!")                     ; Change the symbol shown for folded headlines.
-  (setq-local org-hide-block-properties nil)           ; Always show the :PROPERTIES: drawer under headlines.
-  (setq-local org-special-ctrl-a/e t)                  ; Make C-a/C-e jump to the beginning/end of headline text, not the stars.
+  (setq-local visual-fill-column-width 120)          ; Set line wrap width of characters for this buffer
+  (setq-local line-spacing 0.1)                      ; Add extra spacing between lines
+  (setq-default visual-fill-column-center-text t)    ; Center text globally (affects all buffers)
+  (visual-fill-column-mode 1)                       ; Enable visual-fill-column mode
 
   ;; --- Minor Modes ---
   (org-indent-mode 1)
@@ -1366,6 +1360,7 @@ If the side window is being created, it prompts for the source buffer."
 ;; Org-mode core configuration
 (use-package org
   :ensure t
+  :init
   :hook (org-mode . le/my-org-buffer-setup)
   :bind (("C-c c" . org-capture)
          ("C-c a" . org-agenda)
@@ -1376,16 +1371,20 @@ If the side window is being created, it prompts for the source buffer."
          ("S-<down>" . org-shiftdown))
   :config
   (setq org-agenda-files '("~/org/gtd/"
-                           "~/org/kb/learning"
-                           "~/org/kb/issues"
+                           ;; "~/org/kb/learning"
+                           ;; "~/org/kb/issues"
                            ))
   (setq
    org-startup-with-inline-images t
-   org-image-actual-width nil ; Display images at their actual width, or nil to scale down
-   org-image-max-width 300    ; Max width for images when scaled
+   org-image-actual-width nil     ; Display images at their actual width, or nil to scale down
+   org-image-max-width 300        ; Max width for images when scaled
    org-hide-emphasis-markers t    ; Hide * / _ = ~
    org-startup-indented t         ; Start Org buffers with indentation
    org-edit-src-code t            ; Enable editing source code blocks in separate buffer
+   org-hide-emphasis-markers t    ; Hide the markup characters, e.g., show "bold" instead of "*bold*".
+   org-ellipsis " !!!"            ; Change the symbol shown for folded headlines.
+   org-hide-block-properties nil  ; Always show the :PROPERTIES: drawer under headlines.
+   org-special-ctrl-a/e t         ; Make C-a/C-e jump to the beginning/end of headline text, not the stars.
    org-ellipsis " !!!"             ; Set symbole when folding
    org-catch-invisible-edits 'show-and-error ; Check if in invisible region before modification
    org-hide-block-properties nil ; Don't hide :PROPERTIES: and :END: lines when folded
@@ -2237,8 +2236,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                          face)))))))
 
 (use-package centaur-tabs
-  :after (dashboard org)
-  ;; :after (org)
+  :after (org dashboard)
   :ensure t
   :demand
   :init
@@ -2374,6 +2372,12 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :ensure t
   :config
   (dashboard-setup-startup-hook)
+  ;; (add-hook 'after-init-hook
+  ;;           (lambda ()
+  ;;             (require 'org) ;; Ensure org mode is explicitly loaded
+  ;;             (org-agenda-list)  ;; Run the agenda command
+  ;;             ))
+
   ;; Format: "(icon title help action face prefix suffix)"
   (setq dashboard-navigator-buttons
         `(
@@ -2398,7 +2402,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                      (recents . 10)
                      (projects  . 15)
                      (bookmarks . 10)
-                     (agenda    . 20)
+;;                     (agenda    . 20)
                      (registers . 10)
                      ))
   (dashboard-item-shortcuts '(

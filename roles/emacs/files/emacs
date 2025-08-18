@@ -1498,7 +1498,8 @@ If the side window is being created, it prompts for the source buffer."
   :init
   (setq org-roam-directory "~/org/kb/"
         org-roam-dailies-directory "daily/"
-        org-roam-db-location "~/.emacs.d/org-roam.db")
+        org-roam-db-location "~/.emacs.d/org-roam.db"
+        org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
   :hook (after-init . org-roam-db-autosync-mode)
   :bind (;; Core org-roam functions
          ("C-c n c" . org-roam-capture)

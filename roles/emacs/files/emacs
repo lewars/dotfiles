@@ -790,17 +790,6 @@ If the side window is being created, it prompts for the source buffer."
  '(mode-line ((t (:background "#093159" :foreground "#dde4eb" :box nil))))
  '(mode-line-inactive ((t (:background "#394c55" :foreground "#a4aeba" :box nil))))
  '(nerd-icons-orange ((t (:foreground "steel blue"))))
- '(org-document-info-keyword ((t (:inherit (org-drawer)))))
- '(org-document-title ((t (:inherit (bold variable-pitch) :height 1.1 :foreground "gray95"))))
- '(org-headline-done ((t (:foreground "#777979"))))
- '(org-level-1 ((t (:inherit (bold variable-pitch) :height 1.0 :foreground "gray90"))))
- '(org-level-2 ((t (:inherit (bold variable-pitch) :height 0.9 :foreground "gray90"))))
- '(org-level-3 ((t (:inherit (bold variable-pitch) :height 0.9 :foreground "gray90"))))
- '(org-level-4 ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
- '(org-level-5 ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
- '(org-level-6 ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
- '(org-level-7 ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
- '(org-level-8 ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
  '(region ((t (:extend t :background "IndianRed4"))))
  '(shadow ((t (:foreground "rosy brown"))))
  '(show-paren-match ((t (:background "dim gray" :foreground "cyan" :weight ultra-bold))))
@@ -1349,38 +1338,35 @@ If the side window is being created, it prompts for the source buffer."
         (message "Face: %s" face)
       (message "No face at %d" pos))))
 
-;; Org-mode visual line and padding setup
-(defun le/my-org-mode-visual-line-setup ()
-  "Enable visual line wrapping at 120 characters for Org mode."
-  (setq-local visual-fill-column-width 120)          ; Set line wrap width of characters for this buffer
-  (setq-local line-spacing 0.1)                      ; Add extra spacing between lines
-  (setq-default visual-fill-column-center-text t)    ; Center text globally (affects all buffers)
-  (visual-fill-column-mode 1))                       ; Enable visual-fill-column mode
+;;; -*- lexical-binding: t; -*-
 
-;; Define functions before use-package
-(defun le/my-org-mode-setup-yasnippet ()
-  "Setup yasnippet for Org mode."
-  (setq-local yas-trigger-key [tab])
-  (define-key yas-keymap [tab] 'yas-next-field-or-maybe-expand)
-  (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
+(defun le/my-org-buffer-setup ()
+  "Apply all buffer-local visual and minor-mode settings for Org."
+  ;; --- Visuals and Layout ---
+  (setq-local visual-fill-column-width 120)            ; Set visual line wrap width to 120 characters.
+  (setq-local line-spacing 0.1)                        ; Add a small vertical gap between lines for readability.
+  (visual-fill-column-mode 1)
+  (setq-local left-margin-width 100)                   ; Create a wide padding area on the left side of the text.
 
-(defun le/my-org-mode-add-padding ()
-  "Add a bit of left and right padding to Org mode buffers."
-  (setq-local left-margin-width 100))
+  ;; --- Org-Specific Buffer Settings (moved from :config) ---
+  (setq-local org-hide-emphasis-markers t)             ; Hide the markup characters, e.g., show "bold" instead of "*bold*".
+  (setq-local org-ellipsis " !!!")                     ; Change the symbol shown for folded headlines.
+  (setq-local org-hide-block-properties nil)           ; Always show the :PROPERTIES: drawer under headlines.
+  (setq-local org-special-ctrl-a/e t)                  ; Make C-a/C-e jump to the beginning/end of headline text, not the stars.
 
-;; Define the windmove setup function
-(defun le/my-org-mode-windmove-setup ()
-  "Configure windmove to use S-s-<cursor> in org-mode."
-  ;; Disable windmove's S-<cursor> bindings in org-mode
-  (local-unset-key (kbd "S-<left>"))
-  (local-unset-key (kbd "S-<right>"))
-  (local-unset-key (kbd "S-<up>"))
-  (local-unset-key (kbd "S-<down>"))
-  windmove-mode -1)
+  ;; --- Minor Modes ---
+  (org-indent-mode 1)
+  (org-bullets-mode 1)
+  (org-appear-mode 1)
+
+  ;; --- YASnippet Integration ---
+  (setq-local yas-trigger-key [tab])                   ; Designate the TAB key to trigger yasnippet expansions.
+  (define-key yas-keymap [tab] 'yas-next-field-or-maybe-expand))
 
 ;; Org-mode core configuration
 (use-package org
   :ensure t
+  :hook (org-mode . le/my-org-buffer-setup)
   :bind (("C-c c" . org-capture)
          ("C-c a" . org-agenda)
          :map org-mode-map
@@ -1388,19 +1374,11 @@ If the side window is being created, it prompts for the source buffer."
          ("S-<right>" . org-shiftright)
          ("S-<up>" . org-shiftup)
          ("S-<down>" . org-shiftdown))
-  :hook ( ;; org-mode hooks
-         (org-mode . le/my-org-mode-visual-line-setup)
-         (org-mode . le/my-org-mode-setup-yasnippet)
-         (org-mode . le/my-org-mode-windmove-setup)
-         )
-  :custom
-  ;; Configure Org to find all the Org Agenda files and directories
-  (org-agenda-files (list "~/org/gtd/"
-                          "~/org/kb/learning"
-                          "~/org/kb/issues"
-                          ))
-
   :config
+  (setq org-agenda-files '("~/org/gtd/"
+                           "~/org/kb/learning"
+                           "~/org/kb/issues"
+                           ))
   (setq
    org-startup-with-inline-images t
    org-image-actual-width nil ; Display images at their actual width, or nil to scale down

@@ -1476,7 +1476,7 @@ If the side window is being created, it prompts for the source buffer."
   (setq org-roam-directory "~/org/kb/"
         org-roam-dailies-directory "daily/"
         org-roam-db-location "~/.emacs.d/org-roam.db"
-        org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+        org-roam-node-display-template (concat "${title:*}" (propertize "${tags:5}" 'face 'org-tag)))
   :hook (after-init . org-roam-db-autosync-mode)
   :bind (;; Core org-roam functions
          ("C-c n c" . org-roam-capture)
@@ -1564,7 +1564,20 @@ Extract implicit action items from conversational notes (e.g., \"John will follo
    - Add property drawers for metadata
 ")
 
+(defun le/get-demo-presentation-prompt ()
+  "Return the meeting synthesizer system prompt."
+  "Convert these raw project notes above into a clear, engaging presentation speech. Structure it with:
 
+1. Opening hook that captures audience attention
+2. Clear problem statement and project objectives
+3. Key findings/results with supporting evidence
+4. Main challenges and how they were addressed
+5. Impact and next steps
+6. Strong closing that reinforces main message
+
+Make it conversational but professional. Include transition phrases between sections. Target 5-7 minutes speaking time. Focus on insights and outcomes rather than technical details unless specifically relevant to the audience.
+"
+)
 
 ;; --- Org-roam Capture Templates ---
 (use-package org-roam-capture
@@ -1581,7 +1594,7 @@ Extract implicit action items from conversational notes (e.g., \"John will follo
 * Raw Notes / Transcript (Paste here)
 %?
 
-* AI Synthesized Summary & Action Items
+* ✨ AI-Generated Summary & Action Items
 :PROPERTIES:
 %(le/org-multiline-property \"gptel_system\" (le/get-meeting-synthesizer-prompt))
 :END:
@@ -1598,10 +1611,10 @@ Extract implicit action items from conversational notes (e.g., \"John will follo
           ;; Project Meeting (j)
           ("j" "Project Meeting" plain
            "
-* Raw Notes / Transcript
+* 📝 Raw Notes / Transcript
 %?
 
-* AI Synthesized Summary & Action Items as TODO Header
+* ✨ AI-Generated Summary & Action Items as TODO Header
 :PROPERTIES:
 %(le/org-multiline-property \"gptel_system\" (le/get-meeting-synthesizer-prompt))
 :END:
@@ -1615,13 +1628,33 @@ Extract implicit action items from conversational notes (e.g., \"John will follo
 #+PROJECT: %(le/org-roam-select-node \"Project (required): \" \"project\")")
            :unnarrowed t)
 
+          ;; Demo Meeting (d)
+          ("j" "Demo Meeting" plain
+           "
+* 🗣️ Demo Speech for ${title}
+%?
+
+* ✨ Presentation Speech
+:PROPERTIES:
+%(le/org-multiline-property \"gptel_system\" (le/get-demo-presentation-prompt))
+:END:
+"
+           :target (file+head "meetings/%<%Y-%m-%d>-${slug}.org"
+                              "#+TITLE: ${title} %<%Y-%m-%d>
+#+ROAM_TAGS: meeting:demo,presentation
+#+FILETAGS: :meeting:demo:
+#+DATE: %<%Y-%m-%d %H:%M>
+#+ATTENDEES: %(le/org-roam-select-nodes \"Attendees (select multiple people): \" \"person\")
+#+PROJECT: %(le/org-roam-select-node \"Project (required): \" \"project\")")
+           :unnarrowed t)
+
           ;; One-on-One Meeting (o)
           ("o" "One-on-One Meeting" plain
            "
-* Raw Notes / Discussion Points (Paste here)
+* 📝 Raw Notes / Discussion Points (Paste here)
 %?
 
-* AI Synthesized Summary & Action Items
+* ✨ AI-Generated Summary & Action Items as TODO Header
 :PROPERTIES:
 %(le/org-multiline-property \"gptel_system\" (le/get-meeting-synthesizer-prompt))
 :END:
@@ -1637,11 +1670,11 @@ Extract implicit action items from conversational notes (e.g., \"John will follo
           ;; Topic (t)
           ("T" "Topic (General Knowledge/Concept)" plain
            "
-* Topic Notes: ${title}
+* 📝 Topic Notes: ${title}
 
 %?
 
-* AI Synthesized Topic
+* ✨ AI-Generated Topic Text
 :PROPERTIES:
 %(le/org-multiline-property \"gptel_system\" (le/get-topic-synthesizer-prompt))
 :END:
@@ -1656,10 +1689,10 @@ Extract implicit action items from conversational notes (e.g., \"John will follo
           ;; Work Topic (w)
           ("w" "Work Topic (Company Specific)" plain
            "
-* Work Topic Notes: ${title}
+* 📝 Work Topic Notes: ${title}
 
 %?
-* AI Synthesized Topic
+* ✨ AI-Generated Topic Text
 :PROPERTIES:
 %(le/org-multiline-property \"gptel_system\" (le/get-topic-synthesizer-prompt))
 :END:
@@ -1676,17 +1709,12 @@ Extract implicit action items from conversational notes (e.g., \"John will follo
           ;; Learn Topic (l)
           ("l" "Learn Topic (Skill/Tool Focused)" plain
            "
-* Topic Notes: ${title}
+* 📝 Topic Notes: ${title}
 
 %?
 
-* Topic
 
-
-* Resources
-
-
-* AI Synthesized Topic
+* ✨ AI-Generated Topic Text
 :PROPERTIES:
 %(le/org-multiline-property \"gptel_system\" (le/get-topic-synthesizer-prompt))
 :END:
@@ -1704,40 +1732,42 @@ Extract implicit action items from conversational notes (e.g., \"John will follo
           ;; Person Capture Template (p)
           ("p" "Person" plain
            "
-* Work Context
-** Professional Background
+** 🧑‍🔧 Professional Background
 %?
 
-** Current Projects
+** 📐 Current Projects
 -
 
-** Skills & Expertise
+** 🧗Skills & Expertise
 -
 
-** Working Style
+** 🗣️ Working Style
 -
 
-* Interaction History
-** Meeting History
+* 💬 Interaction History
+-
+
+** 🪑 Meeting History
+
 #+BEGIN_QUERY
 { :query [:and [:from \"file\"] [:filetags \"meeting\"] [:or [:id \"${id}\"] [:in-alias \"${id}\"]]] }
 #+END_QUERY
 
-** 1:1 Notes
+** 🗣️ 1:1 Notes
 #+BEGIN_QUERY
 { :query [:and [:from \"file\"] [:filetags \"meeting:1on1\"] [:or [:id \"${id}\"] [:in-alias \"${id}\"]]] }
 #+END_QUERY
 
-** Action Items (from/for this person)
+** 💫 Action Items (from/for this person)
 -
 
-** Personal Notes
+** 📝 Personal Notes
 -
 
-** Strategy
+** 🧠 Strategy
 -
 
-** Issue Log
+** 🚩 Issue Log
 #+BEGIN_QUERY
 { :query [:and [:from \"file\"] [:filetags \"issue:incident\"] [:or [:id \"${id}\"] [:in-alias \"${id}\"]]] }
 #+END_QUERY"
@@ -1761,27 +1791,23 @@ Extract implicit action items from conversational notes (e.g., \"John will follo
           ;; Project Capture Template (P)
           ("P" "Project" plain
            "
-* Project Overview
+* 📝 Project Overview
 %?
 
-* Goals & Objectives
+* 🎯 Goals & Objectives
 
+* 💫 Key Deliverables
 
-* Key Deliverables
+* ⚠️ Risks & Mitigations
 
+* 📚 Resources
 
-* Risks & Mitigations
-
-
-* Resources
-
-
-* Meeting History
+* 📅 Meeting History
 #+BEGIN_QUERY
 { :query [:and [:from \"file\"] [:filetags \"meeting:project\"] [:or [:id \"${id}\"] [:in-alias \"${id}\"]]] }
 #+END_QUERY
 
-* Tasks & Roadmap
+* 🗺️ Tasks & Roadmap
 "
            :target (file+head "projects/${slug}.org"
                               "#+TITLE: ${title}
@@ -1808,7 +1834,7 @@ Extract implicit action items from conversational notes (e.g., \"John will follo
           ("I" "Incident Log (with Person)" plain
 
            "
-* Incident Details (ENCRYPTED SECTION) :crypt:
+* 🚩 Incident Details (ENCRYPTED SECTION) :crypt:
 
 %?
 
@@ -1834,12 +1860,12 @@ Extract implicit action items from conversational notes (e.g., \"John will follo
            "* Initial Observation & Symptoms
 %?
 
-* Investigative Ideas to Take
+* 🧠 Investigative Ideas to Take
 - [ ] Idea 1...
 - [ ] Idea 2...
 - [ ] Idea 3...
 
-* Troubleshooting Steps Taken
+* 📝 Troubleshooting Steps Taken
 -
 
 * Analysis & Hypothesis
@@ -1874,6 +1900,32 @@ Extract implicit action items from conversational notes (e.g., \"John will follo
 #+RELATED_PROJECT: %(le/org-roam-select-node \"Related Project (optional): \" \"project\")
 #+REPORTED_BY: %(le/org-roam-select-node \"Reported By (optional): \" \"person\")")
            :unnarrowed t)
+
+          ;; Standup Notes (s)
+          ("s" "Standup Note" plain
+           "
+* Raw Notes
+
+** ✅ Yesterday
+   - [ ]
+
+** 🚀 Today
+   - [ ]
+
+** 🛑 Blockers
+   - [ ] None
+
+* ✨ AI-Generated Concise, Two to Three Sentence Summary
+:PROPERTIES:
+%(le/org-multiline-property \"gptel_system\" (le/get-meeting-synthesizer-prompt))
+:END:
+"
+           :target (file+head "standup-${slug}-%<%Y-%m-%d>.org"
+                              "#+TITLE: Standup: ${title}
+#+ROAM_TAGS: standup
+#+FILETAGS: :standup:
+#+DATE: %<%Y-%m-%d %H:%M>")
+            :unnarrowed t)
           )))
 
 ;; Org-crypt configuration (part of Org-mode, no :ensure t)

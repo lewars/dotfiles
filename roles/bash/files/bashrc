@@ -252,6 +252,10 @@ alias dhi="dnf history info"
 alias dhl="dnf history list | fzf --preview 'dnf history info {1}' --preview-window=right:50% | awk '{print $1}' | xargs -I {} dnf history info {}"
 alias scan='sudo freshclam; clamscan'
 
+# container development
+alias usU="podman unshare chown -R $(id -u):$(id -g) ."
+alias us0='podman unshare chown -R 0:0 .'
+
 # functions
 las(){
     local -r pflg="$1"
@@ -324,60 +328,6 @@ function k8sh() {
     kubectl exec -it "$1" -c "$2" -- sh -c $"$cmd"
 }
 
-## A function to abstract the obtaining the shell on jenkins{,-stg}.tools
-function jenkins-tools() {
-
-    # setup namespace
-    k8ns prod-cicd
-
-    # Select jenkins by environment
-    environment="$1"
-    if [ -z "$1" ]; then
-        environment="prod"
-    fi
-
-    # Select command to run
-    cmd="$2"
-    if [ -z "$cmd" ]; then
-        cmd="/bin/bash"
-    fi
-
-    k8sh "$environment"-jenkins-0 jenkins "$cmd"
-}
-
-## A generic function that obtains a shell on a jenkins agent
-function jenkins-agent() {
-    # setup namespace
-    k8ns prod-cicd
-
-    # Select jenkins agent by number
-    if [ -z "$1" ]; then
-        echo "Usage: jenkins-can-agent <agent_number> [cmd]"
-        return 1
-    fi
-
-    # Select command to run
-    cmd="$2"
-    if [ -z "$cmd" ]; then
-        cmd="/bin/bash"
-    fi
-
-    k8sh prod-cicd-jenkins-slave-"$1" prod-cicd-jenkins-slave "$cmd"
-}
-
-## A function that obtains a shell on a jenkins-ui agent
-function jenkins-ui-agent() {
-    k8cluster gke_i-cbscom-dev_us-central1_pplus-tools-cluster
-    jenkins-agent "$1"
-}
-
-## A function that obtains a shell on a jenkins can agent
-function jenkins-can-agent() {
-    # switch to can cluster
-    k8cluster gke_i-can-dev_us-central1_can-tools-cluster
-    jenkins-agent "$1"
-}
-
 ## A function that quickly cd's to a directory
 function qcd() {
     if [ -z "$1" ]; then
@@ -417,17 +367,6 @@ function frg(){
         | fzf --preview "bat --color=always {1} --highlight-line {2}" \
               --preview-window ~8,+{2}-5
 }
-
-
-export -f k8ns
-export -f k8listns
-export -f k8sh
-export -f k8cluster
-export -f k8listcluster
-export -f jenkins-ui-agent
-export -f jenkins-can-agent
-export -f qcd
-export -f jenkins-tools
 
 # . $HOME/.asdf/asdf.sh
 # . $HOME/.asdf/completions/asdf.bash

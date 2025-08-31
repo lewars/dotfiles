@@ -7,4 +7,4 @@ TAGS
 #*#
 .\#*
 package*.json
-.env
+.env*

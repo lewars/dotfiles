@@ -43,6 +43,29 @@
 (global-unset-key (kbd "C-x C-z"))
 (global-unset-key (kbd "C-z"))
 
+;; Package manager configuration
+(require 'package)
+(setq package-archives
+      '(("gnu" . "https://elpa.gnu.org/packages/")
+        ("melpa" . "https://melpa.org/packages/")
+        ("melpa-stable" . "https://stable.melpa.org/packages/")
+        ))
+
+(setq package-archive-priorities
+      '(("gnu" . 30)
+        ("melpa-stable" . 20)
+        ("melpa" . 40)))
+
+(package-initialize)
+(package-refresh-contents)
+(package-install 'quelpa)
+(require 'use-package-ensure)
+(quelpa '(quelpa-use-package
+          :fetcher git
+          :url "https://github.com/quelpa/quelpa-use-package.git"))
+(require 'quelpa-use-package)
+
+
 ;; TODO: Improve scrolling
 (setq fast-but-imprecise-scrolling t)
 
@@ -77,27 +100,6 @@
 (set-face-attribute 'variable-pitch nil
                     :family "Atkinson Hyperlegible"
                     :height 1.40)
-
-(require 'package)
-(setq package-archives
-      '(("gnu" . "https://elpa.gnu.org/packages/")
-        ("melpa" . "https://melpa.org/packages/")
-        ("melpa-stable" . "https://stable.melpa.org/packages/")
-        ))
-
-(setq package-archive-priorities
-      '(("gnu" . 30)
-        ("melpa-stable" . 20)
-        ("melpa" . 40)))
-
-(package-initialize)
-(package-refresh-contents)
-(package-install 'quelpa)
-(require 'use-package-ensure)
-(quelpa '(quelpa-use-package
-          :fetcher git
-          :url "https://github.com/quelpa/quelpa-use-package.git"))
-(require 'quelpa-use-package)
 
 ;; Misc configs
 (delete-selection-mode 1)
@@ -735,26 +737,27 @@ If the side window is being created, it prompts for the source buffer."
  '(centaur-tabs-bar-height 22)
  '(column-number-mode 1)
  '(custom-safe-themes
-   '("f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33"
-     "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294"
-     "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb"
-     "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8"
-     "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77"
-     "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da"
-     "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a"
-     "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d"
-     "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae"
-     "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4"
-     "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561"
-     "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350"
-     default))
+   '("f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33" "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294"
+     "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb" "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8"
+     "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77" "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da"
+     "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a" "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d"
+     "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae" "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4"
+     "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561" "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350" default))
  '(frame-background-mode nil)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
- '(package-selected-packages nil)
+ '(package-selected-packages
+   '(all-the-icons anki-editor ansible ansible-doc async async-await atomic-chrome blacken casual centaur-tabs colorful-mode company-ansible company-quickhelp
+                   consult-flycheck consult-gh-forge consult-lsp consult-org-roam consult-projectile consult-yasnippet copilot corfu dashboard demap diff-hl
+                   dockerfile-mode doom-modeline doom-themes dotenv-mode dumb-jump emojify eterm-256color expand-region flycheck-posframe flyspell-correct focus
+                   frame-local fzf go-mode google-this gptel groovy-mode helpful highlight-indent-guides ibuffer-projectile idle-highlight-mode imenu-list
+                   jinja2-mode k8s-mode latex-preview-pane lorem-ipsum lsp-pyright lsp-treemacs lsp-ui marginalia mermaid-mode mixed-pitch multi-vterm
+                   multiple-cursors nerd-icons-completion nerd-icons-dired nerd-icons-ibuffer ob-go ob-mermaid olivetti orderless org-appear org-bullets
+                   org-make-toc org-preview-html org-projectile org-roam-ui org-super-agenda org-view-mode ox-hugo pdf-tools ppp py-isort python-mode pyvenv
+                   quelpa-use-package rainbow-mode systemd terraform-mode textile-mode treemacs-magit treemacs-nerd-icons treemacs-projectile vertico-posframe
+                   visual-fill-column whitespace-cleanup-mode yasnippet-snippets))
  '(package-vc-selected-packages
-   '((copilot :url "https://github.com/copilot-emacs/copilot.el" :branch
-              "main")))
+   '((copilot :url "https://github.com/copilot-emacs/copilot.el" :branch "main")))
  '(tramp-default-method "ssh")
  '(warning-suppress-types '((lsp-mode) (comp)))
  '(window-divider-default-right-width 2)
@@ -1381,6 +1384,7 @@ If the side window is being created, it prompts for the source buffer."
    org-hide-emphasis-markers t    ; Hide * / _ = ~
    org-startup-indented t         ; Start Org buffers with indentation
    org-edit-src-code t            ; Enable editing source code blocks in separate buffer
+   org-edit-src-content-indentation 0 ; controls the relative indentation of the source code within the src block
    org-hide-emphasis-markers t    ; Hide the markup characters, e.g., show "bold" instead of "*bold*".
    org-ellipsis " !!!"            ; Change the symbol shown for folded headlines.
    org-hide-block-properties nil  ; Always show the :PROPERTIES: drawer under headlines.
@@ -1920,7 +1924,7 @@ Make it conversational but professional. Include transition phrases between sect
 %(le/org-multiline-property \"gptel_system\" (le/get-meeting-synthesizer-prompt))
 :END:
 "
-           :target (file+head "standup-${slug}-%<%Y-%m-%d>.org"
+           :target (file+head "standup/standup-${slug}-%<%Y-%m-%d>.org"
                               "#+TITLE: Standup: ${title}
 #+ROAM_TAGS: standup
 #+FILETAGS: :standup:
@@ -1952,6 +1956,7 @@ Make it conversational but professional. Include transition phrases between sect
    (sqlite . t)
    (dot . t) ; For Graphviz diagrams
    (mermaid . t)
+   (go . t)
    ))
 
 (setq org-confirm-babel-evaluate nil)
@@ -1967,6 +1972,7 @@ Make it conversational but professional. Include transition phrases between sect
   :config
   (setq org-babel-show-process-buffer t)
   (setq ob-mermaid-executable "~/.local/bin/mmdc"))
+
 
 (use-package org-appear
   :ensure t
@@ -1985,6 +1991,11 @@ Make it conversational but professional. Include transition phrases between sect
   :init
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
   :config
+  (add-to-list 'forge-alist
+               '("github.com"             ;; GITHOST (the domain of your forge instance)
+                 "api.github.com/api/v3"      ;; APIHOST (the API endpoint)
+                 "github.com"             ;; WEBHOST (the web interface domain)
+                 forge-github-repository)) ;; CLASS (the forge type, in this case, GitHub)
   (defun le/magit-display-buffer-pop-up-frame (buffer)
     (if (with-current-buffer buffer (eq major-mode 'magit-status-mode))
         (display-buffer buffer
@@ -2173,9 +2184,9 @@ Make it conversational but professional. Include transition phrases between sect
   (consult-customize
    consult-ripgrep consult-git-grep consult-grep)
   (setq
-   consult-narrow-key "<")
-  (setq consult-projectile-source-projectile-project-action #'dired))
-
+   consult-narrow-key "<"
+   consult-projectile-source-projectile-project-action #'dired)
+  )
 
 (use-package consult-yasnippet
   :ensure t
@@ -2353,6 +2364,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
         company-tooltip-margin 3)
   (setq company-global-modes '(not text-mode fundamental-mode))
   (add-to-list 'company-backends 'company-ansible)
+  (define-key company-active-map (kbd "<tab>") #'company-complete-selection)
+  (define-key company-active-map (kbd "TAB") #'company-complete-selection)
   )
 
 (use-package company-quickhelp
@@ -3136,6 +3149,10 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :config
   (global-colorful-mode t)
   (add-to-list 'global-colorful-modes 'elisp-mode))
+
+(use-package go-mode
+  :ensure t
+  :hook (go-mode . lsp-deferred))
 
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)

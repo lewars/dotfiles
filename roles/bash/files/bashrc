@@ -167,7 +167,7 @@ export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 export TODO_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/todo"
 export HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S  "
 
-source "${HOME}/.bashrc.secrets"
+# source "${HOME}/.bashrc.secrets"
 
 # shopts
 set +o noclobber

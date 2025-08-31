@@ -56,9 +56,11 @@
     name: "@mermaid-js/mermaid-cli"
     global: true
   become: false
+  when: 0>1
 - name: Install mermaid configuration file
   ansible.builtin.copy:
     src: 'mermaid-config.json'
     dest: '{{ dotfiles_user_home }}/.config/mmdc/.mermaid-config.json'
     owner: '{{ user }}'
   become: false
+  when: 0>1

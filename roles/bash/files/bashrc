@@ -12,7 +12,7 @@ export OSH="${HOME}/.dotfiles/oh-my-bash"
 # it'll load a random theme each time that oh-my-bash is loaded.
 
 # if running on aroma set the theme to powerbash10k
-if [[ "$HOSTNAME" == "aroma" ]]; then
+if [[ "$HOSTNAME" =~ ^aroma ]]; then
     OSH_THEME="powerbash10k"
 else
     # OSH_THEME="powerline-icon"
@@ -24,6 +24,15 @@ fi
 
 # Show Python virtual environment and conda environment
 THEME_SHOW_PYTHON=true
+
+# Handle dumb terminals
+if [[ "$TERM" == "dumb" ]]; then
+    # Unset OSH's theme
+    OSH_THEME=""
+
+    # Use a simple, standard prompt like "$" or "> "
+    PS1='\$ '
+fi
 
 # Uncomment the following line to use case-sensitive completion.
 # OMB_CASE_SENSITIVE="true"
@@ -127,7 +136,6 @@ plugins=(
 #  if [ "$DISPLAY" ] || [ "$SSH" ]; then
 #      plugins+=(tmux-autoattach)
 #  fi
-
 source "$OSH"/oh-my-bash.sh
 
 # User configuration

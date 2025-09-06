@@ -256,6 +256,10 @@ alias scan='sudo freshclam; clamscan'
 alias usU="podman unshare chown -R $(id -u):$(id -g) ."
 alias us0='podman unshare chown -R 0:0 .'
 
+# jenkins and datadog container management aliases
+alias jclean='podman stop jenkins_server; sleep 4; podman container rm jenkins_server'
+alias dclean='podman stop datadog_agent; sleep 4; podman rm datadog_agent'
+
 # functions
 las(){
     local -r pflg="$1"

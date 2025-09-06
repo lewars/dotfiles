@@ -420,7 +420,9 @@ then
 fi
 
 # # Set up gcloud auto complete
-source /usr/share/google-cloud-sdk/completion.bash.inc
+if [[ "$HOSTNAME" =~ ^penguin ]]; then
+    source /usr/share/google-cloud-sdk/completion.bash.inc
+fi
 
 # # Make sure 'g' alias to 'gcloud' works as well
 _gcloud_alias_completion() {

@@ -2360,6 +2360,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (add-to-list 'company-backends 'company-ansible)
   (define-key company-active-map (kbd "<tab>") #'company-complete-selection)
   (define-key company-active-map (kbd "TAB") #'company-complete-selection)
+  (define-key company-active-map (kbd "<escape>") #'company-abort)
   )
 
 (use-package company-quickhelp

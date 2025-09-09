@@ -1924,7 +1924,7 @@ Make it conversational but professional. Include transition phrases between sect
 :END:
 "
            :target (file+head "standup/standup-${slug}-%<%Y-%m-%d>.org"
-                              "#+TITLE: Standup: ${title}
+                              "#+TITLE: ${title}-%<%Y-%m-%d-%H:%M>
 #+ROAM_TAGS: standup
 #+FILETAGS: :standup:
 #+DATE: %<%Y-%m-%d %H:%M>")

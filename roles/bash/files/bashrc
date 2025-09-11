@@ -387,13 +387,11 @@ function frg(){
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     export JAVA_HOME=/usr/local/opt/openjdk@17
-    export CLASSPATH=${HOME}/git/cbsi-cbscom/cbssre-jenkins-migration-tools/scripts/integration/libs/jenkins-core-2.319.jar
-    source ${HOME}/.op/plugins.sh
 fi
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-17.0.8.0.7-1.fc37.x86_64/
-    # source "${HOME}/.config/op/plugins.sh"
+    export JAVA_HOME="/usr/lib/jvm/java-21-openjdk"
+    export PATH="$JAVA_HOME/bin:$PATH"
 fi
 
 export CLOUDSDK_PYTHON=python3

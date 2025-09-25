@@ -1014,6 +1014,7 @@ If the side window is being created, it prompts for the source buffer."
 
 ;; ======= Language configuration ============
 (add-to-list `auto-mode-alist '("\\.svg\\'" . nxml-mode))
+(add-to-list `auto-mode-alist '("\\.jelly\\'" . nxml-mode))
 
 (use-package python-mode
   :ensure t
@@ -2357,7 +2358,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
         company-tooltip-annotation-padding 5
         company-tooltip-margin 3)
   (setq company-global-modes '(not text-mode fundamental-mode))
-  (add-to-list 'company-backends 'company-ansible)
+  (add-to-list 'company-backends 'company-ansible 'systemd-company-backend )
   (define-key company-active-map (kbd "<tab>") #'company-complete-selection)
   (define-key company-active-map (kbd "TAB") #'company-complete-selection)
   (define-key company-active-map (kbd "<escape>") #'company-abort)
@@ -2382,6 +2383,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :ensure t
   :hook ((terraform-mode . lsp-deferred)
          (go-mode . lsp)
+         (java-mode . lsp)
          (lsp-mode . lsp-enable-which-key-integration)
          le/corfu-lsp-setup)
   :config (setq lsp-enable-links t
@@ -2401,6 +2403,17 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                 lsp-groovy-server-file (concat (getenv "HOME") "/.emacs.d/.cache/lsp/groovy-language-server-all.jar")
                 lsp-groovy-classpath (concat (getenv "HOME") "/groovy-language-server/build/libs"))
   :commands (lsp lsp-deferred))
+
+(use-package lsp-java
+  :ensure t
+  :config
+  (setq lsp-java-java-path "/usr/lib/jvm/java-21-openjdk/bin/java")
+  (add-hook 'java-mode-hook 'lsp))
+
+(use-package dap-mode
+  :ensure t
+  :after lsp-mode
+  :config (dap-auto-configure-mode))
 
 (use-package lsp-ui
   :commands lsp-ui-mode
@@ -2545,9 +2558,12 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package dockerfile-mode
   :ensure t
-  :defer 2
-  :mode
-  ("Dockerfile\\'" . dockerfile-mode))
+  :mode ("Containerfile\\'" "Dockerfile\\'" "containerfile\\'" "dockerfile\\'"))
+
+(use-package systemd
+  :ensure t
+  :hook (systemd-mode . company-mode)
+  :mode ("\\.container\\'"))
 
 (use-package eterm-256color
   :ensure t)

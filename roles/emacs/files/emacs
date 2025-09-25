@@ -1404,8 +1404,8 @@ If the side window is being created, it prompts for the source buffer."
    ;; TODO keyword faces with darker, less saturated background colors
    org-todo-keyword-faces '(
                             ("TODO" . (:foreground "black" :background "#6d97ba" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
-                            ("NEXT" . (:foreground "black" :background "#f79000" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
-                            ("STARTED" . (:foreground "black" :background "#f7f700" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("NEXT" . (:foreground "black" :background "#c79933" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("STARTED" . (:foreground "white" :background "#126711" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("REVIEW" . (:foreground "white" :background "#9369d9" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("REPEAT" . (:foreground "black" :background "#89b5d9" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("BLOCKED" . (:foreground "white" :background "#d95252" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))

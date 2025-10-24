@@ -1341,47 +1341,44 @@ If the side window is being created, it prompts for the source buffer."
   :init
   :hook (org-mode . le/my-org-buffer-setup)
   :bind (("C-c c" . org-capture)
-         ("C-c a" . org-agenda)
-         :map org-mode-map
-         ("S-<left>" . org-shiftleft)
-         ("S-<right>" . org-shiftright)
-         ("S-<up>" . org-shiftup)
-         ("S-<down>" . org-shiftdown))
+         ("C-c a" . org-agenda))
   :config
   (setq org-agenda-files '("~/org/gtd/"
                            ;; "~/org/kb/learning"
                            ;; "~/org/kb/issues"
                            ))
   (setq
-   org-startup-with-inline-images t
-   org-image-actual-width nil     ; Display images at their actual width, or nil to scale down
-   org-image-max-width 300        ; Max width for images when scaled
-   org-hide-emphasis-markers t    ; Hide * / _ = ~
-   org-startup-indented t         ; Start Org buffers with indentation
+   org-catch-invisible-edits 'show-and-error ; Check if in invisible region before modification
+   org-clock-sound "~/.emacs.d/org/media/alarm.mp3" ; Sound for timeout - promodoro
+   org-default-notes-file "~/org/gtd/inbox.org" ; Default org note file saved by org-capture
    org-edit-src-code t            ; Enable editing source code blocks in separate buffer
    org-edit-src-content-indentation 0 ; controls the relative indentation of the source code within the src block
-   org-hide-emphasis-markers t    ; Hide the markup characters, e.g., show "bold" instead of "*bold*".
    org-ellipsis " !!!"            ; Change the symbol shown for folded headlines.
    org-hide-block-properties nil  ; Always show the :PROPERTIES: drawer under headlines.
-   org-special-ctrl-a/e t         ; Make C-a/C-e jump to the beginning/end of headline text, not the stars.
-   org-ellipsis " !!!"             ; Set symbole when folding
-   org-catch-invisible-edits 'show-and-error ; Check if in invisible region before modification
-   org-hide-block-properties nil ; Don't hide :PROPERTIES: and :END: lines when folded
-   org-clock-sound "~/.emacs.d/org/media/alarm.mp3" ; Sound for timeout - promodoro
-   org-special-ctrl-a/e t        ; Enable special behavior for C-a and C-e in Org mode
-   org-default-notes-file "~/org/gtd/inbox.org" ; Default org note file saved by org-capture
-   org-refile-targets '((org-agenda-files :maxlevel . 4)) ;; only allow refiling to entries with the given levels of org-agenda-files
-   org-return-follows-link t     ; Follow link by using the return key
-
+   org-hide-emphasis-markers t    ; Hide * / _ = ~
+   org-image-actual-width nil     ; Display images at their actual width, or nil to scale down
+   org-image-max-width 300        ; Max width for images when scaled
+   org-refile-targets
+   '((org-agenda-files :maxlevel . 4)) ;; only allow refiling to entries with the given levels of org-agenda-files
+   org-return-follows-link t      ; Follow link by using the return key
+   org-special-ctrl-a/e nil       ; Make C-a/C-e jump to the beginning/end of headline text, not the stars.
+   org-startup-indented t         ; Start Org buffers with indentation
+   org-startup-with-inline-images t ; Display inline images automatically when Org mode loads a file.
+   org-agenda-use-time-grid t     ; Enable the use of a time grid in the Org agenda.
+   org-agenda-time-grid           ; Configure the appearance and behavior of the Org agenda time grid.
+   '((daily potentially-blocked)  ; Define grid type (daily) and task blocking behavior.
+     (0900 1000 1100 1200 1300 1400 1500 1600 1700) ; Specify the hours to display in the grid.
+     "......"                     ; String used to represent busy time slots in the agenda.
+     "----------------")          ; String used to represent free time slots in the agenda.
 
    ;; TODO workflow configuration
-   org-todo-keywords '((sequence "TODO" "NEXT" "STARTED" "REVIEW" "REPEAT" "BLOCKED" "|" "DONE" "CANCELED"))
+   org-todo-keywords '((sequence "TODO" "NEXT" "STARTED..." "REVIEW" "REPEAT" "BLOCKED" "|" "DONE" "CANCELED"))
 
    ;; TODO keyword faces with darker, less saturated background colors
    org-todo-keyword-faces '(
                             ("TODO" . (:foreground "black" :background "#6d97ba" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("NEXT" . (:foreground "black" :background "#c79933" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
-                            ("STARTED" . (:foreground "white" :background "#126711" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("STARTED..." . (:foreground "white" :background "#126711" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("REVIEW" . (:foreground "white" :background "#9369d9" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("REPEAT" . (:foreground "black" :background "#89b5d9" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("BLOCKED" . (:foreground "white" :background "#d95252" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))

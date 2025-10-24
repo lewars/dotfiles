@@ -2344,8 +2344,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
         company-selection-wrap-around t
         company-require-match nil
         company-tooltip-annotation-padding 5
-        company-tooltip-margin 3)
-  (setq company-global-modes '(not text-mode fundamental-mode))
+        company-tooltip-margin 3
+        company-global-modes '(not text-mode fundamental-mode))
   (add-to-list 'company-backends 'company-ansible 'systemd-company-backend )
   (define-key company-active-map (kbd "<tab>") #'company-complete-selection)
   (define-key company-active-map (kbd "TAB") #'company-complete-selection)

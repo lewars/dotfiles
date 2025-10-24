@@ -753,6 +753,8 @@ If the side window is being created, it prompts for the source buffer."
  '(frame-background-mode nil)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
+ '(org-agenda-files
+   '("/home/slams/org/gtd/gtd.org" "/home/slams/org/gtd/inbox.org"))
  '(package-selected-packages nil)
  '(package-vc-selected-packages
    '((copilot :url "https://github.com/copilot-emacs/copilot.el" :branch

@@ -737,28 +737,29 @@ If the side window is being created, it prompts for the source buffer."
  '(centaur-tabs-bar-height 22)
  '(column-number-mode 1)
  '(custom-safe-themes
-   '("f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33"
-     "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294"
-     "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb"
-     "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8"
-     "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77"
-     "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da"
-     "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a"
-     "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d"
-     "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae"
-     "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4"
-     "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561"
-     "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350"
-     default))
+   '("f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33" "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294"
+     "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb" "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8"
+     "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77" "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da"
+     "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a" "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d"
+     "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae" "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4"
+     "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561" "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350" default))
  '(frame-background-mode nil)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files
    '("/home/slams/org/gtd/gtd.org" "/home/slams/org/gtd/inbox.org"))
- '(package-selected-packages nil)
+ '(package-selected-packages
+   '(all-the-icons anki-editor ansible ansible-doc async async-await atomic-chrome blacken casual centaur-tabs colorful-mode company-ansible company-prescient
+                   company-quickhelp consult-flycheck consult-gh-forge consult-lsp consult-org-roam consult-projectile consult-yasnippet copilot corfu dashboard
+                   demap diff-hl dockerfile-mode doom-modeline doom-themes dotenv-mode dumb-jump emojify eterm-256color expand-region flycheck-posframe
+                   flyspell-correct focus frame-local fzf go-mode google-this gptel groovy-mode helpful highlight-indent-guides ibuffer-projectile
+                   idle-highlight-mode imenu-list jinja2-mode k8s-mode latex-preview-pane lorem-ipsum lsp-java lsp-pyright lsp-ui marginalia mermaid-mode
+                   mixed-pitch multi-vterm multiple-cursors nerd-icons-completion nerd-icons-dired nerd-icons-ibuffer ob-go ob-mermaid olivetti orderless
+                   org-appear org-bullets org-make-toc org-preview-html org-projectile org-roam-ui org-super-agenda org-view-mode ox-hugo pdf-tools ppp
+                   prescient py-isort python-mode pyvenv quelpa-use-package rainbow-mode simpleclip systemd terraform-mode textile-mode treemacs-magit
+                   treemacs-nerd-icons treemacs-projectile vertico-posframe visual-fill-column whitespace-cleanup-mode yasnippet-snippets))
  '(package-vc-selected-packages
-   '((copilot :url "https://github.com/copilot-emacs/copilot.el" :branch
-              "main")))
+   '((copilot :url "https://github.com/copilot-emacs/copilot.el" :branch "main")))
  '(tramp-default-method "ssh")
  '(warning-suppress-types '((lsp-mode) (comp)))
  '(window-divider-default-right-width 2)
@@ -2322,6 +2323,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (define-key company-active-map (kbd "<tab>") #'company-complete-selection)
   (define-key company-active-map (kbd "TAB") #'company-complete-selection)
   (define-key company-active-map (kbd "<escape>") #'company-abort)
+  (define-key company-active-map (kbd "C-g") #'company-abort)
   )
 
 (use-package company-quickhelp
@@ -3126,6 +3128,23 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 (use-package go-mode
   :ensure t
   :hook (go-mode . lsp-deferred))
+
+(use-package prescient
+  :ensure t
+  :config
+  ;; Global mode to track usage history for sorting
+  (prescient-persist-mode +1))
+
+(use-package company-prescient
+  :ensure t
+  :config
+  ;; Enable company-prescient globally for all company backends
+  (company-prescient-mode +1)
+
+  ;; Crucial step: Tell company-prescient to use the orderless matching function.
+  ;; This connects your existing orderless setup to the company UI.
+  (setq company-prescient-prefix-length 0 ; Start matching immediately
+        company-prescient-filter-alist '((t . prescient-filter-orderless))))
 
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)

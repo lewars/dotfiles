@@ -1605,8 +1605,7 @@ Make it conversational but professional. Include transition phrases between sect
 "
            :target (file+head "meetings/%<%Y-%m-%d>-${slug}.org"
                               "#+TITLE: ${title} %<%Y-%m-%d>
-#+ROAM_TAGS: meeting:general,meeting
-#+FILETAGS: :meeting:general:meeting:
+#+FILETAGS: :meeting:general:
 #+DATE: %<%Y-%m-%d %H:%M>
 #+ATTENDEES: %(le/org-roam-select-nodes \"Attendees (select multiple people): \" \"person\")
 #+PROJECT: %(le/org-roam-select-node \"Project (optional): \" \"project\")")
@@ -1625,8 +1624,7 @@ Make it conversational but professional. Include transition phrases between sect
 "
            :target (file+head "meetings/%<%Y-%m-%d>-${slug}.org"
                               "#+TITLE: ${title} %<%Y-%m-%d>
-#+ROAM_TAGS: meeting:project,meeting,project
-#+FILETAGS: :meeting:project:meeting:project:
+#+FILETAGS: :meeting:project:
 #+DATE: %<%Y-%m-%d %H:%M>
 #+ATTENDEES: %(le/org-roam-select-nodes \"Attendees (select multiple people): \" \"person\")
 #+PROJECT: %(le/org-roam-select-node \"Project (required): \" \"project\")")
@@ -1645,7 +1643,6 @@ Make it conversational but professional. Include transition phrases between sect
 "
            :target (file+head "meetings/%<%Y-%m-%d>-${slug}.org"
                               "#+TITLE: ${title} %<%Y-%m-%d>
-#+ROAM_TAGS: meeting:demo,presentation
 #+FILETAGS: :meeting:demo:
 #+DATE: %<%Y-%m-%d %H:%M>
 #+ATTENDEES: %(le/org-roam-select-nodes \"Attendees (select multiple people): \" \"person\")
@@ -1665,8 +1662,7 @@ Make it conversational but professional. Include transition phrases between sect
 "
            :target (file+head "meetings/1on1-%<%Y-%m-%d>-${slug}.org"
                               "#+TITLE: 1:1 with %(progn (setq temp-person (le/org-roam-select-node \"Person (required): \" \"person\")) (if (string-empty-p temp-person) (error \"Person is required for a 1:1 Meeting\") (replace-regexp-in-string \"\\[\\[.*?\\]\\[\\(.*?\\)\\]\\]\" \"\\1\" temp-person))) %<%Y-%m-%d>
-#+ROAM_TAGS: meeting:1on1,meeting,person
-#+FILETAGS: :meeting:1on1:meeting:person:
+#+FILETAGS: :meeting:1on1:person:
 #+DATE: %<%Y-%m-%d %H:%M>
 #+PERSON: %(le/org-roam-select-node \"Person (required): \" \"person\")")
            :unnarrowed t)
@@ -1685,8 +1681,7 @@ Make it conversational but professional. Include transition phrases between sect
 "
            :target (file+head "topics/${slug}.org"
                               "#+TITLE: ${title}
-#+ROAM_TAGS: knowledge:concept,knowledge
-#+FILETAGS: :knowledge:concept:knowledge:
+#+FILETAGS: :knowledge:concept:
 #+DATE: %<%Y-%m-%d>")
            :unnarrowed t)
 
@@ -1704,7 +1699,6 @@ Make it conversational but professional. Include transition phrases between sect
 "
            :target (file+head "work-topics/%(progn (setq temp-company (completing-read \"Company (stninc/discovery): \" '(\"stninc\" \"discovery\") nil t)) (downcase temp-company))-${slug}.org"
                               "#+TITLE: ${title}
-#+ROAM_TAGS: %(format \"%s,work-topic\" (downcase temp-company))
 #+FILETAGS: :%(format \"%s:work-topic\" (downcase temp-company)):
 #+DATE: %<%Y-%m-%d>
 #+PROJECT: %(le/org-roam-select-node \"Related Project (optional): \" \"project\")")
@@ -1726,7 +1720,6 @@ Make it conversational but professional. Include transition phrases between sect
 "
  :target (file+head "learning/${slug}.org"
                     "#+TITLE: ${title}
-#+ROAM_TAGS: learning
 #+FILETAGS: :learning:
 #+DATE: %<%Y-%m-%d>
 #+SOURCE: %(read-from-minibuffer \"Source (e.g., Book, Course, Blog): \")")
@@ -1777,7 +1770,6 @@ Make it conversational but professional. Include transition phrases between sect
 #+END_QUERY"
            :target (file+head "people/${slug}.org"
                               "#+TITLE: ${title}
-#+ROAM_TAGS: person
 #+FILETAGS: :person:
 #+DATE: %<%Y-%m-%d>
 #+FULL_NAME: ${title}
@@ -1815,7 +1807,6 @@ Make it conversational but professional. Include transition phrases between sect
 "
            :target (file+head "projects/${slug}.org"
                               "#+TITLE: ${title}
-#+ROAM_TAGS: project
 #+FILETAGS: :project:
 #+DATE: %<%Y-%m-%d>
 #+PROJECT_NAME: ${title}
@@ -1846,7 +1837,6 @@ Make it conversational but professional. Include transition phrases between sect
 "
            :target (file+head "incidents/incident-%<%Y-%m-%d>-${slug}.org"
                               "#+TITLE: ${title}
-#+ROAM_TAGS: issue:incident,person
 #+FILETAGS: :issue:incident:person:
 #+DATE: %<%Y-%m-%d>
 #+PERSON: %(le/org-roam-select-node \"Person Involved (required): \" \"person\")
@@ -1892,7 +1882,6 @@ Make it conversational but professional. Include transition phrases between sect
 "
            :target (file+head "issues/%<%Y-%m-%d>-${slug}.org"
                               "#+TITLE: ${title}
-#+ROAM_TAGS: %(progn (setq temp-system-categories (completing-read-multiple \"System Categories (space-separated, e.g., linux k8s): \" '(\"linux\" \"gpu\" \"slurm\" \"container\" \"k8s\" \"ci\" \"iac\" \"artifactory\" \"github\" \"storage\" \"network\" \"code\") nil t)) (setq temp-additional-tags (completing-read-multiple \"Additional Tags (space-separated, e.g., performance security): \" '(\"performance\" \"security\" \"infrastructure\" \"ai-training\" \"ai-inference\") nil t)) (mapconcat 'identity (append (mapcar (lambda (x) (format \"issue:%s\" x)) temp-system-categories) (mapcar (lambda (x) (format \"issue:%s\" x)) temp-additional-tags) '(\"issue\")) \",\"))
 #+FILETAGS: :%(mapconcat 'identity (append (mapcar (lambda (x) (format \"issue:%s\" x)) temp-system-categories) (mapcar (lambda (x) (format \"issue:%s\" x)) temp-additional-tags) '(\"issue\")) \":\"):
 #+DATE: %<%Y-%m-%d>
 #+ISSUE_TITLE: ${title}
@@ -1926,7 +1915,6 @@ Make it conversational but professional. Include transition phrases between sect
 "
            :target (file+head "standup/standup-${slug}-%<%Y-%m-%d>.org"
                               "#+TITLE: ${title}-%<%Y-%m-%d-%H:%M>
-#+ROAM_TAGS: standup
 #+FILETAGS: :standup:
 #+DATE: %<%Y-%m-%d %H:%M>")
             :unnarrowed t)

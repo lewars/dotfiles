@@ -2490,7 +2490,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
   )
 
-
 (use-package which-key
   :ensure t
   :init (which-key-mode)
@@ -2628,6 +2627,13 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
   ;; Add our indicator function to copy mode hooks
   (add-hook 'vterm-copy-mode-hook 'vterm-copy-mode-indicator)
+
+  ;; Define the Super-key bindings specifically for vterm-mode-map
+  ;; These bindings override the default vterm behavior to send keys to shell.
+  ;; (define-key vterm-mode-map (kbd "s-c") 'simpleclip-copy)
+  ;; (define-key vterm-mode-map (kbd "s-x") 'simpleclip-kill)
+  ;; (define-key vterm-mode-map (kbd "s-v") 'simpleclip-paste)
+  (setq vterm-enable-manipulate-selection-data-by-osc52 t)
 
   :custom
   (vterm-copy-exclude-prompt t)

@@ -43,6 +43,14 @@
 (global-unset-key (kbd "C-x C-z"))
 (global-unset-key (kbd "C-z"))
 
+;; Configure Emacs to use the flatpak Brave Browser
+(defun brave-browser-flatpak (url &optional new-window)
+  "Launch the Flatpak Brave browser to browse URL."
+  (interactive)
+  (start-process "brave-browser-flatpak" nil "flatpak" "run" "com.brave.Browser" url))
+
+(setq browse-url-browser-function 'brave-browser-flatpak)
+
 ;; Package manager configuration
 (require 'package)
 (setq package-archives

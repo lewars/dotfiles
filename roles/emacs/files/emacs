@@ -736,28 +736,29 @@ If the side window is being created, it prompts for the source buffer."
  '(centaur-tabs-bar-height 22)
  '(column-number-mode 1)
  '(custom-safe-themes
-   '("f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33"
-     "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294"
-     "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb"
-     "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8"
-     "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77"
-     "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da"
-     "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a"
-     "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d"
-     "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae"
-     "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4"
-     "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561"
-     "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350"
-     default))
+   '("f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33" "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294"
+     "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb" "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8"
+     "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77" "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da"
+     "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a" "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d"
+     "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae" "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4"
+     "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561" "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350" default))
  '(frame-background-mode nil)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files
    '("/home/slams/org/gtd/gtd.org" "/home/slams/org/gtd/inbox.org"))
- '(package-selected-packages nil)
+ '(package-selected-packages
+   '(all-the-icons anki-editor ansible ansible-doc async async-await atomic-chrome blacken cape casual centaur-tabs colorful-mode company-ansible company-prescient
+                   company-quickhelp consult-flycheck consult-gh-forge consult-lsp consult-org-roam consult-projectile consult-yasnippet copilot corfu dashboard
+                   demap diff-hl dockerfile-mode doom-modeline doom-themes dotenv-mode dumb-jump emojify eterm-256color expand-region flycheck-posframe
+                   flyspell-correct focus frame-local fzf go-mode google-this gptel groovy-mode helpful highlight-indent-guides ibuffer-projectile
+                   idle-highlight-mode imenu-list jinja2-mode k8s-mode latex-preview-pane lorem-ipsum lsp-java lsp-pyright lsp-ui marginalia mermaid-mode
+                   mixed-pitch multi-vterm multiple-cursors nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer ob-go ob-mermaid olivetti
+                   orderless org-appear org-bullets org-make-toc org-preview-html org-projectile org-roam-ui org-super-agenda org-view-mode ox-hugo pdf-tools
+                   ppp py-isort python-mode pyvenv quelpa-use-package rainbow-mode simpleclip slime-company systemd terraform-mode textile-mode treemacs-magit
+                   treemacs-nerd-icons treemacs-projectile vertico-posframe visual-fill-column vlf whitespace-cleanup-mode yasnippet-snippets))
  '(package-vc-selected-packages
-   '((copilot :url "https://github.com/copilot-emacs/copilot.el" :branch
-              "main")))
+   '((copilot :url "https://github.com/copilot-emacs/copilot.el" :branch "main")))
  '(show-paren-context-when-offscreen t)
  '(show-paren-style 'mixed)
  '(tramp-default-method "ssh")
@@ -2311,67 +2312,118 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :bind (:map minibuffer-local-map
          ("M-A" . marginalia-cycle)))
 
-(use-package company
-  :ensure t
-  :init
-  (add-hook 'after-init-hook 'global-company-mode)
-  :config
-  ;; Completion trigger settings
-  (setq company-minimum-prefix-length 2           ;; require 3 chars before showing candidates
-        company-idle-delay 1.0                    ;; show popup after 1 second of inactivity
+;; (use-package company
+;;   :ensure t
+;;   :init
+;;   (add-hook 'after-init-hook 'global-company-mode)
+;;   :config
+;;   ;; Completion trigger settings
+;;   (setq company-minimum-prefix-length 2           ;; require 3 chars before showing candidates
+;;         company-idle-delay 1.0                    ;; show popup after 1 second of inactivity
 
-        ;; Selection behavior
-        company-selection-wrap-around t           ;; cycle selection: end wraps to start
-        company-require-match nil                 ;; allow completing text not in candidate list
+;;         ;; Selection behavior
+;;         company-selection-wrap-around t           ;; cycle selection: end wraps to start
+;;         company-require-match nil                 ;; allow completing text not in candidate list
 
-        ;; Tooltip appearance
-        company-tooltip-annotation-padding 5      ;; 5 spaces between text and annotation
-        company-tooltip-margin 3                  ;; 3-char margin on right side of tooltip
+;;         ;; Tooltip appearance
+;;         company-tooltip-annotation-padding 5      ;; 5 spaces between text and annotation
+;;         company-tooltip-margin 3                  ;; 3-char margin on right side of tooltip
 
-        ;; Mode filtering
-        company-global-modes '(not text-mode fundamental-mode)  ;; enable everywhere except text/fundamental modes
+;;         ;; Mode filtering
+;;         company-global-modes '(not text-mode fundamental-mode)  ;; enable everywhere except text/fundamental modes
 
-        ;; Candidate filtering
-        company-dabbrev-ignore-case t           ;; case-sensitive matching (reduces false matches)
-        company-dabbrev-code-ignore-case t      ;; case-sensitive matching in code (reduces false matches)
-        company-abort-manual-when-away t)         ;; dismiss popup if cursor moves away from completion point
+;;         ;; Candidate filtering
+;;         company-dabbrev-ignore-case t           ;; case-sensitive matching (reduces false matches)
+;;         company-dabbrev-code-ignore-case t      ;; case-sensitive matching in code (reduces false matches)
+;;         company-abort-manual-when-away t)         ;; dismiss popup if cursor moves away from completion point
 
-  ;; ;; Add case-insensitive sorting
-  (setq company-transformers '(company-sort-by-occurrence
-                               company-sort-by-backend-importance))
-  (setq completion-ignore-case nil)  ;; global setting for all completers
+;;   ;; ;; Add case-insensitive sorting
+;;   (setq company-transformers '(company-sort-by-occurrence
+;;                                company-sort-by-backend-importance))
+;;   (setq completion-ignore-case nil)  ;; global setting for all completers
 
-  ;; company-ansible: Ansible playbook completion
-  ;; systemd-company-backend: systemd unit file completion
-  (add-to-list 'company-backends 'company-ansible 'systemd-company-backend)
-  (define-key company-active-map (kbd "<tab>") #'company-complete-selection)
-  (define-key company-active-map (kbd "TAB") #'company-complete-selection)
-  (define-key company-active-map (kbd "<escape>") #'company-abort)
-  (define-key company-active-map (kbd "C-g") #'company-abort))
+;;   ;; company-ansible: Ansible playbook completion
+;;   ;; systemd-company-backend: systemd unit file completion
+;;   (add-to-list 'company-backends 'company-ansible 'systemd-company-backend)
+;;   (define-key company-active-map (kbd "<tab>") #'company-complete-selection)
+;;   (define-key company-active-map (kbd "TAB") #'company-complete-selection)
+;;   (define-key company-active-map (kbd "<escape>") #'company-abort)
+;;   (define-key company-active-map (kbd "C-g") #'company-abort))
 
 
-(use-package company-quickhelp
-  :ensure t
-  :hook (company-mode . company-quickhelp-mode)
-  :config
-  (setq company-quickhelp-delay 3))
+;; (use-package company-quickhelp
+;;   :ensure t
+;;   :hook (company-mode . company-quickhelp-mode)
+;;   :config
+;;   (setq company-quickhelp-delay 3))
 
+;; 1. UI: Corfu (The interface)
 (use-package corfu
   :ensure t
-  :disabled)
+  :custom
+  (corfu-auto t)                 ;; Enable auto completion
+  (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
+  (corfu-quit-no-match 'separator) ;; Quit if no match
+  (corfu-popupinfo-delay 0.2)    ;; Delay for documentation popup (like company-quickhelp)
+  ;; (corfu-preselect 'prompt)      ;; Always preselect the prompt first
+  :init
+  (global-corfu-mode)
+  (corfu-popupinfo-mode)         ;; Enable documentation popup
+  :config
+  ;; Make it look like the minibuffer (VSCode-ish width)
+  (setq corfu-max-width 80)
+  :bind
+  (:map corfu-map
+        ;; This restores the "Enter to complete" behavior
+        ("RET" . corfu-insert)
+        ;; Ensure the graphical Enter key works too
+        ("<return>" . corfu-insert)))
+
+;; 2. VISUALS: Nerd Icons for Corfu
+;; This replaces kind-icon or company-box
+(use-package nerd-icons-corfu
+  :ensure t
+  :after corfu
+  :config
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
+;; 3. BACKENDS: Cape (The heavy lifters)
+;; This bridges the gap for things that aren't LSP (like file paths and text)
+(use-package cape
+  :ensure t
+  :init
+  ;; Add useful backends to the global completion list
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  ;; (add-to-list 'completion-at-point-functions #'cape-keyword)
+  )
 
 (defun le/corfu-lsp-setup ()
   (corfu-mode)
   (setq-local completion-styles '(orderless)
               completion-category-defaults nil))
 
+(quelpa '(corfu-terminal
+          :fetcher git
+          :url "https://codeberg.org/akib/emacs-corfu-terminal.git"))
+(unless (display-graphic-p)
+  (corfu-terminal-mode +1))
+
 (use-package lsp-mode
   :ensure t
   :hook ((terraform-mode . lsp-deferred)
          (go-mode . lsp)
          (java-mode . lsp)
-         (lsp-mode . lsp-enable-which-key-integration)
-         le/corfu-lsp-setup)
+         (lsp-mode . lsp-enable-which-key-integration))
+  :custom
+  (lsp-completion-provider :none) ;; STOP lsp from setting up company!
+  :init
+  ;; This ensures Orderless works with LSP (fuzzy matching candidates)
+  (defun le/lsp-mode-setup-completion ()
+    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+          '(orderless)))
+  :hook
+  (lsp-completion-mode . le/lsp-mode-setup-completion)
   :config (setq lsp-enable-links t
                 read-process-output-max (* 2048 2048)
                 lsp-use-plists t
@@ -2542,19 +2594,19 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :hook (after-init . le/emojify-setup)
   :config (setq emojify-display-style 'unicode))
 
-(defun le/enable-company-emoji ()
-  "Add company-emoji backend to company-backends."
-  (interactive)
-  (unless (member 'company-emoji company-backends)
-    (setq company-backends (push 'company-emoji company-backends))
-    (message "company-emoji backend enabled.")))
+;; (defun le/enable-company-emoji ()
+;;   "Add company-emoji backend to company-backends."
+;;   (interactive)
+;;   (unless (member 'company-emoji company-backends)
+;;     (setq company-backends (push 'company-emoji company-backends))
+;;     (message "company-emoji backend enabled.")))
 
-(defun le/disable-company-emoji ()
-  "Remove company-emoji backend from `'company-backends."
-  (interactive)
-  (when (member 'company-emoji company-backends)
-    (setq company-backends (remove 'company-emoji company-backends))
-    (message "company-emoji backend disabled.")))
+;; (defun le/disable-company-emoji ()
+;;   "Remove company-emoji backend from `'company-backends."
+;;   (interactive)
+;;   (when (member 'company-emoji company-backends)
+;;     (setq company-backends (remove 'company-emoji company-backends))
+;;     (message "company-emoji backend disabled.")))
 
 ;; (use-package company-emoji
 ;;   :ensure t)
@@ -3202,16 +3254,16 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   ;; Global mode to track usage history for sorting
   (prescient-persist-mode +1))
 
-(use-package company-prescient
-  :ensure t
-  :config
-  ;; Enable company-prescient globally for all company backends
-  (company-prescient-mode +1)
+;; (use-package company-prescient
+;;   :ensure t
+;;   :config
+;;   ;; Enable company-prescient globally for all company backends
+;;   (company-prescient-mode +1)
 
-  ;; Crucial step: Tell company-prescient to use the orderless matching function.
-  ;; This connects your existing orderless setup to the company UI.
-  (setq company-prescient-prefix-length 0 ; Start matching immediately
-        company-prescient-filter-alist '((t . prescient-filter-orderless))))
+;;   ;; Crucial step: Tell company-prescient to use the orderless matching function.
+;;   ;; This connects your existing orderless setup to the company UI.
+;;   (setq company-prescient-prefix-length 0 ; Start matching immediately
+;;         company-prescient-filter-alist '((t . prescient-filter-orderless))))
 
 ;; (use-package simpleclip
 ;;   :ensure t

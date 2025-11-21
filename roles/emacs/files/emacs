@@ -2311,50 +2311,50 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :bind (:map minibuffer-local-map
          ("M-A" . marginalia-cycle)))
 
-(use-package company
-  :ensure t
-  :init
-  (add-hook 'after-init-hook 'global-company-mode)
-  :config
-  ;; Completion trigger settings
-  (setq company-minimum-prefix-length 2           ;; require 3 chars before showing candidates
-        company-idle-delay 1.0                    ;; show popup after 1 second of inactivity
+;; (use-package company
+;;   :ensure t
+;;   :init
+;;   (add-hook 'after-init-hook 'global-company-mode)
+;;   :config
+;;   ;; Completion trigger settings
+;;   (setq company-minimum-prefix-length 2           ;; require 3 chars before showing candidates
+;;         company-idle-delay 1.0                    ;; show popup after 1 second of inactivity
 
-        ;; Selection behavior
-        company-selection-wrap-around t           ;; cycle selection: end wraps to start
-        company-require-match nil                 ;; allow completing text not in candidate list
+;;         ;; Selection behavior
+;;         company-selection-wrap-around t           ;; cycle selection: end wraps to start
+;;         company-require-match nil                 ;; allow completing text not in candidate list
 
-        ;; Tooltip appearance
-        company-tooltip-annotation-padding 5      ;; 5 spaces between text and annotation
-        company-tooltip-margin 3                  ;; 3-char margin on right side of tooltip
+;;         ;; Tooltip appearance
+;;         company-tooltip-annotation-padding 5      ;; 5 spaces between text and annotation
+;;         company-tooltip-margin 3                  ;; 3-char margin on right side of tooltip
 
-        ;; Mode filtering
-        company-global-modes '(not text-mode fundamental-mode)  ;; enable everywhere except text/fundamental modes
+;;         ;; Mode filtering
+;;         company-global-modes '(not text-mode fundamental-mode)  ;; enable everywhere except text/fundamental modes
 
-        ;; Candidate filtering
-        company-dabbrev-ignore-case t           ;; case-sensitive matching (reduces false matches)
-        company-dabbrev-code-ignore-case t      ;; case-sensitive matching in code (reduces false matches)
-        company-abort-manual-when-away t)         ;; dismiss popup if cursor moves away from completion point
+;;         ;; Candidate filtering
+;;         company-dabbrev-ignore-case t           ;; case-sensitive matching (reduces false matches)
+;;         company-dabbrev-code-ignore-case t      ;; case-sensitive matching in code (reduces false matches)
+;;         company-abort-manual-when-away t)         ;; dismiss popup if cursor moves away from completion point
 
-  ;; ;; Add case-insensitive sorting
-  (setq company-transformers '(company-sort-by-occurrence
-                               company-sort-by-backend-importance))
-  (setq completion-ignore-case nil)  ;; global setting for all completers
+;;   ;; ;; Add case-insensitive sorting
+;;   (setq company-transformers '(company-sort-by-occurrence
+;;                                company-sort-by-backend-importance))
+;;   (setq completion-ignore-case nil)  ;; global setting for all completers
 
-  ;; company-ansible: Ansible playbook completion
-  ;; systemd-company-backend: systemd unit file completion
-  (add-to-list 'company-backends 'company-ansible 'systemd-company-backend)
-  (define-key company-active-map (kbd "<tab>") #'company-complete-selection)
-  (define-key company-active-map (kbd "TAB") #'company-complete-selection)
-  (define-key company-active-map (kbd "<escape>") #'company-abort)
-  (define-key company-active-map (kbd "C-g") #'company-abort))
+;;   ;; company-ansible: Ansible playbook completion
+;;   ;; systemd-company-backend: systemd unit file completion
+;;   (add-to-list 'company-backends 'company-ansible 'systemd-company-backend)
+;;   (define-key company-active-map (kbd "<tab>") #'company-complete-selection)
+;;   (define-key company-active-map (kbd "TAB") #'company-complete-selection)
+;;   (define-key company-active-map (kbd "<escape>") #'company-abort)
+;;   (define-key company-active-map (kbd "C-g") #'company-abort))
 
 
-(use-package company-quickhelp
-  :ensure t
-  :hook (company-mode . company-quickhelp-mode)
-  :config
-  (setq company-quickhelp-delay 3))
+;; (use-package company-quickhelp
+;;   :ensure t
+;;   :hook (company-mode . company-quickhelp-mode)
+;;   :config
+;;   (setq company-quickhelp-delay 3))
 
 (use-package corfu
   :ensure t
@@ -2542,19 +2542,19 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :hook (after-init . le/emojify-setup)
   :config (setq emojify-display-style 'unicode))
 
-(defun le/enable-company-emoji ()
-  "Add company-emoji backend to company-backends."
-  (interactive)
-  (unless (member 'company-emoji company-backends)
-    (setq company-backends (push 'company-emoji company-backends))
-    (message "company-emoji backend enabled.")))
+;; (defun le/enable-company-emoji ()
+;;   "Add company-emoji backend to company-backends."
+;;   (interactive)
+;;   (unless (member 'company-emoji company-backends)
+;;     (setq company-backends (push 'company-emoji company-backends))
+;;     (message "company-emoji backend enabled.")))
 
-(defun le/disable-company-emoji ()
-  "Remove company-emoji backend from `'company-backends."
-  (interactive)
-  (when (member 'company-emoji company-backends)
-    (setq company-backends (remove 'company-emoji company-backends))
-    (message "company-emoji backend disabled.")))
+;; (defun le/disable-company-emoji ()
+;;   "Remove company-emoji backend from `'company-backends."
+;;   (interactive)
+;;   (when (member 'company-emoji company-backends)
+;;     (setq company-backends (remove 'company-emoji company-backends))
+;;     (message "company-emoji backend disabled.")))
 
 ;; (use-package company-emoji
 ;;   :ensure t)
@@ -3202,16 +3202,16 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   ;; Global mode to track usage history for sorting
   (prescient-persist-mode +1))
 
-(use-package company-prescient
-  :ensure t
-  :config
-  ;; Enable company-prescient globally for all company backends
-  (company-prescient-mode +1)
+;; (use-package company-prescient
+;;   :ensure t
+;;   :config
+;;   ;; Enable company-prescient globally for all company backends
+;;   (company-prescient-mode +1)
 
-  ;; Crucial step: Tell company-prescient to use the orderless matching function.
-  ;; This connects your existing orderless setup to the company UI.
-  (setq company-prescient-prefix-length 0 ; Start matching immediately
-        company-prescient-filter-alist '((t . prescient-filter-orderless))))
+;;   ;; Crucial step: Tell company-prescient to use the orderless matching function.
+;;   ;; This connects your existing orderless setup to the company UI.
+;;   (setq company-prescient-prefix-length 0 ; Start matching immediately
+;;         company-prescient-filter-alist '((t . prescient-filter-orderless))))
 
 ;; (use-package simpleclip
 ;;   :ensure t

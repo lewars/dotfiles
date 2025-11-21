@@ -71,10 +71,10 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 (package-refresh-contents)
 (package-install 'quelpa)
 (require 'use-package-ensure)
-;; (quelpa '(quelpa-use-package
-;;           :fetcher git
-;;           :url "https://github.com/quelpa/quelpa-use-package.git"))
-;; (require 'quelpa-use-package)
+(quelpa '(quelpa-use-package
+          :fetcher git
+          :url "https://github.com/quelpa/quelpa-use-package.git"))
+(require 'quelpa-use-package)
 
 
 ;; TODO: Improve scrolling
@@ -201,6 +201,12 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 
    read-process-output-max (* 16 1024 1024)) ; 16MB
 
+
+
+(use-package diff-hl
+  :ensure t
+  :hook ((prog-mode . diff-hl-mode)
+         (dired-mode . diff-hl-dired-mode)))
 
    ;; Configure literal mode for very large files
    ;; (setq-default literal-mode-threshold (* 1 1024 1024))
@@ -429,6 +435,13 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
   (let ((inhibit-read-only t))
     (ansi-color-apply-on-region (point-min) (point-max))))
 (add-hook 'ansible-doc 'display-ansi-colors)
+
+(use-package visual-fill-column
+  :ensure t)
+
+(use-package mixed-pitch
+  :hook
+  (text-mode . mixed-pitch-mode))
 
 (use-package help
   :bind
@@ -748,17 +761,14 @@ If the side window is being created, it prompts for the source buffer."
  '(org-agenda-files
    '("/home/slams/org/gtd/gtd.org" "/home/slams/org/gtd/inbox.org"))
  '(package-selected-packages
-   '(all-the-icons anki-editor ansible ansible-doc async async-await atomic-chrome blacken cape casual centaur-tabs colorful-mode company-ansible company-prescient
-                   company-quickhelp consult-flycheck consult-gh-forge consult-lsp consult-org-roam consult-projectile consult-yasnippet copilot corfu dashboard
-                   demap diff-hl dockerfile-mode doom-modeline doom-themes dotenv-mode dumb-jump emojify eterm-256color expand-region flycheck-posframe
-                   flyspell-correct focus frame-local fzf go-mode google-this gptel groovy-mode helpful highlight-indent-guides ibuffer-projectile
-                   idle-highlight-mode imenu-list jinja2-mode k8s-mode latex-preview-pane lorem-ipsum lsp-java lsp-pyright lsp-ui marginalia mermaid-mode
-                   mixed-pitch multi-vterm multiple-cursors nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer ob-go ob-mermaid olivetti
-                   orderless org-appear org-bullets org-make-toc org-preview-html org-projectile org-roam-ui org-super-agenda org-view-mode ox-hugo pdf-tools
-                   ppp py-isort python-mode pyvenv quelpa-use-package rainbow-mode simpleclip slime-company systemd terraform-mode textile-mode treemacs-magit
-                   treemacs-nerd-icons treemacs-projectile vertico-posframe visual-fill-column vlf whitespace-cleanup-mode yasnippet-snippets))
- '(package-vc-selected-packages
-   '((copilot :url "https://github.com/copilot-emacs/copilot.el" :branch "main")))
+   '(all-the-icons anki-editor ansible atomic-chrome blacken cape casual centaur-tabs colorful-mode consult-flycheck consult-gh-forge consult-lsp consult-yasnippet
+                   corfu dashboard demap diff-hl dockerfile-mode doom-modeline doom-themes dotenv-mode dumb-jump emojify eterm-256color expand-region
+                   flycheck-posframe flyspell-correct fzf go-mode gptel groovy-mode helpful highlight-indent-guides ibuffer-projectile idle-highlight-mode
+                   imenu-list jinja2-mode k8s-mode latex-preview-pane lorem-ipsum lsp-java lsp-pyright lsp-ui marginalia mermaid-mode multi-vterm
+                   multiple-cursors nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer ob-go ob-mermaid orderless org-appear org-bullets
+                   org-preview-html org-project-capture org-roam-ui pdf-tools prescient py-isort python-mode pyvenv quelpa-use-package rainbow rainbow-mode
+                   slime systemd terraform-mode textile-mode treemacs-magit treemacs-nerd-icons treemacs-projectile vertico-posframe visual-fill-column
+                   whitespace-cleanup-mode))
  '(show-paren-context-when-offscreen t)
  '(show-paren-style 'mixed)
  '(tramp-default-method "ssh")
@@ -770,7 +780,6 @@ If the side window is being created, it prompts for the source buffer."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(copilot-overlay-face ((t (:foreground "pale violet red"))))
  '(doom-modeline-buffer-file ((t (:foreground "white"))))
  '(doom-modeline-icon ((t (:foreground "white"))))
  '(doom-themes-treemacs-root-face ((t (:inherit font-lock-string-face :height 0.85))))
@@ -801,6 +810,9 @@ If the side window is being created, it prompts for the source buffer."
   :custom
   (nerd-icons--cache-limit 4096)
   (nerd-icons-font-family "SauceCodePro Nerd Font"))
+
+(use-package nerd-icons-ibuffer
+  :ensure t)
 
 ;; ========== Developer configurations ===========
 (use-package fzf
@@ -1320,7 +1332,19 @@ If the side window is being created, it prompts for the source buffer."
         (message "Face: %s" face)
       (message "No face at %d" pos))))
 
-;;; -*- lexical-binding: t; -*-
+;; ob-mermaid configuration
+(use-package ob-mermaid
+  :ensure t
+  :after org-babel
+  :hook (org-mode . ob-mermaid-mode)
+  :config
+  (setq org-babel-show-process-buffer t)
+  (setq ob-mermaid-executable "~/.local/bin/mmdc"))
+
+(use-package ob-go
+  :ensure t
+  :after org-babel
+  :hook (org-mode . ob-go-mode))
 
 (defun le/my-org-buffer-setup ()
   "Apply all buffer-local visual and minor-mode settings for Org."
@@ -1930,16 +1954,6 @@ Make it conversational but professional. Include transition phrases between sect
 ;; (setq org-babel-python-command "python3")
 ;; (setq org-babel-shell-command "bash")
 
-;; ob-mermaid configuration
-(use-package ob-mermaid
-  :ensure t
-  :after org-babel
-  :hook (org-mode . ob-mermaid-mode)
-  :config
-  (setq org-babel-show-process-buffer t)
-  (setq ob-mermaid-executable "~/.local/bin/mmdc"))
-
-
 (use-package org-appear
   :ensure t
   :hook (org-mode . org-appear-mode)
@@ -1963,8 +1977,7 @@ Make it conversational but professional. Include transition phrases between sect
                         '((display-buffer-reuse-window
                            display-buffer-below-selected)
                           (reusable-frames . t)))
-      (magit-display-buffer-traditional buffer)))
-)
+      (magit-display-buffer-traditional buffer))))
 
 ;; UI
 ;; Configure doom-modeline
@@ -2402,12 +2415,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (corfu-mode)
   (setq-local completion-styles '(orderless)
               completion-category-defaults nil))
-
-(quelpa '(corfu-terminal
-          :fetcher git
-          :url "https://codeberg.org/akib/emacs-corfu-terminal.git"))
-(unless (display-graphic-p)
-  (corfu-terminal-mode +1))
 
 (use-package lsp-mode
   :ensure t
@@ -3169,11 +3176,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :defer t
   :mode ("\\.mmd\\'" . mermaid-mode))
 
-(use-package diff-hl
-  :ensure t
-  :hook ((prog-mode . diff-hl-mode)
-         (dired-mode . diff-hl-dired-mode)))
-
 
 ;; (use-package symbol-overlay
 ;;   :ensure t
@@ -3279,6 +3281,21 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :after (slime company)
   :config (setq slime-company-completion 'fuzzy
                 slime-company-after-completion 'slime-company-just-one-space))
+
+(use-package rainbow-mode
+  :ensure t)
+
+(use-package ansible
+  :ensure t)
+
+(use-package org-preview-html
+  :ensure t)
+
+(use-package org-project-capture
+  :ensure t)
+
+(use-package pdf-tools
+  :ensure t)
 
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)

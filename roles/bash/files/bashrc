@@ -226,6 +226,7 @@ alias a01='ssh a01'
 
 # system/admin
 alias s='sudo systemctl'
+alias specs='fastfetch --localip-show-all-ips --localip-show-loop'
 
 # development
 alias gcsheet='gcloud cheat-sheet'
@@ -263,6 +264,7 @@ alias scan='sudo freshclam; clamscan'
 # container development
 alias usU="podman unshare chown -R $(id -u):$(id -g) ."
 alias us0='podman unshare chown -R 0:0 .'
+alias gemcli='SANDBOX_FLAGS="--userns=keep-id --network=slirp4netns" gemini -s'
 
 # jenkins and datadog container management aliases
 alias jclean='podman stop jenkins_server; sleep 4; podman container rm jenkins_server'

@@ -82,7 +82,6 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 
 ;; Additional settings for specific file types
 (add-to-list 'auto-mode-alist '("\\.log\\'" . fundamental-mode))
-(add-to-list 'auto-mode-alist '("\\.sql\\'" . fundamental-mode))
 (add-to-list 'auto-mode-alist '("\\.odt\\'" . docview-mode))
 
 (setq ispell-personal-dictionary (expand-file-name "~/.ispell_english"))
@@ -170,7 +169,7 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
   (visual-line-mode)
   (setq fill-column 220)
   (setq sentence-end-double-space nil)
-  (flyspell-mode)
+  ;; (flyspell-mode)
   (setq show-trailing-whitespace t)
   (setq whitespace-style '(face
                          tabs spaces trailing lines space-before-tab newline
@@ -439,9 +438,16 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 (use-package visual-fill-column
   :ensure t)
 
-(use-package mixed-pitch
-  :hook
-  (text-mode . mixed-pitch-mode))
+;; (use-package mixed-pitch
+;;   :hook
+;;   (text-mode . mixed-pitch-mode))
+
+;; (defun my-consult-gh-hook ()
+;;   "Turn off mixed-pitch-mode when in a consult-gh buffer."
+;;   (when (derived-mode-p 'consult-gh-mode)
+;;     (mixed-pitch-mode -1)))
+
+;; (add-hook 'consult-gh-mode-hook 'my-consult-gh-hook)
 
 (use-package help
   :bind
@@ -552,9 +558,6 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
          (window-height . 0.2)
          (side . bottom)
          (slot . 0))
-        ("\\*Org todo\\*"
-         (display-buffer-at-bottom)
-         (window-height . 0.3))
         ))
 
 
@@ -749,26 +752,26 @@ If the side window is being created, it prompts for the source buffer."
  '(centaur-tabs-bar-height 22)
  '(column-number-mode 1)
  '(custom-safe-themes
-   '("f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33" "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294"
-     "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb" "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8"
-     "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77" "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da"
-     "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a" "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d"
-     "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae" "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4"
-     "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561" "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350" default))
+   '("088cd6f894494ac3d4ff67b794467c2aa1e3713453805b93a8bcb2d72a0d1b53"
+     "f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33"
+     "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294"
+     "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb"
+     "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8"
+     "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77"
+     "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da"
+     "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a"
+     "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d"
+     "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae"
+     "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4"
+     "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561"
+     "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350"
+     default))
  '(frame-background-mode nil)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files
    '("/home/slams/org/gtd/gtd.org" "/home/slams/org/gtd/inbox.org"))
- '(package-selected-packages
-   '(all-the-icons anki-editor ansible atomic-chrome blacken cape casual centaur-tabs colorful-mode consult-flycheck consult-gh-forge consult-lsp consult-yasnippet
-                   corfu dashboard demap diff-hl dockerfile-mode doom-modeline doom-themes dotenv-mode dumb-jump emojify eterm-256color expand-region
-                   flycheck-posframe flyspell-correct fzf go-mode gptel groovy-mode helpful highlight-indent-guides ibuffer-projectile idle-highlight-mode
-                   imenu-list jinja2-mode k8s-mode latex-preview-pane lorem-ipsum lsp-java lsp-pyright lsp-ui marginalia mermaid-mode multi-vterm
-                   multiple-cursors nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer ob-go ob-mermaid orderless org-appear org-bullets
-                   org-preview-html org-project-capture org-roam-ui pdf-tools prescient py-isort python-mode pyvenv quelpa-use-package rainbow rainbow-mode
-                   slime systemd terraform-mode textile-mode treemacs-magit treemacs-nerd-icons treemacs-projectile vertico-posframe visual-fill-column
-                   whitespace-cleanup-mode))
+ '(package-selected-packages nil)
  '(show-paren-context-when-offscreen t)
  '(show-paren-style 'mixed)
  '(tramp-default-method "ssh")
@@ -842,7 +845,7 @@ If the side window is being created, it prompts for the source buffer."
 
 (use-package highlight-indent-guides
   :ensure t
-  ;; :hook  (prog-mode . highlight-indent-guides-mode)
+  :hook  (prog-mode . highlight-indent-guides-mode)
   :config
   (setq highlight-indent-guides-method 'bitmap
         highlight-indent-guides-bitmap-function 'highlight-indent-guides--bitmap-line))
@@ -1366,7 +1369,6 @@ If the side window is being created, it prompts for the source buffer."
 ;; Org-mode core configuration
 (use-package org
   :ensure t
-  :init
   :hook ((org-mode . le/my-org-buffer-setup)
          (org-todo-repeat-hook . org-reset-checkbox-state-subtree))
   :bind (("C-c c" . org-capture)
@@ -1394,27 +1396,29 @@ If the side window is being created, it prompts for the source buffer."
    org-startup-indented t         ; Start Org buffers with indentation
    org-startup-with-inline-images t ; Display inline images automatically when Org mode loads a file.
    org-agenda-use-time-grid t     ; Enable the use of a time grid in the Org agenda.
-   org-agenda-time-grid           ; Configure the appearance and behavior of the Org agenda time grid.
-   ;; org-reset-checkbox-subtree t   ; Reset checkboxes when a new scheduled item is created
-   '((daily potentially-blocked)  ; Define grid type (daily) and task blocking behavior.
+   org-use-fast-todo-selection 'buffer ; TODO workflow configuration with fast keys
+
+   ;; Define grid type (daily) and task blocking behavior.
+   org-agenda-time-grid
+   '((daily potentially-blocked)
      (0900 1000 1100 1200 1300 1400 1500 1600 1700) ; Specify the hours to display in the grid.
      "......"                     ; String used to represent busy time slots in the agenda.
      "----------------")          ; String used to represent free time slots in the agenda.
 
    ;; TODO workflow configuration
-   org-todo-keywords '((sequence "TODO" "NEXT" "STARTED..." "REVIEW" "REPEAT" "BLOCKED" "|" "DONE" "CANCELED"))
+   org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "IN PROG...(p)" "REVIEW(v)" "REPEAT(r)" "BLOCKED(b)" "|" "DONE(d)" "CANCELED(c)"))
 
    ;; TODO keyword faces with darker, less saturated background colors
    org-todo-keyword-faces '(
                             ("TODO" . (:foreground "black" :background "#6d97ba" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("NEXT" . (:foreground "black" :background "#c79933" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
-                            ("STARTED..." . (:foreground "white" :background "#126711" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("IN PROG..." . (:foreground "white" :background "#518fe8" :weight normal :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("REVIEW" . (:foreground "white" :background "#9369d9" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("REPEAT" . (:foreground "black" :background "#89b5d9" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("BLOCKED" . (:foreground "white" :background "#d95252" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("DONE" . (:foreground "black" :background "#89d989" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("CANCELED" . (:foreground "#4a4a4a" :background "#bdbdbd" :weight normal :height 0.88 :box (:line-width 3 :style nil :color "#263238"))))
-  )
+   )
 
   :custom-face
   (org-document-title         ((t (:inherit (bold variable-pitch) :height 1.1 :foreground "gray95"))))
@@ -2055,7 +2059,8 @@ Make it conversational but professional. Include transition phrases between sect
       (append
        (mapcar (lambda (cmd) (cons cmd le-bottom-center-width-7-posframe-config))
                '(consult-line consult-buffer consult-ls-git consult-grep
-                              consult-ripgrep consult-imenu consult-bookmark))
+                              consult-ripgrep consult-imenu consult-bookmark
+                              org-todo))
        '((consult-projectile
           posframe
           ;; (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
@@ -2065,7 +2070,8 @@ Make it conversational but professional. Include transition phrases between sect
          (execute-extended-command unobtrusive))))
 
   (setq vertico-multiform-categories
-        '((file grid)))
+        '((file grid)
+          (org-todo posframe)))
   (vertico-multiform-mode 1))
 
 ;; Persist history over Emacs restarts. Vertico sorts by history position.
@@ -2182,53 +2188,40 @@ Make it conversational but professional. Include transition phrases between sect
 (add-hook 'kill-buffer-hook 'le/ensure-proper-buffer-after-tab-close)
 
 (defun le/centaur-tabs-buffer-groups ()
-  "`centaur-tabs-buffer-groups' control buffers' group rules.
+  "`centaur-tabs-buffer-groups' control buffers' group rules."
+  (let ((bn (buffer-name)))
+    (list
+     (cond
+      ;; NEW: Explicitly ignore the Org selection buffer so it doesn't get a tab
+      ((string-equal bn "*Org todo*") nil)
 
-Group centaur-tabs with mode if buffer is derived from
-`emacs-lisp-mode' `dired-mode' `org-mode' `'magit-mode'.
+      ;; Your original "Emacs" group for other internal buffers
+      ((string-prefix-p "*" bn) "Emacs")
 
-All buffer name start with * will group to \"Emacs\".
-Other buffer group by `centaur-tabs-get-group-name' with project name."
-  (list
-   (cond
-    ((string-equal
-      "*"
-      (substring
-       (buffer-name)
-       0 1))
-     "Emacs")
-    ((memq
-      major-mode
-      '(magit-process-mode
-        magit-status-mode
-        magit-diff-mode
-        magit-log-mode
-        magit-file-mode
-        magit-blob-mode
-        magit-blame-mode
-        tags-table-mode
-        ))
-     "Magit")
-    ((derived-mode-p 'prog-mode)
-     "Development")
-    ((derived-mode-p 'dired-mode)
-     "Dired")
-    ((memq major-mode '(helpful-mode
-                        help-mode))
-     "Help")
-    ((memq major-mode '(org-mode
-                        org-agenda-clockreport-mode
-                        org-src-mode
-                        org-agenda-mode
-                        org-beamer-mode
-                        org-indent-mode
-                        org-bullets-mode
-                        org-cdlatex-mode
-                        org-agenda-log-mode
-                        diary-mode))
-     "OrgMode")
-    (t
-     (centaur-tabs-get-group-name (current-buffer))))))
+      ;; Magit grouping [cite: 271]
+      ((memq major-mode '(magit-process-mode magit-status-mode magit-diff-mode
+                          magit-log-mode magit-file-mode magit-blob-mode
+                          magit-blame-mode tags-table-mode))
+       "Magit")
+
+      ;; Development/Prog mode grouping [cite: 271]
+      ((derived-mode-p 'prog-mode) "Development")
+
+      ;; Dired grouping [cite: 271]
+      ((derived-mode-p 'dired-mode) "Dired")
+
+      ;; Help grouping [cite: 271]
+      ((memq major-mode '(helpful-mode help-mode)) "Help")
+
+      ;; OrgMode grouping [cite: 272-274]
+      ((memq major-mode '(org-mode org-agenda-clockreport-mode org-src-mode
+                          org-agenda-mode org-beamer-mode org-indent-mode
+                          org-bullets-mode org-cdlatex-mode org-agenda-log-mode
+                          diary-mode))
+       "OrgMode")
+
+      ;; Default to project name [cite: 274]
+      (t (centaur-tabs-get-group-name (current-buffer)))))))
 
 (defun le/debug-centaur-tab-icon (tab)
   "Print debug info about the icon for the given tab."
@@ -2387,6 +2380,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (setq corfu-max-width 80)
   :bind
   (:map corfu-map
+        ("C-g" . corfu-quit)
         ;; This restores the "Enter to complete" behavior
         ("RET" . corfu-insert)
         ;; Ensure the graphical Enter key works too
@@ -2422,8 +2416,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
          (go-mode . lsp)
          (java-mode . lsp)
          (lsp-mode . lsp-enable-which-key-integration))
-  :custom
-  (lsp-completion-provider :none) ;; STOP lsp from setting up company!
+  ;; :custom
+  ;; (lsp-completion-provider :none) ;; STOP lsp from setting up company!
   :init
   ;; This ensures Orderless works with LSP (fuzzy matching candidates)
   (defun le/lsp-mode-setup-completion ()
@@ -2635,7 +2629,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package dockerfile-mode
   :ensure t
-  :mode ("Containerfile\\'" "Dockerfile\\'" "containerfile\\'" "dockerfile\\'"))
+  :mode ("Containerfile\\'" "Dockerfile\\'" "containerfile\\'" "dockerfile\\'" "\\.container\\'"))
 
 (use-package systemd
   :ensure t
@@ -3069,9 +3063,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package consult-gh
   :ensure t
-  :after consult
-  :init
-  (require 'consult-gh)
+  :after (consult yasnippet)
   :custom
   (consult-gh-default-clone-directory "~/git/personal/")
   (consult-gh-show-preview t)
@@ -3197,8 +3189,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :ensure t
   :diminish
   :after doom-modeline
-
-
   :bind (("C-c m". demap-toggle))
   :config
   (setq demap-minimap-window-side 'right)
@@ -3296,6 +3286,24 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package pdf-tools
   :ensure t)
+
+(use-package org-protocol
+  :ensure nil
+  :after org
+  :config
+  (setq org-capture-templates
+        '(("N" "Protocol Link" entry
+           (file+headline "~/org/gtd/inbox.org" "Links to Process")
+           "* [[%:link][%:description]] :website:\n%U\n%:initial\n"))))
+
+
+(defun le/org-todo-with-completion (orig-fun &rest args)
+  "Force `org-todo' to use the Vertico minibuffer."
+  (let ((completing-read-function #'completing-read)
+        (org-use-fast-todo-selection 'buffer))
+    (apply orig-fun args)))
+
+(advice-add 'org-todo :around #'le/org-todo-with-completion)
 
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)

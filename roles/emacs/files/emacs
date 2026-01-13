@@ -21,18 +21,10 @@
 (when (string-equal system-type "gnu/linux")
   (defvar ispell-program-name "aspell"))
 
-(defun le/monitor-name-is-eDP-1 ()
-  "Return t if any monitor is named eDP-1."
-  (seq-some (lambda (monitor)
-              (equal (cdr (assoc 'name monitor)) "eDP-1"))
-            (display-monitor-attributes-list)))
-(defun le/first-monitor-larger-than-3840x2400 ()
-  "Check if the first monitor's geometry has a resolution greater than 3840x2400."
-  (let* ((monitor-attrs (car (display-monitor-attributes-list)))
-         (geometry (cdr (assoc 'geometry monitor-attrs)))
-         (width (nth 2 geometry))
-         (height (nth 3 geometry)))
-    (and (> width 3840) (> height 2400))))
+;; Load host-specific hardware config if it exists
+(let ((local-config (expand-file-name "local-hardware.el" user-emacs-directory)))
+  (when (file-exists-p local-config)
+    (load local-config)))
 
 ;; Global settings
 (setq gc-cons-threshold 100000000)
@@ -42,6 +34,8 @@
 (setq scroll-down-aggressively 0.5)
 (global-unset-key (kbd "C-x C-z"))
 (global-unset-key (kbd "C-z"))
+(defvar gitdir (expand-file-name "~/git"))
+(defvar orgdir (expand-file-name "~/org"))
 
 ;; Configure Emacs to use the flatpak Brave Browser
 (defun brave-browser-flatpak (url &optional _new-window)
@@ -73,6 +67,7 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 (require 'use-package-ensure)
 (quelpa '(quelpa-use-package
           :fetcher git
+          :commit d985c0326b66aa19581918deccdc5edcacccf953
           :url "https://github.com/quelpa/quelpa-use-package.git"))
 (require 'quelpa-use-package)
 
@@ -84,13 +79,7 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 (add-to-list 'auto-mode-alist '("\\.log\\'" . fundamental-mode))
 (add-to-list 'auto-mode-alist '("\\.odt\\'" . docview-mode))
 
-(setq ispell-personal-dictionary (expand-file-name "~/.ispell_english"))
-
-(if (string-equal system-type "gnu/linux")
-    (if (le/monitor-name-is-eDP-1)
-        (defvar my-default-font-height 150)
-      (defvar my-default-font-height 100))
-    (defvar my-default-font-height 108))
+(setq ispell-personal-dictionary (expand-file-name ".ispell_english" "~"))
 
 ;; Set fonts
 ;;;
@@ -198,9 +187,9 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
    undo-strong-limit (* 6 1024 1024)
    undo-outer-limit (* 12 1024 1024)
 
-   read-process-output-max (* 16 1024 1024)) ; 16MB
+   read-process-output-max (* 16 1024 1024)  ; 16MB
 
-
+   so-long-mode 1)
 
 (use-package diff-hl
   :ensure t
@@ -362,7 +351,7 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 (global-set-key "\C-x\ \P" 'check-parens)
 (setq-default indent-tabs-mode nil)
 
-(setq explicit-shell-file-name "/bin/bash")
+(setq explicit-shell-file-name (executable-find "bash"))
 (eval-after-load "term"
   '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
 
@@ -519,7 +508,7 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
   :hook (emacs-lisp-mode . (lambda () (yas-minor-mode -1)))
   :bind ("M-/" . hippie-expand)
   :config
-  (setq yas-snippet-dirs '("~/git/contrib/yasnippet-snippets/snippets/")
+  (setq yas-snippet-dirs (list (expand-file-name "contrib/yasnippet-snippets/snippets" gitdir))
         yas-wrap-around-region t
         yas-triggers-in-field t)
   (yas-global-mode 1)
@@ -752,27 +741,26 @@ If the side window is being created, it prompts for the source buffer."
  '(centaur-tabs-bar-height 22)
  '(column-number-mode 1)
  '(custom-safe-themes
-   '("088cd6f894494ac3d4ff67b794467c2aa1e3713453805b93a8bcb2d72a0d1b53" "f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33"
-     "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294" "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb"
-     "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8" "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77"
-     "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da" "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a"
-     "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d" "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae"
-     "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4" "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561"
-     "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350" default))
+   '("088cd6f894494ac3d4ff67b794467c2aa1e3713453805b93a8bcb2d72a0d1b53"
+     "f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33"
+     "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294"
+     "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb"
+     "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8"
+     "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77"
+     "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da"
+     "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a"
+     "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d"
+     "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae"
+     "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4"
+     "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561"
+     "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350"
+     default))
  '(frame-background-mode nil)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files
    '("/home/slams/org/gtd/gtd.org" "/home/slams/org/gtd/inbox.org"))
- '(package-selected-packages
-   '(all-the-icons anki-editor ansible atomic-chrome blacken cape casual centaur-tabs colorful-mode consult-flycheck consult-flyspell consult-gh-forge consult-lsp
-                   consult-org-roam consult-projectile consult-yasnippet corfu dashboard demap diff-hl dockerfile-mode doom-modeline doom-themes dotenv-mode
-                   dumb-jump emojify eterm-256color expand-region flycheck-posframe flyspell-correct fzf gnuplot go-mode gptel groovy-mode helpful
-                   highlight-indent-guides ibuffer-projectile idle-highlight-mode imenu-list jinja2-mode k8s-mode latex-preview-pane lorem-ipsum lsp-java
-                   lsp-pyright lsp-ui marginalia mermaid-mode multi-vterm multiple-cursors nerd-icons-completion nerd-icons-corfu nerd-icons-dired
-                   nerd-icons-ibuffer ob-go ob-mermaid orderless org-appear org-bullets org-preview-html org-project-capture org-roam-ui pdf-tools prescient
-                   py-isort python-mode pyvenv quelpa-use-package rainbow-mode slime systemd terraform-mode textile-mode treemacs-magit treemacs-nerd-icons
-                   treemacs-projectile vertico-posframe visual-fill-column whitespace-cleanup-mode))
+ '(package-selected-packages nil)
  '(safe-local-variable-values '((eval org-babel-execute-buffer)))
  '(show-paren-context-when-offscreen t)
  '(show-paren-style 'mixed)
@@ -927,7 +915,7 @@ If the side window is being created, it prompts for the source buffer."
     projectile-map)
 
   :config
-  (setq projectile-project-search-path '(("~/git" . 4)))
+  (setq projectile-project-search-path (list (cons gitdir 4)))
   (setq projectile-enable-caching t)
   (setq projectile-switch-project-action #'projectile-dired)
   (setq projectile-per-project-compilation-buffer t)
@@ -1344,7 +1332,7 @@ If the side window is being created, it prompts for the source buffer."
   :hook (org-mode . ob-mermaid-mode)
   :config
   (setq org-babel-show-process-buffer t)
-  (setq ob-mermaid-executable "~/.local/bin/mmdc"))
+  (setq ob-mermaid-executable (expand-file-name ".local/bin/mmdc" "~")))
 
 (use-package ob-go
   :ensure t
@@ -1376,14 +1364,11 @@ If the side window is being created, it prompts for the source buffer."
   :bind (("C-c c" . org-capture)
          ("C-c a" . org-agenda))
   :config
-  (setq org-agenda-files '("~/org/gtd/"
-                           ;; "~/org/kb/learning"
-                           ;; "~/org/kb/issues"
-                           ))
+  (setq org-agenda-files (expand-file-name "gtd/" orgdir))
   (setq
    org-catch-invisible-edits 'show-and-error ; Check if in invisible region before modification
-   org-clock-sound "~/.emacs.d/org/media/alarm.mp3" ; Sound for timeout - promodoro
-   org-default-notes-file "~/org/gtd/inbox.org" ; Default org note file saved by org-capture
+   org-clock-sound (expand-file-name "org/media/alarm.mp3" user-emacs-directory) ; Sound for timeout - promodoro
+   org-default-notes-file (expand-file-name "gtd/inbox.org" orgdir) ; Default org note file saved by org-capture
    org-edit-src-code t            ; Enable editing source code blocks in separate buffer
    org-edit-src-content-indentation 0 ; controls the relative indentation of the source code within the src block
    org-ellipsis " !!!"            ; Change the symbol shown for folded headlines.
@@ -1485,9 +1470,9 @@ If the side window is being created, it prompts for the source buffer."
   :ensure t
   :after org
   :init
-  (setq org-roam-directory "~/org/kb/"
+  (setq org-roam-directory (expand-file-name "kb/" orgdir)
         org-roam-dailies-directory "daily/"
-        org-roam-db-location "~/.emacs.d/org-roam.db"
+        org-roam-db-location (expand-file-name "org-roam.db" user-emacs-directory)
         org-roam-node-display-template (concat "${title:65}" (propertize "${tags:40}" 'face 'org-tag)))
   :hook (after-init . org-roam-db-autosync-mode)
   :bind (;; Core org-roam functions
@@ -1598,7 +1583,7 @@ Make it conversational but professional. Include transition phrases between sect
   (setq org-roam-capture-templates
         '(
           ;; General TODO
-          ("t" "Todo" entry (file+headline "~/org/gtd/inbox.org" "Inbox")
+          ("t" "Todo" entry (file+headline (expand-file-name "gtd/inbox.org" orgdir) "Inbox")
            "* TODO %?\n%i\n%a")
           ;; General Meeting (m)
           ("m" "General Meeting" plain
@@ -3074,7 +3059,7 @@ Make it conversational but professional. Include transition phrases between sect
   :ensure t
   :after (consult yasnippet)
   :custom
-  (consult-gh-default-clone-directory "~/git/personal/")
+  (consult-gh-default-clone-directory (expand-file-name "personal" gitdir))
   (consult-gh-show-preview t)
   (consult-gh-repo-action #'consult-gh--repo-browse-files-action)
   (consult-gh-issue-action #'consult-gh--issue-view-action)
@@ -3302,7 +3287,7 @@ Make it conversational but professional. Include transition phrases between sect
   :config
   (setq org-capture-templates
         '(("N" "Protocol Link" entry
-           (file+headline "~/org/gtd/inbox.org" "Links to Process")
+           (file+headline (expand-file-name "gtd/inbox.org" orgdir) "Links to Process")
            "* [[%:link][%:description]] :website:\n%U\n%:initial\n"))))
 
 

@@ -752,26 +752,28 @@ If the side window is being created, it prompts for the source buffer."
  '(centaur-tabs-bar-height 22)
  '(column-number-mode 1)
  '(custom-safe-themes
-   '("088cd6f894494ac3d4ff67b794467c2aa1e3713453805b93a8bcb2d72a0d1b53"
-     "f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33"
-     "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294"
-     "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb"
-     "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8"
-     "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77"
-     "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da"
-     "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a"
-     "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d"
-     "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae"
-     "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4"
-     "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561"
-     "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350"
-     default))
+   '("088cd6f894494ac3d4ff67b794467c2aa1e3713453805b93a8bcb2d72a0d1b53" "f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33"
+     "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294" "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb"
+     "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8" "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77"
+     "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da" "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a"
+     "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d" "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae"
+     "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4" "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561"
+     "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350" default))
  '(frame-background-mode nil)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-files
    '("/home/slams/org/gtd/gtd.org" "/home/slams/org/gtd/inbox.org"))
- '(package-selected-packages nil)
+ '(package-selected-packages
+   '(all-the-icons anki-editor ansible atomic-chrome blacken cape casual centaur-tabs colorful-mode consult-flycheck consult-flyspell consult-gh-forge consult-lsp
+                   consult-org-roam consult-projectile consult-yasnippet corfu dashboard demap diff-hl dockerfile-mode doom-modeline doom-themes dotenv-mode
+                   dumb-jump emojify eterm-256color expand-region flycheck-posframe flyspell-correct fzf gnuplot go-mode gptel groovy-mode helpful
+                   highlight-indent-guides ibuffer-projectile idle-highlight-mode imenu-list jinja2-mode k8s-mode latex-preview-pane lorem-ipsum lsp-java
+                   lsp-pyright lsp-ui marginalia mermaid-mode multi-vterm multiple-cursors nerd-icons-completion nerd-icons-corfu nerd-icons-dired
+                   nerd-icons-ibuffer ob-go ob-mermaid orderless org-appear org-bullets org-preview-html org-project-capture org-roam-ui pdf-tools prescient
+                   py-isort python-mode pyvenv quelpa-use-package rainbow-mode slime systemd terraform-mode textile-mode treemacs-magit treemacs-nerd-icons
+                   treemacs-projectile vertico-posframe visual-fill-column whitespace-cleanup-mode))
+ '(safe-local-variable-values '((eval org-babel-execute-buffer)))
  '(show-paren-context-when-offscreen t)
  '(show-paren-style 'mixed)
  '(tramp-default-method "ssh")
@@ -1937,6 +1939,12 @@ Make it conversational but professional. Include transition phrases between sect
   (setq org-crypt-key nil) ; Set to your GPG key ID or email if using GPG, otherwise for simple password
   )
 
+(use-package gnuplot
+  :ensure t
+  :defer t
+  :config
+  (setq gnuplot-program "/usr/bin/gnuplot"))
+
 ;; Org-babel language configuration
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -1951,9 +1959,10 @@ Make it conversational but professional. Include transition phrases between sect
    (dot . t) ; For Graphviz diagrams
    (mermaid . t)
    (go . t)
+   (gnuplot . t)
    ))
 
-(setq org-confirm-babel-evaluate nil)
+(setq org-confirm-babel-evaluate t)
 ;; You might need to set specific interpreter paths if they are not in your PATH
 ;; (setq org-babel-python-command "python3")
 ;; (setq org-babel-shell-command "bash")
@@ -1966,7 +1975,7 @@ Make it conversational but professional. Include transition phrases between sect
   (org-appear-autolinks t)         ; Show full link syntax when cursor is on links
   (org-appear-sutosudmarkers t)    ; Show sub/superscript markers (^{} and _{}) when cursor is on them
   (org-appear-trigger 'always)     ; Always trigger appearance changes (alternative: 'manual)
-  (org-appear-delay 0.5))          ; Wait 0.5 seconds before showing/hiding markup
+  (org-appear-delay 3))          ; Wait 3.0 seconds before showing/hiding markup
 
 (use-package magit
   :ensure t

@@ -584,13 +584,13 @@ CONTENT-FN is responsible for the buffer's content and its read-only state."
   "Name of the buffer to display journalctl output.")
 
 (defun my-insert-journalctl-output ()
-  "Clear the current buffer and insert `sudo journalctl` output asynchronously.
+  "Clear the current buffer and insert `journalctl` output asynchronously.
 The buffer is made read-only once the command completes."
   ;; This function is called within (with-current-buffer ...) by my-toggle-info-buffer
   ;; inhibit-read-only is also active from the caller.
-  (let ((command "SYSTEMD_COLORS=false sudo journalctl -f --no-hostname --no-pager --output=cat")
+  (let ((command "SYSTEMD_COLORS=false journalctl -f --no-hostname --no-pager --output=cat")
         (output-buffer (current-buffer)))
-    (insert (format "Running '%s'...\nThis may require sudo privileges.\n\n" command))
+    (insert (format "Running '%s'...\nThis may require higher privileges.\n\n" command))
     (set-buffer-modified-p nil) ; Mark as not modified initially
 
     ;; Start the asynchronous shell command
@@ -697,6 +697,7 @@ If the side window is being created, it prompts for the source buffer."
 
 ;; Tramp configuration
 (customize-set-variable 'tramp-use-ssh-controlmaster-options 'suppress)
+(customize-set-variable 'tramp-allow-unsafe-temporary-files nil)
 (customize-set-variable 'tramp-default-method "ssh")
 ;; (customize-set-variable 'tramp-verbose 6 "Enable remote command traces")
 
@@ -848,22 +849,21 @@ If the side window is being created, it prompts for the source buffer."
 
 (use-package projectile
   :ensure t
+  :bind (:map projectile-mode-map
+              ("C-c p" . projectile-command-map)
+              :map projectile-command-map
+              ("A" . projectile-add-known-project))
   :init
   (projectile-mode +1)
-  ;; :bind (:map projectile-mode-map
-  ;;             ("C-c p" . projectile-command-map)
-  ;;             :map projectile-command-map
-  ;;             ("A" . projectile-add-known-project))
-  :init
-  ;; nested keymap for 'p' prefix (projectile)
-  (let ((projectile-map (make-sparse-keymap)))
-    (define-key projectile-map "f" #'consult-projectile-find-file)
-    (define-key projectile-map "o" #'consult-projectile-find-file-other-window)
-    (define-key projectile-map "r" #'consult-projectile-recentf)
-    (define-key projectile-map "p" #'consult-projectile-switch-project)
-    (define-key projectile-map "b" #'consult-projectile-switch-to-buffer)
-    (define-key projectile-map "d" #'consult-projectile-find-dir)
-    projectile-map)
+  ;; ;; nested keymap for 'p' prefix (projectile)
+  ;; (let ((projectile-map (make-sparse-keymap)))
+  ;;   (define-key projectile-map "f" #'consult-projectile-find-file)
+  ;;   (define-key projectile-map "o" #'consult-projectile-find-file-other-window)
+  ;;   (define-key projectile-map "r" #'consult-projectile-recentf)
+  ;;   (define-key projectile-map "p" #'consult-projectile-switch-project)
+  ;;   (define-key projectile-map "b" #'consult-projectile-switch-to-buffer)
+  ;;   (define-key projectile-map "d" #'consult-projectile-find-dir)
+  ;;   projectile-map)
 
   :config
   (setq projectile-project-search-path (list (cons gitdir 4)))
@@ -1015,7 +1015,7 @@ If the side window is being created, it prompts for the source buffer."
     "Conditionally reformat YAML file with yq based on `yaml-formatting-enabled'."
     (interactive)
     (when (and yaml-formatting-enabled (eq major-mode 'yaml-mode))
-      (shell-command-to-string (format "yq eval-all -i %s" buffer-file-name))
+      (shell-command-to-string (format "yq eval-all -i %s" (shell-quote-argument buffer-file-name)))
       (revert-buffer t t t)
       (message "YAML file reformatted.")))
   (defun le/yaml-mode-setup ()
@@ -1033,7 +1033,7 @@ If the side window is being created, it prompts for the source buffer."
   (defun frmt-hcl ()
     "Reformat HCL file with terraform fmt."
     (when (eq major-mode 'terraform-mode)
-      (shell-command-to-string (format "terraform fmt %s" buffer-file-name))
+      (shell-command-to-string (format "terraform fmt %s" (shell-quote-argument buffer-file-name)))
       (auto-revert-mode)))
   (add-hook 'after-save-hook 'frmt-hcl)
   (add-hook 'terraform-mode-hook 'outline-minor-mode)
@@ -1335,6 +1335,8 @@ If the side window is being created, it prompts for the source buffer."
    org-startup-with-inline-images t ; Display inline images automatically when Org mode loads a file.
    org-agenda-use-time-grid t     ; Enable the use of a time grid in the Org agenda.
    org-use-fast-todo-selection 'buffer ; TODO workflow configuration with fast keys
+   org-latex-pdf-process '("lualatex -interaction nonstopmode -output-directory %o %f"
+                           "lualatex -interaction nonstopmode -output-directory %o %f")
 
    ;; Define grid type (daily) and task blocking behavior.
    org-agenda-time-grid
@@ -2050,7 +2052,7 @@ Make it conversational but professional. Include transition phrases between sect
    ("C-c i" . consult-info)
    ([remap Info-search] . consult-info)
 
-   ("C-c p p" . consult-projectile-switch-project)
+   ;; ("C-c p p" . consult-projectile-switch-project)
 
    ;; C-x bindings in `ctl-x-map'
    ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
@@ -2150,16 +2152,16 @@ Make it conversational but professional. Include transition phrases between sect
                           magit-blame-mode tags-table-mode))
        "Magit")
 
-      ;; Development/Prog mode grouping [cite: 271]
+      ;; Development/Prog mode grouping
       ((derived-mode-p 'prog-mode) "Development")
 
-      ;; Dired grouping [cite: 271]
+      ;; Dired grouping
       ((derived-mode-p 'dired-mode) "Dired")
 
-      ;; Help grouping [cite: 271]
+      ;; Help grouping
       ((memq major-mode '(helpful-mode help-mode)) "Help")
 
-      ;; OrgMode grouping [cite: 272-274]
+      ;; OrgMode grouping
       ((memq major-mode '(org-mode org-agenda-clockreport-mode org-src-mode
                           org-agenda-mode org-beamer-mode org-indent-mode
                           org-bullets-mode org-cdlatex-mode org-agenda-log-mode
@@ -2362,13 +2364,15 @@ Make it conversational but professional. Include transition phrases between sect
          (go-mode . lsp)
          (java-mode . lsp)
          (lsp-mode . lsp-enable-which-key-integration))
-  ;; :custom
-  ;; (lsp-completion-provider :none) ;; STOP lsp from setting up company!
+  :custom
+  (lsp-completion-provider :none) ;; STOP lsp from setting up company!
   :init
   ;; This ensures Orderless works with LSP (fuzzy matching candidates)
   (defun le/lsp-mode-setup-completion ()
-    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-          '(orderless)))
+    (setq-local completion-category-defaults
+                        '((lsp-capf . (corfu-capf orderless)))))
+    ;; (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+    ;;       '(orderless)))
   :hook
   (lsp-completion-mode . le/lsp-mode-setup-completion)
   :config (setq lsp-enable-links t
@@ -2579,7 +2583,7 @@ Make it conversational but professional. Include transition phrases between sect
 
 (use-package systemd
   :ensure t
-  :hook (systemd-mode . company-mode)
+  :defer t
   :mode ("\\.container\\'"))
 
 (use-package eterm-256color

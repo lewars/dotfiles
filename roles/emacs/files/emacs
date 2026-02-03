@@ -428,17 +428,6 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 (use-package visual-fill-column
   :ensure t)
 
-;; (use-package mixed-pitch
-;;   :hook
-;;   (text-mode . mixed-pitch-mode))
-
-;; (defun my-consult-gh-hook ()
-;;   "Turn off mixed-pitch-mode when in a consult-gh buffer."
-;;   (when (derived-mode-p 'consult-gh-mode)
-;;     (mixed-pitch-mode -1)))
-
-;; (add-hook 'consult-gh-mode-hook 'my-consult-gh-hook)
-
 (use-package help
   :bind
   (:map help-mode-map
@@ -483,16 +472,6 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
   :config
   (setq eldoc-idle-delay 5)
   (setq eldoc-echo-area-use-multiline-p t))
-
-;; (use-package elisp-eldoc
-;;   :ensure nil
-;;   :hook (emacs-lisp-mode . elisp-eldoc-enable))
-
-;; (use-package eldoc-box
-;;   :ensure t
-;;   :hook (emacs-lisp-mode . eldoc-box-hover-at-point-mode)
-;;   :config
-;;   (setq eldoc-box-clear-with-C-g t))
 
 (use-package electric
   :ensure nil
@@ -699,17 +678,7 @@ If the side window is being created, it prompts for the source buffer."
 (global-set-key (kbd "C-c j") #'my-toggle-journalctl-window)
 (global-set-key (kbd "C-c b") #'my-toggle-copied-buffer-window) ; Example: C-c (then) c (then) b
 
-;; ------------------------------- feature/info-side-windows -------------------------------
-
-
-(defun le/my-find-file-symlink-target ()
-  "Follow symlinks for specific files, avoiding the VC prompt."
-  (let ((filename (file-name-nondirectory (buffer-file-name))))
-    (when (or (equal filename ".emacs")
-              (equal filename ".bashrc"))
-      (setq vc-follow-symlinks t))))
-
-(add-hook 'find-file-hook 'le/my-find-file-symlink-target)
+;; ------------------- feature/info-side-windows --------------------------
 
 ;; Revert Dired and other buffers
 ;; (setq global-auto-revert-non-file-buffers t)
@@ -726,12 +695,6 @@ If the side window is being created, it prompts for the source buffer."
   :ensure t
   :hook
   (dired-mode . nerd-icons-dired-mode))
-
-;; Setup dired-single
-;; (use-package dired-single
-;;   :ensure t)
-
-;; (require 'dired-single)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -830,10 +793,6 @@ If the side window is being created, it prompts for the source buffer."
   :ensure t)
 (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
 
-;; (use-package rg
-;;   :ensure t)
-;; (rg-enable-default-bindings)
-
 (use-package highlight-indent-guides
   :ensure t
   :hook  (prog-mode . highlight-indent-guides-mode)
@@ -841,31 +800,12 @@ If the side window is being created, it prompts for the source buffer."
   (setq highlight-indent-guides-method 'bitmap
         highlight-indent-guides-bitmap-function 'highlight-indent-guides--bitmap-line))
 
-;; (use-package highlight-symbol
-;;   :ensure t
-;;   :config
-;;   (setf highlight-symbol-idle-delay 0)
-;;   :bind (("M-s" . highlight-symbol-at-point)
-;;          ("M-S" . highlight-symbol-remove-all)))
-
-
-;; (defvar my-fringe-symbol "-")
-;; (defun my-idle-highlight-fringe-symbol ()
-;;   (message "Reached my-idle-highlight-fringe-symbol")
-;;   (let ((symbol (if (and (boundp 'idle-highlight-symbol)
-;;                          idle-highlight-symbol)
-;;                     idle-highlight-symbol
-;;                   (thing-at-point 'symbol))))
-;;     (if (and (boundp 'idle-highlight-mode) idle-highlight-mode symbol)
-;;         (set-fringe-style (list my-fringe-symbol fringe-width))
-;;       (set-fringe-style (list nil nil)))
-;;     ))
-
-;; (add-hook 'idle-highlight-idle-hook 'my-idle-highlight-fringe-symbol)
-;; (add-hook 'idle-highlight-mode-hook 'my-idle-highlight-fringe-symbol)
-
 (use-package idle-highlight-mode
   :ensure t
+  :custom-face
+  (idle-highlight ((t (:foreground "#C792EA"
+                       :background "#37474F"
+                       :weight bold :underline t))))
   :config (setq idle-highlight-idle-time 1))
 
 (use-package expand-region
@@ -2748,162 +2688,12 @@ Make it conversational but professional. Include transition phrases between sect
        gptel-backend (gptel-make-gemini "Gemini"
                        :host "generativelanguage.googleapis.com"
                        :key #'gptel-api-key-from-auth-source
-                       ;; :key (getenv "GEMINI_API_KEY")
                        :stream t
                        :models '("gemini-2.5-flash"
-                                 "gemini-2.5-pro")))
-       ;; gptel-backend (gptel-make-ollama "Ollama"
-       ;;                 :host "localhost:11434"
-       ;;                 :stream t
-       ;;                 :models '("deepseek-r1:70b"
-       ;;                           "codegemma:7b-instruct-fp16"
-       ;;                           "codegemma:latest"
-       ;;                           "deepseek-coder-v2:16b-lite-instruct-fp16"
-       ;;                           "deepseek-coder:33b-base-q8_0"
-       ;;                           "dolphin-mixtral:8x22b"
-       ;;                           "llama3.2-vision:90b"
-       ;;                           "llama3.3:latest"
-       ;;                           "qwen2.5-coder:32b"
-       ;;                           "qwen2.5:72b")))
+                                 "gemini-2.5-pro"
+                                 "gemini-3.0-flash"
+                                 "gemini-3.0-pro")))
 
- (add-to-list 'gptel-directives
-              `(Ai-bm-automation-Expert . ,(concat
-                              "# HPC/AI Bare Metal Provisioning Expert\n\n"
-                              "You are a system architect specializing in **HPC and AI infrastructure provisioning**. Focus on production-ready, scalable solutions.\n\n"
-                              "## Core Areas\n"
-                              "- **Bare metal provisioning** for HPC/AI workloads\n"
-                              "- **Network topology** for high-bandwidth, low-latency compute\n"
-                              "- **Storage systems** for large datasets and checkpointing\n"
-                              "- **Automation and CI/CD** for infrastructure lifecycle\n\n"
-                              "## Key Technologies\n"
-                              "- **Provisioning**: PXE, Kickstart, Foreman, MaaS, Cloud-Init\n"
-                              "- **Infrastructure as Code**: Terraform, Ansible, Puppet\n"
-                              "- **Asset Management**: NetBox for DCIM and network documentation\n"
-                              "- **CI/CD**: Jenkins pipelines for automated deployment\n"
-                              "- **Orchestration**: Kubernetes, Slurm integration\n"
-                              "- **Networking**: InfiniBand, RDMA, SR-IOV\n"
-                              "- **Storage**: Lustre, GPFS, BeeGFS, NVMe-oF\n"
-                              "- **Monitoring**: Prometheus, Grafana for HPC metrics\n\n"
-                              "## Response Requirements\n"
-                              "- Prioritize **performance, scalability, reliability**\n"
-                              "- Consider **NUMA topology, GPU clustering, power/cooling**\n"
-                              "- Provide **specific tools and implementation steps**\n"
-                              "- Address **automation workflows and CI/CD integration**\n"
-                              "- Include **vendor optimizations** (NVIDIA, Intel, AMD)\n")))
-
- (add-to-list 'gptel-directives
-              `(Ai-Expert . ,(concat
-                              "You are an AI research expert specializing in:\n"
-                              "1. Large Language Models - including architecture, training, and deployment\n"
-                              "2. Stable Diffusion and text-to-image systems - including models, samplers, and parameters\n"
-                              "3. AI video generation - covering text-to-video, video-to-video, and frame interpolation\n\n"
-                              "Provide technical, accurate responses focused on current techniques and best practices.\n"
-                              "When discussing implementations, reference specific models, frameworks, and tools.\n"
-                              "If you're uncertain about any detail, acknowledge the limitation rather than speculate.\n"
-                              "Include relevant parameter settings and technical constraints when explaining processes.")))
-
-(add-to-list 'gptel-directives
-             `(Linux-Admin . ,(concat
-                               "You are a Fedora Linux Server 40 expert. Write concise command examples "
-                               "with essential flags and proper error handling. Include verification steps "
-                               "for critical operations. Focus on security and stability. If asked for help, "
-                               "provide a concise and simple solution with a brief explanation after.\n"
-                               "If uncertain about anything, just say so.")))
-
-(add-to-list 'gptel-directives
-             `(Python-Coder . ,(concat
-                                "You're a Python software engineer.\n"
-                                "Generate Python code only, no explanations. Follow these rules when writing code:\n\n"
-                                "1. Use type hints\n"
-                                "2. Handle errors with specific try/except blocks\n"
-                                "3. Write clear docstrings as described in the Google Python Style Guide\n"
-                                "4. Keep functions small and single-purpose\n"
-                                "5. Use comments only for complex logic\n"
-                                "6. Follow SOLID principles, especially single responsibility and dependency inversion")))
-
-(add-to-list 'gptel-directives
-             `(Bash-Coder . ,(concat
-                              "You are a Bash shell programming expert. Write code only, no explanation. Follow these rules when writing code:\n"
-                              "1. Always include proper error handling with 'set -euo pipefail' and quote all variables\n"
-                              "2. Write clear code with meaningful variable/function names, only comment complex logic\n"
-                              "3. Prioritize built-in commands over external tools when possible\n"
-                              "4. Consider security implications and validate all inputs\n"
-                              "5. Optimize for both performance and maintainability\n"
-                              "6. Ensure proper file permissions and handle cleanup appropriately\n")))
-
- (add-to-list 'gptel-directives
-              `(Ansible-Coder . ,(concat
-                               "You are an Ansible automation expert. Write code only, no explanation. Follw these rules when writing code:\n"
-                               "1. Always use YAML syntax correctly with proper indentation and format\n"
-                               "2. Write clear task names and use meaningful variable names\n"
-                               "3. Follow idempotency principles - tasks should be repeatable without side effects\n"
-                               "4. Use built-in Ansible modules over shell/command modules when possible\n"
-                               "5. Include proper error handling and validate all inputs\n"
-                               "6. Follow least privilege principle and use proper permissions\n"
-                               "7. Use loops and conditionals effectively to avoid task repetition\n")))
-
-(add-to-list 'gptel-directives
-            `(OCI-Container-Coder . ,(concat
-                             "You are an OCI container engineer. Write code only, no explanation. Follow these rules when writing code:\n"
-                             "1. Follow multi-stage build patterns to minimize final image size\n"
-                             "2. Use specific base image tags, never 'latest'\n"
-                             "3. Group RUN commands with && to reduce layers\n"
-                             "4. Place frequently changing files and commands later in the Dockerfile\n"
-                             "5. Include proper health checks and set appropriate user permissions\n"
-                             "6. Remove unnecessary files and cleanup package manager caches\n")))
-
-(add-to-list 'gptel-directives
-            `(Golang-Coder . ,(concat
-                             "You are a Golang expert engineer. Write code only, no explanation. Follow these rules when writing code:\n"
-                             "2. Use proper error handling with meaningful error messages\n"
-                             "3. Implement interfaces only where needed and keep them small\n"
-                             "4. Write concurrent code safely using proper synchronization\n"
-                             "5. Follow standard naming conventions (CamelCase for exported)\n"
-                             "6. Use the standard library over external packages when possible\n"
-                             "7. Implement appropriate logging and tracing mechanisms\n"
-                             "8. Use context for cancellation and timeout handling\n"
-                             "9. Structure code for dependency injection when applicable\n"
-                             "10. Follow SOLID principles, especially single responsibility and dependency inversion")))
-
-(add-to-list 'gptel-directives
-            `(Javascript-Coder . ,(concat
-                             "You are a JavaScript expert engineer. Write code only, no explanation. Follow these rules when writing code:\n"
-                             "1. Use modern ES6+ features and syntax appropriately\n"
-                             "2. Implement proper async/await patterns for asynchronous code\n"
-                             "3. Use appropriate error handling with try/catch blocks\n"
-                             "4. Follow proper closure and scope management\n"
-                             "5. Implement proper type checking and validation\n"
-                             "6. Use appropriate design patterns when applicable\n"
-                             "7. Follow SOLID principles, especially single responsibility and dependency inversion\n"
-                             "8. Optimize for performance and browser compatibility\n")))
-
-(add-to-list 'gptel-directives
-            `(Java-Coder . ,(concat
-                             "You are a Java expert engineer. Write code only, no explanation. Follow these rules when writing code:\n"
-                             "1. Follow clean code principles and SOLID design patterns\n"
-                             "2. Use proper exception handling with meaningful messages\n"
-                             "3. Implement appropriate logging mechanisms\n"
-                             "4. Use streams and lambdas for functional programming\n"
-                             "5. Follow proper memory management and resource cleanup\n"
-                             "6. Implement thread-safe code when needed\n"
-                             "7. Use appropriate collections and data structures\n"
-                             "8. Follow standard naming conventions (camelCase, PascalCase)\n"
-                             "9. Use dependency injection when appropriate\n"
-                             "10. Write testable code with proper unit tests\n")))
-
-(add-to-list 'gptel-directives
-            `(Cpp-Coder . ,(concat
-                             "You are a C++ expert engineer. Produce code only, no explanation. When writing C++ code:\n"
-                             "1. Use modern C++ features (C++17/20) when appropriate\n"
-                             "2. Follow RAII principles and smart pointers for resource management\n"
-                             "3. Implement proper error handling with exceptions or error codes\n"
-                             "4. Use const correctness and appropriate access specifiers\n"
-                             "5. Write thread-safe code with proper synchronization\n"
-                             "6. Optimize for performance while maintaining readability\n"
-                             "7. Use STL containers and algorithms when applicable\n"
-                             "8. Implement proper memory management to prevent leaks\n"
-                             "9. Follow consistent naming conventions and formatting\n"
-                             "10. Use forward declarations to minimize compilation dependencies\n")))
 (add-to-list 'gptel-directives
              `(Anki-Card-Generator . ,(concat
                              "You are an expert Anki flashcard creator specialized in generating high-quality spaced repetition cards from learning content in anki-editor format.\n"
@@ -2945,83 +2735,7 @@ Make it conversational but professional. Include transition phrases between sect
                              "- Keep note titles descriptive but concise\n"
                              "- Ensure answers are complete and self-contained\n"
                              "- Use the filename (without .org extension) as the ANKI_DECK value\n"
-                             "- NEVER analyze content from the \"Anki Cards Data\" section itself")))
-
-;;;; gptel tool functions
-;;;; ====================
-
-;; Create a file
-(gptel-make-tool
- :function (lambda (rel-path script-content)
-             "Create a file at a given path relative to the home directory,
-   creating any necessary directories.  If the file already exists,
-   signal an error."
-             (let* ((full-path (expand-file-name rel-path (expand-file-name "~")))
-                    (dir-path (file-name-directory full-path)))
-               (when (file-exists-p full-path)
-                 (error "File already exists: %s" full-path))
-               (condition-case err
-                   (progn
-                     (when dir-path
-                       (make-directory dir-path t))
-                     (write-region script-content nil full-path)
-                     full-path)  ; Return the created file path
-                 (error (error "Failed to create file: %s (%s)"
-                               full-path (error-message-string err))))))
-
- :name "create_file"
- :description "Create a file with text"
- :args (list '(:name "rel-path"
-                     :type string
-                     :description "file path relative to home directory")
-             '(:name "script-content"
-                     :type string
-                     :description "file text data")))
-
-;; Create a directory
-(gptel-make-tool
- :function (lambda (rel-path)
-  "Create directories specified by a relative path, relative to the
-   home directory. Creates parent directories as needed.  Errors if
-   any part of the path already exists as a file."
-  (let ((full-path (expand-file-name rel-path (expand-file-name "~"))))
-    (when (file-exists-p full-path)
-      (error "ERROR: Path already exists (as a file): %s" full-path))
-    (unless (file-directory-p full-path)
-      (condition-case err
-          (progn
-            (make-directory full-path t)
-            (message "Created directory: %s" full-path)
-            full-path)  ; Return the created path
-        (error (error "ERROR: Failed to create directory: %s (%s)"
-                     full-path (error-message-string err)))))))
- :name "create_directory"
- :description "Create a directory"
- :args (list '(:name "rel-path"
-                     :type string
-                     :description "directory path relative to home directory")))
-
-;; List files
-(gptel-make-tool
- :function (lambda (dir-path)
-             "List files recursively in a directory, appending / to empty directories."
-             (let* ((full-dir-path (expand-file-name dir-path (expand-file-name "~")))
-                    (all-paths (directory-files-recursively full-dir-path ".*" t nil t)))
-               (unless (file-directory-p full-dir-path)
-                 (error "Invalid directory path: %s" full-dir-path))
-               (mapcar (lambda (path)
-                         (if (and (file-directory-p path)
-                                  (equal (directory-files path nil "^[^.]" t) nil))
-                             (concat path "/")
-                           path))
-                       all-paths)))
- :name "list_files"
- :description "List files in a directory"
- :args (list '(:name "dir-path"
-                     :type string
-                     :description "directory path relative to home directory")))
-
-)
+                             "- NEVER analyze content from the \"Anki Cards Data\" section itself"))))
 
 (use-package multi-vterm
   :ensure t

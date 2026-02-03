@@ -60,10 +60,11 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
       '(("gnu" . 30)
         ("melpa-stable" . 20)
         ("melpa" . 40)))
-
+(setq package-check-signature 'all)
 (package-initialize)
 (package-refresh-contents)
 (package-install 'quelpa)
+
 (require 'use-package-ensure)
 (quelpa '(quelpa-use-package
           :fetcher git

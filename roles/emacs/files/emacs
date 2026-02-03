@@ -104,6 +104,16 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 (setq recentf-max-saved-items 50)
 (run-at-time nil (* 5 60) 'recentf-save-list)
 
+;; Exclude internal and metadata files from the list
+(setq recentf-exclude
+      (append '("/auto-save-list/"
+                "\\.emacs\\.d/\\.cache/treemacs-persist"
+                "\\.ispell_english"
+                "\\.saves-"
+                "/elpa/"
+                "\\.git/.*")
+              recentf-exclude))
+
 ;; A few more useful configurations...
 (use-package emacs
   :init
@@ -1971,7 +1981,7 @@ Make it conversational but professional. Include transition phrases between sect
               ("DEL" . vertico-directory-delete-char)
               ("M-DEL" . vertico-directory-delete-word))
   :custom
-  (setq vertico-cycle t)
+  (vertico-cycle t)
   (vertico-count 20))
 
 (use-package vertico-posframe
@@ -1983,26 +1993,27 @@ Make it conversational but professional. Include transition phrases between sect
         '((left-fringe . 8)
           (right-fringe . 8)))
 
-
   (setq le-bottom-center-width-7-posframe-config
-      '(posframe
-        (vertico-posframe-poshandler . posframe-poshandler-frame-bottom-center)
-        (vertico-posframe-border-width . 7)
-        (vertico-posframe-fallback-mode . vertico-buffer-mode)))
+        '(posframe
+          (vertico-posframe-poshandler . posframe-poshandler-frame-bottom-center)
+          (vertico-posframe-border-width . 7)
+          (vertico-posframe-fallback-mode . vertico-buffer-mode)))
 
   (setq vertico-multiform-commands
-      (append
-       (mapcar (lambda (cmd) (cons cmd le-bottom-center-width-7-posframe-config))
-               '(consult-line consult-buffer consult-ls-git consult-grep
-                              consult-ripgrep consult-imenu consult-bookmark
-                              org-todo))
-       '((consult-projectile
-          posframe
-          ;; (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
-          (vertico-posframe-border-width . 7)
-          (vertico-posframe-fallback-mode . vertico-buffer-mode))
-         (t posframe)
-         (execute-extended-command unobtrusive))))
+        (append
+         (mapcar (lambda (cmd) (cons cmd le-bottom-center-width-7-posframe-config))
+                 '(consult-line consult-buffer consult-ls-git consult-grep
+                   consult-ripgrep consult-imenu consult-bookmark
+                   org-todo))
+         ;; Individual command overrides
+         '((recentf-open (vertico-sort-function . nil) posframe)
+           (recentf-open-files (vertico-sort-function . nil) posframe)
+           (consult-projectile
+            posframe
+            (vertico-posframe-border-width . 7)
+            (vertico-posframe-fallback-mode . vertico-buffer-mode))
+           (t posframe)
+           (execute-extended-command unobtrusive))))
 
   (setq vertico-multiform-categories
         '((file grid)

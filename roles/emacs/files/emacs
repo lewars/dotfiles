@@ -1607,7 +1607,7 @@ Make it conversational but professional. Include transition phrases between sect
           ;; Project Meeting (j)
           ("j" "Project Meeting" plain
            "
-* 📝 Raw Notes / Transcript
+* ✍️ Raw Notes / Transcript
 %?
 
 * ✨ AI-Generated Summary & Action Items as TODO Header
@@ -1645,7 +1645,7 @@ Make it conversational but professional. Include transition phrases between sect
           ;; One-on-One Meeting (o)
           ("o" "One-on-One Meeting" plain
            "
-* 📝 Raw Notes / Discussion Points (Paste here)
+* 📔 Raw Notes / Discussion Points (Paste here)
 %?
 
 * ✨ AI-Generated Summary & Action Items as TODO Header
@@ -1663,7 +1663,7 @@ Make it conversational but professional. Include transition phrases between sect
           ;; Topic (t)
           ("T" "Topic (General Knowledge/Concept)" plain
            "
-* 📝 Topic Notes: ${title}
+* 📔 ${title}
 
 %?
 
@@ -1681,7 +1681,7 @@ Make it conversational but professional. Include transition phrases between sect
           ;; Work Topic (w)
           ("w" "Work Topic (Company Specific)" plain
            "
-* 📝 Work Topic Notes: ${title}
+* 📔 Work Topic: ${title}
 
 %?
 * ✨ AI-Generated Topic Text
@@ -1698,9 +1698,9 @@ Make it conversational but professional. Include transition phrases between sect
            :unnarrowed t)
 
           ;; Learn Topic (l)
-          ("l" "Learn Topic (Skill/Tool Focused)" plain
+          ("l" "Learn Topic (Skill/Tool to learn)" plain
            "
-* 📝 Topic Notes: ${title}
+* 💡 ${title}
 
 %?
 
@@ -1751,7 +1751,7 @@ Make it conversational but professional. Include transition phrases between sect
 ** 💫 Action Items (from/for this person)
 -
 
-** 📝 Personal Notes
+** ✒️ Personal Notes
 -
 
 ** 🧠 Strategy
@@ -1780,23 +1780,23 @@ Make it conversational but professional. Include transition phrases between sect
           ;; Project Capture Template (P)
           ("P" "Project" plain
            "
-* 📝 Project Overview
+* 🏛️ Project Overview
 %?
 
-* 🎯 Goals & Objectives
+* 🏁 Goals & Objectives
 
-* 💫 Key Deliverables
+* 💰 Key Deliverables
 
 * ⚠️ Risks & Mitigations
 
-* 📚 Resources
+* 🌐 Resources
+
+* 📈 Tasks & Roadmap
 
 * 📅 Meeting History
 #+BEGIN_QUERY
 { :query [:and [:from \"file\"] [:filetags \"meeting:project\"] [:or [:id \"${id}\"] [:in-alias \"${id}\"]]] }
 #+END_QUERY
-
-* 🗺️ Tasks & Roadmap
 "
            :target (file+head "projects/${slug}.org"
                               "#+TITLE: ${title}
@@ -1852,7 +1852,7 @@ Make it conversational but professional. Include transition phrases between sect
 - [ ] Idea 2...
 - [ ] Idea 3...
 
-* 📝 Troubleshooting Steps Taken
+* 🔎 Troubleshooting Steps Taken
 -
 
 * Analysis & Hypothesis

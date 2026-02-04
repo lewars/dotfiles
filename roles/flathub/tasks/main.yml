@@ -1,0 +1,10 @@
+- name: Install flatpak applications
+  community.general.flatpak:
+    name: "{{ item }}"
+    remote: flathub
+    state: present
+    system: yes
+  become: yes
+  become_user: root
+  become_method: sudo
+  loop: "{{ flatpaks }}"

@@ -28,6 +28,7 @@
 
 ;; Global settings
 (setq gc-cons-threshold 100000000)
+(defvar my-default-font-height 120)
 (setq fill-column 120)
 (setq tab-bar-show nil)
 (setq scroll-up-aggressively 0.5)
@@ -48,30 +49,38 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 
 (setq browse-url-browser-function 'brave-browser-flatpak)
 
-;; Package manager configuration
 (require 'package)
 (setq package-archives
-      '(("gnu" . "https://elpa.gnu.org/packages/")
-        ("melpa" . "https://melpa.org/packages/")
-        ("melpa-stable" . "https://stable.melpa.org/packages/")
-        ))
+      '(("gnu"          . "https://elpa.gnu.org/packages/")
+        ("melpa"        . "https://melpa.org/packages/")
+        ("melpa-stable" . "https://stable.melpa.org/packages/")))
 
 (setq package-archive-priorities
-      '(("gnu" . 30)
+      '(("gnu"          . 30)
         ("melpa-stable" . 20)
-        ("melpa" . 40)))
-(setq package-check-signature 'all)
-(package-initialize)
-(package-refresh-contents)
-(package-install 'quelpa)
+        ("melpa"        . 40)))
 
+;; Standard initialization
+;; (setq package-check-signature 'all)
+(package-initialize)
+
+;; Bootstrap Quelpa directly from GitHub if not installed
+;; This bypasses the "Package unavailable" error on fresh installs
+(unless (package-installed-p 'quelpa)
+  (with-temp-buffer
+    (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
+    (eval-buffer)
+    (quelpa-self-upgrade)))
+
+(require 'quelpa)
 (require 'use-package-ensure)
+
+;; Install quelpa-use-package via Quelpa
 (quelpa '(quelpa-use-package
           :fetcher git
-          :commit d985c0326b66aa19581918deccdc5edcacccf953
           :url "https://github.com/quelpa/quelpa-use-package.git"))
-(require 'quelpa-use-package)
 
+(require 'quelpa-use-package)
 
 ;; TODO: Improve scrolling
 (setq fast-but-imprecise-scrolling t)
@@ -819,9 +828,9 @@ If the side window is being created, it prompts for the source buffer."
                        :weight bold :underline t))))
   :config (setq idle-highlight-idle-time 1))
 
-(use-package expand-region
-  :ensure t
-  :bind ("C-=" . er/expand-region))
+;; (use-package expand-region
+;;   :ensure t
+;;   :bind ("C-=" . er/expand-region))
 
 (use-package multiple-cursors
   :ensure t
@@ -1276,20 +1285,6 @@ If the side window is being created, it prompts for the source buffer."
         (message "Face: %s" face)
       (message "No face at %d" pos))))
 
-;; ob-mermaid configuration
-(use-package ob-mermaid
-  :ensure t
-  :after org-babel
-  :hook (org-mode . ob-mermaid-mode)
-  :config
-  (setq org-babel-show-process-buffer t)
-  (setq ob-mermaid-executable (expand-file-name ".local/bin/mmdc" "~")))
-
-(use-package ob-go
-  :ensure t
-  :after org-babel
-  :hook (org-mode . ob-go-mode))
-
 (defun le/my-org-buffer-setup ()
   "Apply all buffer-local visual and minor-mode settings for Org."
   ;; --- Visuals and Layout ---
@@ -1306,6 +1301,20 @@ If the side window is being created, it prompts for the source buffer."
   ;; --- YASnippet Integration ---
   (setq-local yas-trigger-key [tab])                   ; Designate the TAB key to trigger yasnippet expansions.
   (define-key yas-keymap [tab] 'yas-next-field-or-maybe-expand))
+
+;; ob-mermaid configuration
+(use-package ob-mermaid
+  :ensure t
+  :after org-babel
+  :hook (org-mode . ob-mermaid-mode)
+  :config
+  (setq org-babel-show-process-buffer t)
+  (setq ob-mermaid-executable (expand-file-name ".local/bin/mmdc" "~")))
+
+(use-package ob-go
+  :ensure t
+  :after org-babel
+  :hook (org-mode . ob-go-mode))
 
 ;; Org-mode core configuration
 (use-package org
@@ -1884,21 +1893,21 @@ Make it conversational but professional. Include transition phrases between sect
   (setq gnuplot-program "/usr/bin/gnuplot"))
 
 ;; Org-babel language configuration
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((python . t)
-   (shell . t)
-   (emacs-lisp . t)
-   (groovy . t)
-   (sed . t)
-   (js . t)
-   (sql . t)
-   (sqlite . t)
-   (dot . t) ; For Graphviz diagrams
-   (mermaid . t)
-   (go . t)
-   (gnuplot . t)
-   ))
+(with-eval-after-load 'org
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((python . t)
+     (shell . t)
+     (emacs-lisp . t)
+     (groovy . t)
+     (sed . t)
+     (js . t)
+     (sql . t)
+     (sqlite . t)
+     (dot . t) ; For Graphviz diagrams
+     (mermaid . t)
+     (go . t)
+     (gnuplot . t))))
 
 (setq org-confirm-babel-evaluate t)
 ;; You might need to set specific interpreter paths if they are not in your PATH
@@ -2266,51 +2275,6 @@ Make it conversational but professional. Include transition phrases between sect
   :bind (:map minibuffer-local-map
          ("M-A" . marginalia-cycle)))
 
-;; (use-package company
-;;   :ensure t
-;;   :init
-;;   (add-hook 'after-init-hook 'global-company-mode)
-;;   :config
-;;   ;; Completion trigger settings
-;;   (setq company-minimum-prefix-length 2           ;; require 3 chars before showing candidates
-;;         company-idle-delay 1.0                    ;; show popup after 1 second of inactivity
-
-;;         ;; Selection behavior
-;;         company-selection-wrap-around t           ;; cycle selection: end wraps to start
-;;         company-require-match nil                 ;; allow completing text not in candidate list
-
-;;         ;; Tooltip appearance
-;;         company-tooltip-annotation-padding 5      ;; 5 spaces between text and annotation
-;;         company-tooltip-margin 3                  ;; 3-char margin on right side of tooltip
-
-;;         ;; Mode filtering
-;;         company-global-modes '(not text-mode fundamental-mode)  ;; enable everywhere except text/fundamental modes
-
-;;         ;; Candidate filtering
-;;         company-dabbrev-ignore-case t           ;; case-sensitive matching (reduces false matches)
-;;         company-dabbrev-code-ignore-case t      ;; case-sensitive matching in code (reduces false matches)
-;;         company-abort-manual-when-away t)         ;; dismiss popup if cursor moves away from completion point
-
-;;   ;; ;; Add case-insensitive sorting
-;;   (setq company-transformers '(company-sort-by-occurrence
-;;                                company-sort-by-backend-importance))
-;;   (setq completion-ignore-case nil)  ;; global setting for all completers
-
-;;   ;; company-ansible: Ansible playbook completion
-;;   ;; systemd-company-backend: systemd unit file completion
-;;   (add-to-list 'company-backends 'company-ansible 'systemd-company-backend)
-;;   (define-key company-active-map (kbd "<tab>") #'company-complete-selection)
-;;   (define-key company-active-map (kbd "TAB") #'company-complete-selection)
-;;   (define-key company-active-map (kbd "<escape>") #'company-abort)
-;;   (define-key company-active-map (kbd "C-g") #'company-abort))
-
-
-;; (use-package company-quickhelp
-;;   :ensure t
-;;   :hook (company-mode . company-quickhelp-mode)
-;;   :config
-;;   (setq company-quickhelp-delay 3))
-
 ;; 1. UI: Corfu (The interface)
 (use-package corfu
   :ensure t
@@ -2544,23 +2508,6 @@ Make it conversational but professional. Include transition phrases between sect
   :ensure t
   :hook (after-init . le/emojify-setup)
   :config (setq emojify-display-style 'unicode))
-
-;; (defun le/enable-company-emoji ()
-;;   "Add company-emoji backend to company-backends."
-;;   (interactive)
-;;   (unless (member 'company-emoji company-backends)
-;;     (setq company-backends (push 'company-emoji company-backends))
-;;     (message "company-emoji backend enabled.")))
-
-;; (defun le/disable-company-emoji ()
-;;   "Remove company-emoji backend from `'company-backends."
-;;   (interactive)
-;;   (when (member 'company-emoji company-backends)
-;;     (setq company-backends (remove 'company-emoji company-backends))
-;;     (message "company-emoji backend disabled.")))
-
-;; (use-package company-emoji
-;;   :ensure t)
 
 (use-package helpful
   :ensure t
@@ -2970,46 +2917,30 @@ Make it conversational but professional. Include transition phrases between sect
   ;; Global mode to track usage history for sorting
   (prescient-persist-mode +1))
 
-;; (use-package company-prescient
+;; (use-package slime
 ;;   :ensure t
-;;   :config
-;;   ;; Enable company-prescient globally for all company backends
-;;   (company-prescient-mode +1)
+;;   :init
+;;   (setq inferior-lisp-program "/usr/bin/sbcl"))
 
-;;   ;; Crucial step: Tell company-prescient to use the orderless matching function.
-;;   ;; This connects your existing orderless setup to the company UI.
-;;   (setq company-prescient-prefix-length 0 ; Start matching immediately
-;;         company-prescient-filter-alist '((t . prescient-filter-orderless))))
+;; (use-package slime-company
+;;   :after (slime company)
+;;   :config (setq slime-company-completion 'fuzzy
+;;                 slime-company-after-completion 'slime-company-just-one-space))
 
-;; (use-package simpleclip
-;;   :ensure t
-;;   :config
-;;   (simpleclip-mode 1))
+;; (use-package rainbow-mode
+;;   :ensure t)
 
-(use-package slime
-  :ensure t
-  :init
-  (setq inferior-lisp-program "/usr/bin/sbcl"))
+;; (use-package ansible
+;;   :ensure t)
 
-(use-package slime-company
-  :after (slime company)
-  :config (setq slime-company-completion 'fuzzy
-                slime-company-after-completion 'slime-company-just-one-space))
+;; (use-package org-preview-html
+;;   :ensure t)
 
-(use-package rainbow-mode
-  :ensure t)
+;; (use-package org-project-capture
+;;   :ensure t)
 
-(use-package ansible
-  :ensure t)
-
-(use-package org-preview-html
-  :ensure t)
-
-(use-package org-project-capture
-  :ensure t)
-
-(use-package pdf-tools
-  :ensure t)
+;; (use-package pdf-tools
+;;   :ensure t)
 
 (use-package org-protocol
   :ensure nil

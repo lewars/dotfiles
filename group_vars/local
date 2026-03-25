@@ -6,3 +6,4 @@ full_name: Alistair Y. Lewars
 git_user: lewars
 git_email: alistair.lewars@gmail.com
 user: "{{ lookup('env', 'USER') }}"
+gpg_key_id: 3552DBE371D298AD

@@ -1,5 +1,5 @@
 ;;; .emacs --- Emacs initialization file -*- mode: emacs-lisp; lexical-binding: t; -*-
-;; Copyright (C) 1996-2025 Alistair Y. Lewars
+;; Copyright (C) 1996-2026 Alistair Y. Lewars
 
 ;; Author: Alistair Y. Lewars
 
@@ -21,27 +21,35 @@
 (when (string-equal system-type "gnu/linux")
   (defvar ispell-program-name "aspell"))
 
-(defun le/monitor-name-is-eDP-1 ()
-  "Return t if any monitor is named eDP-1."
-  (seq-some (lambda (monitor)
-              (equal (cdr (assoc 'name monitor)) "eDP-1"))
-            (display-monitor-attributes-list)))
-(defun le/first-monitor-larger-than-3840x2400 ()
-  "Check if the first monitor's geometry has a resolution greater than 3840x2400."
-  (let* ((monitor-attrs (car (display-monitor-attributes-list)))
-         (geometry (cdr (assoc 'geometry monitor-attrs)))
-         (width (nth 2 geometry))
-         (height (nth 3 geometry)))
-    (and (> width 3840) (> height 2400))))
+;; Load host-specific hardware config if it exists
+(let ((local-config (expand-file-name "local-hardware.el" user-emacs-directory)))
+  (when (file-exists-p local-config)
+    (load local-config)))
 
 ;; Global settings
 (setq gc-cons-threshold 100000000)
+(defvar my-default-font-height 105)
 (setq fill-column 120)
 (setq tab-bar-show nil)
 (setq scroll-up-aggressively 0.5)
 (setq scroll-down-aggressively 0.5)
 (global-unset-key (kbd "C-x C-z"))
 (global-unset-key (kbd "C-z"))
+(setq gitdir (or (getenv "gitdir")
+                 (expand-file-name "~/git")))
+(setq orgdir (or (getenv "orgdir")
+                 (expand-file-name "~/org")))
+
+(require 'bookmark)
+(bookmark-store "gtd"
+                `((filename . ,(expand-file-name "gtd/gtd.org" orgdir)))
+                nil)
+(defun le/open-gtd ()
+  "Open or switch to the file specified by the 'gtd' bookmark."
+  (interactive)
+  (bookmark-jump "gtd"))
+(global-set-key (kbd "C-c g") 'le/open-gtd)
+
 
 ;; Configure Emacs to use the flatpak Brave Browser
 (defun brave-browser-flatpak (url &optional _new-window)
@@ -54,28 +62,38 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 
 (setq browse-url-browser-function 'brave-browser-flatpak)
 
-;; Package manager configuration
 (require 'package)
 (setq package-archives
-      '(("gnu" . "https://elpa.gnu.org/packages/")
-        ("melpa" . "https://melpa.org/packages/")
-        ("melpa-stable" . "https://stable.melpa.org/packages/")
-        ))
+      '(("gnu"          . "https://elpa.gnu.org/packages/")
+        ("melpa"        . "https://melpa.org/packages/")
+        ("melpa-stable" . "https://stable.melpa.org/packages/")))
 
 (setq package-archive-priorities
-      '(("gnu" . 30)
+      '(("gnu"          . 30)
         ("melpa-stable" . 20)
-        ("melpa" . 40)))
+        ("melpa"        . 40)))
 
+;; Standard initialization
+;; (setq package-check-signature 'all)
 (package-initialize)
-(package-refresh-contents)
-(package-install 'quelpa)
+
+;; Bootstrap Quelpa directly from GitHub if not installed
+;; This bypasses the "Package unavailable" error on fresh installs
+(unless (package-installed-p 'quelpa)
+  (with-temp-buffer
+    (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
+    (eval-buffer)
+    (quelpa-self-upgrade)))
+
+(require 'quelpa)
 (require 'use-package-ensure)
+
+;; Install quelpa-use-package via Quelpa
 (quelpa '(quelpa-use-package
           :fetcher git
           :url "https://github.com/quelpa/quelpa-use-package.git"))
-(require 'quelpa-use-package)
 
+(require 'quelpa-use-package)
 
 ;; TODO: Improve scrolling
 (setq fast-but-imprecise-scrolling t)
@@ -84,13 +102,7 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 (add-to-list 'auto-mode-alist '("\\.log\\'" . fundamental-mode))
 (add-to-list 'auto-mode-alist '("\\.odt\\'" . docview-mode))
 
-(setq ispell-personal-dictionary (expand-file-name "~/.ispell_english"))
-
-(if (string-equal system-type "gnu/linux")
-    (if (le/monitor-name-is-eDP-1)
-        (defvar my-default-font-height 150)
-      (defvar my-default-font-height 100))
-    (defvar my-default-font-height 108))
+(setq ispell-personal-dictionary (expand-file-name ".ispell_english" "~"))
 
 ;; Set fonts
 ;;;
@@ -113,6 +125,19 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 (setq recentf-max-menu-items 50)
 (setq recentf-max-saved-items 50)
 (run-at-time nil (* 5 60) 'recentf-save-list)
+
+;; Exclude internal and metadata files from the list
+(setq recentf-exclude
+      (append '("/auto-save-list/"
+                "\\.emacs\\.d/\\.cache/treemacs-persist"
+                "\\.ispell_english"
+                "\\.saves-"
+                "/elpa/"
+                "\\.git/.*")
+              recentf-exclude))
+
+;; (add-to-list 'treesit-language-source-alist
+;;              '(yaml "https://github.com/ikatyang/tree-sitter-yaml"))
 
 ;; A few more useful configurations...
 (use-package emacs
@@ -142,14 +167,15 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 ;; prog-mode settings and hooks
 (defun le/my-prog-mode-settings ()
   (display-line-numbers-mode)
-  ;; (hl-line-mode)
+  (hl-line-mode)
   (hs-minor-mode) ;; hideshow
   (outline-minor-mode)
+  (subword-mode)
   (setq auto-fill-mode 0)
   (setq toggle-word-wrap 1)
   (setq fill-column 160)
   (setq display-fill-column-indicator 1)
-  (setq display-fill-column-indicator-column 80)
+  (setq display-fill-column-indicator-column 88)
   (setq indent-tabs-mode nil)
   (setq tab-width 4)
   (setq show-trailing-whitespace t)
@@ -162,11 +188,13 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 
 (add-hook 'prog-mode-hook 'le/my-prog-mode-settings)
 (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode t)
+(add-hook 'config-mode-hook 'show-trailing-whitespace t)
 
 ;; text-mode settings and hooks
 (defun le/my-text-mode-settings ()
   (setq-local show-trailing-whitespace nil)
   (visual-line-mode)
+  (subword-mode)
   (setq fill-column 220)
   (setq sentence-end-double-space nil)
   ;; (flyspell-mode)
@@ -198,9 +226,9 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
    undo-strong-limit (* 6 1024 1024)
    undo-outer-limit (* 12 1024 1024)
 
-   read-process-output-max (* 16 1024 1024)) ; 16MB
+   read-process-output-max (* 16 1024 1024)  ; 16MB
 
-
+   so-long-mode 1)
 
 (use-package diff-hl
   :ensure t
@@ -362,7 +390,7 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 (global-set-key "\C-x\ \P" 'check-parens)
 (setq-default indent-tabs-mode nil)
 
-(setq explicit-shell-file-name "/bin/bash")
+(setq explicit-shell-file-name (executable-find "bash"))
 (eval-after-load "term"
   '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
 
@@ -377,8 +405,8 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 (setq use-dialog-box nil)
 
 ;; Start emacs server
-(if (display-graphic-p)
-    '(server-mode t))
+;; (if (display-graphic-p)
+;;     '(server-mode t))
 (require 'server)
 (unless (server-running-p)
   (server-start))
@@ -438,17 +466,6 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 (use-package visual-fill-column
   :ensure t)
 
-;; (use-package mixed-pitch
-;;   :hook
-;;   (text-mode . mixed-pitch-mode))
-
-;; (defun my-consult-gh-hook ()
-;;   "Turn off mixed-pitch-mode when in a consult-gh buffer."
-;;   (when (derived-mode-p 'consult-gh-mode)
-;;     (mixed-pitch-mode -1)))
-
-;; (add-hook 'consult-gh-mode-hook 'my-consult-gh-hook)
-
 (use-package help
   :bind
   (:map help-mode-map
@@ -494,16 +511,6 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
   (setq eldoc-idle-delay 5)
   (setq eldoc-echo-area-use-multiline-p t))
 
-;; (use-package elisp-eldoc
-;;   :ensure nil
-;;   :hook (emacs-lisp-mode . elisp-eldoc-enable))
-
-;; (use-package eldoc-box
-;;   :ensure t
-;;   :hook (emacs-lisp-mode . eldoc-box-hover-at-point-mode)
-;;   :config
-;;   (setq eldoc-box-clear-with-C-g t))
-
 (use-package electric
   :ensure nil
   :init
@@ -519,7 +526,7 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
   :hook (emacs-lisp-mode . (lambda () (yas-minor-mode -1)))
   :bind ("M-/" . hippie-expand)
   :config
-  (setq yas-snippet-dirs '("~/git/contrib/yasnippet-snippets/snippets/")
+  (setq yas-snippet-dirs (list (expand-file-name "contrib/yasnippet-snippets/snippets" gitdir))
         yas-wrap-around-region t
         yas-triggers-in-field t)
   (yas-global-mode 1)
@@ -557,6 +564,8 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
          (display-buffer-in-side-window)
          (window-height . 0.2)
          (side . bottom)
+         (reusable-frames . visible)
+         (window-height   . 0.33)
          (slot . 0))
         ))
 
@@ -605,13 +614,13 @@ CONTENT-FN is responsible for the buffer's content and its read-only state."
   "Name of the buffer to display journalctl output.")
 
 (defun my-insert-journalctl-output ()
-  "Clear the current buffer and insert `sudo journalctl` output asynchronously.
+  "Clear the current buffer and insert `journalctl` output asynchronously.
 The buffer is made read-only once the command completes."
   ;; This function is called within (with-current-buffer ...) by my-toggle-info-buffer
   ;; inhibit-read-only is also active from the caller.
-  (let ((command "SYSTEMD_COLORS=false sudo journalctl -f --no-hostname --no-pager --output=cat")
+  (let ((command "SYSTEMD_COLORS=false journalctl -f --no-hostname --no-pager --output=cat")
         (output-buffer (current-buffer)))
-    (insert (format "Running '%s'...\nThis may require sudo privileges.\n\n" command))
+    (insert (format "Running '%s'...\nThis may require higher privileges.\n\n" command))
     (set-buffer-modified-p nil) ; Mark as not modified initially
 
     ;; Start the asynchronous shell command
@@ -704,22 +713,10 @@ If the side window is being created, it prompts for the source buffer."
                ;; (reusable-frames . visible) ; Standard practice
               ) t) ; 't' appends this rule to the list
 
-;; --- Example Keybindings ---
-;; You can set these to whatever you prefer.
 (global-set-key (kbd "C-c j") #'my-toggle-journalctl-window)
 (global-set-key (kbd "C-c b") #'my-toggle-copied-buffer-window) ; Example: C-c (then) c (then) b
 
-;; ------------------------------- feature/info-side-windows -------------------------------
-
-
-(defun le/my-find-file-symlink-target ()
-  "Follow symlinks for specific files, avoiding the VC prompt."
-  (let ((filename (file-name-nondirectory (buffer-file-name))))
-    (when (or (equal filename ".emacs")
-              (equal filename ".bashrc"))
-      (setq vc-follow-symlinks t))))
-
-(add-hook 'find-file-hook 'le/my-find-file-symlink-target)
+;; ------------------- feature/info-side-windows --------------------------
 
 ;; Revert Dired and other buffers
 ;; (setq global-auto-revert-non-file-buffers t)
@@ -728,6 +725,7 @@ If the side window is being created, it prompts for the source buffer."
 
 ;; Tramp configuration
 (customize-set-variable 'tramp-use-ssh-controlmaster-options 'suppress)
+(customize-set-variable 'tramp-allow-unsafe-temporary-files nil)
 (customize-set-variable 'tramp-default-method "ssh")
 ;; (customize-set-variable 'tramp-verbose 6 "Enable remote command traces")
 
@@ -736,12 +734,6 @@ If the side window is being created, it prompts for the source buffer."
   :ensure t
   :hook
   (dired-mode . nerd-icons-dired-mode))
-
-;; Setup dired-single
-;; (use-package dired-single
-;;   :ensure t)
-
-;; (require 'dired-single)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -752,28 +744,48 @@ If the side window is being created, it prompts for the source buffer."
  '(centaur-tabs-bar-height 22)
  '(column-number-mode 1)
  '(custom-safe-themes
-   '("088cd6f894494ac3d4ff67b794467c2aa1e3713453805b93a8bcb2d72a0d1b53" "f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33"
-     "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294" "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb"
-     "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8" "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77"
-     "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da" "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a"
-     "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d" "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae"
-     "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4" "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561"
-     "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350" default))
+   '("088cd6f894494ac3d4ff67b794467c2aa1e3713453805b93a8bcb2d72a0d1b53"
+     "f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33"
+     "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294"
+     "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb"
+     "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8"
+     "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77"
+     "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da"
+     "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a"
+     "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d"
+     "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae"
+     "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4"
+     "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561"
+     "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350"
+     default))
  '(frame-background-mode nil)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
- '(org-agenda-files
-   '("/home/slams/org/gtd/gtd.org" "/home/slams/org/gtd/inbox.org"))
  '(package-selected-packages
-   '(all-the-icons anki-editor ansible atomic-chrome blacken cape casual centaur-tabs colorful-mode consult-flycheck consult-flyspell consult-gh-forge consult-lsp
-                   consult-org-roam consult-projectile consult-yasnippet corfu dashboard demap diff-hl dockerfile-mode doom-modeline doom-themes dotenv-mode
-                   dumb-jump emojify eterm-256color expand-region flycheck-posframe flyspell-correct fzf gnuplot go-mode gptel groovy-mode helpful
-                   highlight-indent-guides ibuffer-projectile idle-highlight-mode imenu-list jinja2-mode k8s-mode latex-preview-pane lorem-ipsum lsp-java
-                   lsp-pyright lsp-ui marginalia mermaid-mode multi-vterm multiple-cursors nerd-icons-completion nerd-icons-corfu nerd-icons-dired
-                   nerd-icons-ibuffer ob-go ob-mermaid orderless org-appear org-bullets org-preview-html org-project-capture org-roam-ui pdf-tools prescient
-                   py-isort python-mode pyvenv quelpa-use-package rainbow-mode slime systemd terraform-mode textile-mode treemacs-magit treemacs-nerd-icons
-                   treemacs-projectile vertico-posframe visual-fill-column whitespace-cleanup-mode))
- '(safe-local-variable-values '((eval org-babel-execute-buffer)))
+   '(agent-shell anki-editor ansible ansible-doc ansible-vault
+                 atomic-chrome blacken cape casual centaur-tabs
+                 colorful-mode consult-flycheck consult-gh-forge
+                 consult-lsp consult-yasnippet corfu dashboard demap
+                 dockerfile-mode doom-modeline doom-themes dotenv-mode
+                 dumb-jump emojify eterm-256color expreg
+                 flycheck-posframe flyspell-correct fzf gnuplot
+                 go-mode gptel groovy-mode helpful
+                 highlight-indent-guides htmlize ibuffer-projectile
+                 idle-highlight-mode imenu-list jinja2-mode k8s-mode
+                 latex-preview-pane lorem-ipsum lsp-java lsp-pyright
+                 lsp-ui marginalia mermaid-mode multi-vterm
+                 multiple-cursors nerd-icons-completion
+                 nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer
+                 ob-go ob-mermaid orderless org-appear org-bullets
+                 org-roam-ui prescient py-isort python-mode pyvenv
+                 quelpa-use-package systemd terraform-mode
+                 textile-mode treemacs-all-the-icons treemacs-magit
+                 treemacs-nerd-icons treemacs-projectile
+                 vertico-posframe visual-fill-column
+                 whitespace-cleanup-mode yaml-pro))
+ '(safe-local-variable-values
+   '((gptel-model . gemini-3.1-pro-preview)
+     (eval org-babel-execute-buffer)))
  '(show-paren-context-when-offscreen t)
  '(show-paren-style 'mixed)
  '(tramp-default-method "ssh")
@@ -789,6 +801,9 @@ If the side window is being created, it prompts for the source buffer."
  '(doom-modeline-icon ((t (:foreground "white"))))
  '(doom-themes-treemacs-root-face ((t (:inherit font-lock-string-face :height 0.85))))
  '(horizontal-border ((t (:weight thin :background "#364248" :foreground "#364248"))))
+ '(mode-line ((t (:background "#202B30" :foreground "#9BA3A7"))))
+ '(mode-line-inactive ((t (:background "#3b464b" :foreground "#556369"))))
+ '(region ((t (:extend t :background "#455649" :weight bold))))
  '(show-paren-match ((t (:background "#3A6A80" :foreground "#FFFFFF" :weight ultra-bold))))
  '(show-paren-match-expression ((t (:background "#3e4452" :foreground "white"))))
  '(show-paren-mismatch ((t (:background "#E06C75" :foreground "#FFFFFF"))))
@@ -809,15 +824,6 @@ If the side window is being created, it prompts for the source buffer."
 (use-package all-the-icons
   :ensure t
   :if (display-graphic-p))
-
-(use-package nerd-icons
-  :ensure t
-  :custom
-  (nerd-icons--cache-limit 4096)
-  (nerd-icons-font-family "SauceCodePro Nerd Font"))
-
-(use-package nerd-icons-ibuffer
-  :ensure t)
 
 ;; ========== Developer configurations ===========
 (use-package fzf
@@ -841,10 +847,6 @@ If the side window is being created, it prompts for the source buffer."
   :ensure t)
 (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
 
-;; (use-package rg
-;;   :ensure t)
-;; (rg-enable-default-bindings)
-
 (use-package highlight-indent-guides
   :ensure t
   :hook  (prog-mode . highlight-indent-guides-mode)
@@ -852,36 +854,25 @@ If the side window is being created, it prompts for the source buffer."
   (setq highlight-indent-guides-method 'bitmap
         highlight-indent-guides-bitmap-function 'highlight-indent-guides--bitmap-line))
 
-;; (use-package highlight-symbol
-;;   :ensure t
-;;   :config
-;;   (setf highlight-symbol-idle-delay 0)
-;;   :bind (("M-s" . highlight-symbol-at-point)
-;;          ("M-S" . highlight-symbol-remove-all)))
-
-
-;; (defvar my-fringe-symbol "-")
-;; (defun my-idle-highlight-fringe-symbol ()
-;;   (message "Reached my-idle-highlight-fringe-symbol")
-;;   (let ((symbol (if (and (boundp 'idle-highlight-symbol)
-;;                          idle-highlight-symbol)
-;;                     idle-highlight-symbol
-;;                   (thing-at-point 'symbol))))
-;;     (if (and (boundp 'idle-highlight-mode) idle-highlight-mode symbol)
-;;         (set-fringe-style (list my-fringe-symbol fringe-width))
-;;       (set-fringe-style (list nil nil)))
-;;     ))
-
-;; (add-hook 'idle-highlight-idle-hook 'my-idle-highlight-fringe-symbol)
-;; (add-hook 'idle-highlight-mode-hook 'my-idle-highlight-fringe-symbol)
-
 (use-package idle-highlight-mode
   :ensure t
+  :custom-face
+  (idle-highlight ((t (:foreground "#C792EA"
+                       :background "#37474F"
+                       :weight bold :underline t))))
   :config (setq idle-highlight-idle-time 1))
 
-(use-package expand-region
+(use-package expreg
   :ensure t
-  :bind ("C-=" . er/expand-region))
+  :bind (("C-=" . expreg-expand)
+         ("C--" . expreg-contract))
+  :custom
+  (expreg-restore-point-on-quit t)
+  :config
+  (add-hook 'text-mode-hook
+            (lambda ()
+              (setq-local expreg-functions
+                          (append expreg-functions '(expreg--sentence))))))
 
 (use-package multiple-cursors
   :ensure t
@@ -909,25 +900,24 @@ If the side window is being created, it prompts for the source buffer."
 
 (use-package projectile
   :ensure t
+  :bind (:map projectile-mode-map
+              ("C-c p" . projectile-command-map)
+              :map projectile-command-map
+              ("A" . projectile-add-known-project))
   :init
   (projectile-mode +1)
-  ;; :bind (:map projectile-mode-map
-  ;;             ("C-c p" . projectile-command-map)
-  ;;             :map projectile-command-map
-  ;;             ("A" . projectile-add-known-project))
-  :init
-  ;; nested keymap for 'p' prefix (projectile)
-  (let ((projectile-map (make-sparse-keymap)))
-    (define-key projectile-map "f" #'consult-projectile-find-file)
-    (define-key projectile-map "o" #'consult-projectile-find-file-other-window)
-    (define-key projectile-map "r" #'consult-projectile-recentf)
-    (define-key projectile-map "p" #'consult-projectile-switch-project)
-    (define-key projectile-map "b" #'consult-projectile-switch-to-buffer)
-    (define-key projectile-map "d" #'consult-projectile-find-dir)
-    projectile-map)
+  ;; ;; nested keymap for 'p' prefix (projectile)
+  ;; (let ((projectile-map (make-sparse-keymap)))
+  ;;   (define-key projectile-map "f" #'consult-projectile-find-file)
+  ;;   (define-key projectile-map "o" #'consult-projectile-find-file-other-window)
+  ;;   (define-key projectile-map "r" #'consult-projectile-recentf)
+  ;;   (define-key projectile-map "p" #'consult-projectile-switch-project)
+  ;;   (define-key projectile-map "b" #'consult-projectile-switch-to-buffer)
+  ;;   (define-key projectile-map "d" #'consult-projectile-find-dir)
+  ;;   projectile-map)
 
   :config
-  (setq projectile-project-search-path '(("~/git" . 4)))
+  (setq projectile-project-search-path (list (cons gitdir 4)))
   (setq projectile-enable-caching t)
   (setq projectile-switch-project-action #'projectile-dired)
   (setq projectile-per-project-compilation-buffer t)
@@ -938,6 +928,15 @@ If the side window is being created, it prompts for the source buffer."
                                               "*Calendar*" "*server*" "*gnus*"
                                               "*mm*" "*copilot*"))
   (projectile-discover-projects-in-search-path))
+
+(use-package nerd-icons
+  :ensure t
+  :custom
+  (nerd-icons--cache-limit 4096)
+  (nerd-icons-font-family "SauceCodePro Nerd Font"))
+
+(use-package nerd-icons-ibuffer
+  :ensure t)
 
 (use-package treemacs
   :ensure t
@@ -957,11 +956,12 @@ If the side window is being created, it prompts for the source buffer."
           treemacs-project-follow-mode             t
           treemacs-follow-after-init               t
           treemacs-width-is-initially-locked       nil
-          treemacs-text-scale                      -1)
+          treemacs-text-scale                      -1
+          treemacs--icon-size 24)
 
     ;; The default width and height of the icons is 22 pixels. If you are
     ;; using a Hi-DPI display, uncomment this to double the icon size.
-    (setq treemacs-resize-icons 10)
+    (setq treemacs-resize-icons 2)
 
     (treemacs-follow-mode t)
     (treemacs-project-follow-mode t)
@@ -990,8 +990,9 @@ If the side window is being created, it prompts for the source buffer."
 
 (use-package treemacs-nerd-icons
   :ensure t
-  :after treemacs nerd-icons all-the-icons
+  :after doom-themes doom-modeline treemacs nerd-icons all-the-icons
   :config
+  (treemacs-nerd-icons-config)
   (treemacs-load-theme "nerd-icons")
   (treemacs-refresh))
 
@@ -1050,8 +1051,8 @@ If the side window is being created, it prompts for the source buffer."
   (setf (alist-get "Jenkinsfile.+$" auto-mode-alist) 'groovy-mode)
   (setq compile 'jenkins-lint))
 
-(defvar yaml-formatting-enabled nil
-  "Whether YAML formatting is currently enabled.")
+;; (defvar yaml-formatting-enabled nil
+;;   "Whether YAML formatting is currently enabled.")
 
 (use-package yaml-mode
   :ensure t
@@ -1060,6 +1061,9 @@ If the side window is being created, it prompts for the source buffer."
    (yaml-mode . display-line-numbers-mode)
    (yaml-mode . le/yaml-mode-setup)
    (yaml-mode . highlight-indent-guides-mode)
+   (yaml-mode . display-line-numbers-mode)
+   (yaml-mode . hl-line-mode)
+
    ;; (yaml-mode . ansible-mode)
    (yaml-mode . (lambda ()
                   (add-hook 'after-save-hook 'le/yaml-frmt nil t)
@@ -1076,7 +1080,7 @@ If the side window is being created, it prompts for the source buffer."
     "Conditionally reformat YAML file with yq based on `yaml-formatting-enabled'."
     (interactive)
     (when (and yaml-formatting-enabled (eq major-mode 'yaml-mode))
-      (shell-command-to-string (format "yq eval-all -i %s" buffer-file-name))
+      (shell-command-to-string (format "yq eval-all -i %s" (shell-quote-argument buffer-file-name)))
       (revert-buffer t t t)
       (message "YAML file reformatted.")))
   (defun le/yaml-mode-setup ()
@@ -1086,6 +1090,11 @@ If the side window is being created, it prompts for the source buffer."
     (require 'lsp)
     (lsp-deferred)))
 
+;; (use-package yaml-pro
+;;   :ensure t
+;;   :mode "\\.ya?ml\\'"
+;;   :config (yaml-pro-mode))
+
 (use-package terraform-mode
   :ensure t
   :bind (:map terraform-mode-map
@@ -1094,7 +1103,7 @@ If the side window is being created, it prompts for the source buffer."
   (defun frmt-hcl ()
     "Reformat HCL file with terraform fmt."
     (when (eq major-mode 'terraform-mode)
-      (shell-command-to-string (format "terraform fmt %s" buffer-file-name))
+      (shell-command-to-string (format "terraform fmt %s" (shell-quote-argument buffer-file-name)))
       (auto-revert-mode)))
   (add-hook 'after-save-hook 'frmt-hcl)
   (add-hook 'terraform-mode-hook 'outline-minor-mode)
@@ -1132,21 +1141,16 @@ If the side window is being created, it prompts for the source buffer."
 (use-package flycheck
   :ensure t
   ;; :init (global-flycheck-mode)
-  :config (setq-default flycheck-checker-error-threshold 2048)
-  ;; add a lambda for flycheck-rror-list-mode-hook
-  (add-hook 'flycheck-error-list-mode-hook
-            (lambda ()
-              (setq tabulated-list-format '[("Line" 5 flycheck-error-list-entry-< :right-align t)
-                                            ("Col" 3 nil :right-align t)
-                                            ("Level" 8 flycheck-error-list-entry-level-<)
-                                            ("ID" 20 t)
-                                            (#("Message (Checker)" 0 9
-                                               (face default)
-                                               9 16
-                                               (face flycheck-error-list-checker-name)
-                                               16 17
-                                               (face default))
-                                             0 t)]))))
+  :config (setq-default flycheck-checker-error-threshold 2048))
+  ;; ;; add a lambda for flycheck-rror-list-mode-hook
+  ;; (add-hook 'flycheck-error-list-mode-hook
+  ;;           (lambda ()
+  ;;             (setq tabulated-list-format `[("File" 6)
+  ;;                                           ("Line" 5 flycheck-error-list-entry-< :right-align t)
+  ;;                                           ("Col" 3 nil :right-align t)
+  ;;                                           ("Level" 5 flycheck-error-list-entry-level-<)
+  ;;                                           ("ID" 7 t)
+  ;;                                           (,(flycheck-error-list-make-last-column "Message" 'Checker) 0 t)]))))
 
 ;;  :config (setq-default flycheck-disabled-checkers '(emacs-lisp)))
 
@@ -1337,26 +1341,12 @@ If the side window is being created, it prompts for the source buffer."
         (message "Face: %s" face)
       (message "No face at %d" pos))))
 
-;; ob-mermaid configuration
-(use-package ob-mermaid
-  :ensure t
-  :after org-babel
-  :hook (org-mode . ob-mermaid-mode)
-  :config
-  (setq org-babel-show-process-buffer t)
-  (setq ob-mermaid-executable "~/.local/bin/mmdc"))
-
-(use-package ob-go
-  :ensure t
-  :after org-babel
-  :hook (org-mode . ob-go-mode))
-
 (defun le/my-org-buffer-setup ()
   "Apply all buffer-local visual and minor-mode settings for Org."
   ;; --- Visuals and Layout ---
-  (setq-local visual-fill-column-width 120)          ; Set line wrap width of characters for this buffer
-  (setq-local line-spacing 0.1)                      ; Add extra spacing between lines
-  (setq-default visual-fill-column-center-text t)    ; Center text globally (affects all buffers)
+  (setq-local visual-fill-column-width 120)         ; Set line wrap width of characters for this buffer
+  (setq-local line-spacing 0.1)                     ; Add extra spacing between lines
+  (setq-default visual-fill-column-center-text t)   ; Center text globally (affects all buffers)
   (visual-fill-column-mode 1)                       ; Enable visual-fill-column mode
 
   ;; --- Minor Modes ---
@@ -1365,8 +1355,26 @@ If the side window is being created, it prompts for the source buffer."
   (org-appear-mode 1)
 
   ;; --- YASnippet Integration ---
-  (setq-local yas-trigger-key [tab])                   ; Designate the TAB key to trigger yasnippet expansions.
-  (define-key yas-keymap [tab] 'yas-next-field-or-maybe-expand))
+  (setq-local yas-trigger-key [tab])               ; Designate the TAB key to trigger yasnippet expansions.
+  (define-key yas-keymap [tab] 'yas-next-field-or-maybe-expand)
+
+  ;; --- Corfu auto complete setup ---
+  (setq-local corfu-auto nil)
+  )
+
+;; ob-mermaid configuration
+(use-package ob-mermaid
+  :ensure t
+  :after org-babel
+  :hook (org-mode . ob-mermaid-mode)
+  :config
+  (setq org-babel-show-process-buffer t)
+  (setq ob-mermaid-executable (expand-file-name ".local/bin/mmdc" "~")))
+
+(use-package ob-go
+  :ensure t
+  :after org-babel
+  :hook (org-mode . ob-go-mode))
 
 ;; Org-mode core configuration
 (use-package org
@@ -1376,14 +1384,12 @@ If the side window is being created, it prompts for the source buffer."
   :bind (("C-c c" . org-capture)
          ("C-c a" . org-agenda))
   :config
-  (setq org-agenda-files '("~/org/gtd/"
-                           ;; "~/org/kb/learning"
-                           ;; "~/org/kb/issues"
-                           ))
+  (setq org-agenda-files (list (expand-file-name "gtd/gtd.org" orgdir)
+                               (expand-file-name "gtd/inbox.org" orgdir)))
   (setq
    org-catch-invisible-edits 'show-and-error ; Check if in invisible region before modification
-   org-clock-sound "~/.emacs.d/org/media/alarm.mp3" ; Sound for timeout - promodoro
-   org-default-notes-file "~/org/gtd/inbox.org" ; Default org note file saved by org-capture
+   org-clock-sound (expand-file-name "org/media/alarm.mp3" user-emacs-directory) ; Sound for timeout - promodoro
+   org-default-notes-file (expand-file-name "gtd/inbox.org" orgdir) ; Default org note file saved by org-capture
    org-edit-src-code t            ; Enable editing source code blocks in separate buffer
    org-edit-src-content-indentation 0 ; controls the relative indentation of the source code within the src block
    org-ellipsis " !!!"            ; Change the symbol shown for folded headlines.
@@ -1399,6 +1405,8 @@ If the side window is being created, it prompts for the source buffer."
    org-startup-with-inline-images t ; Display inline images automatically when Org mode loads a file.
    org-agenda-use-time-grid t     ; Enable the use of a time grid in the Org agenda.
    org-use-fast-todo-selection 'buffer ; TODO workflow configuration with fast keys
+   org-latex-pdf-process '("lualatex -interaction nonstopmode -output-directory %o %f"
+                           "lualatex -interaction nonstopmode -output-directory %o %f")
 
    ;; Define grid type (daily) and task blocking behavior.
    org-agenda-time-grid
@@ -1485,9 +1493,9 @@ If the side window is being created, it prompts for the source buffer."
   :ensure t
   :after org
   :init
-  (setq org-roam-directory "~/org/kb/"
+  (setq org-roam-directory (expand-file-name "kb/" orgdir)
         org-roam-dailies-directory "daily/"
-        org-roam-db-location "~/.emacs.d/org-roam.db"
+        org-roam-db-location (expand-file-name "org-roam.db" user-emacs-directory)
         org-roam-node-display-template (concat "${title:65}" (propertize "${tags:40}" 'face 'org-tag)))
   :hook (after-init . org-roam-db-autosync-mode)
   :bind (;; Core org-roam functions
@@ -1598,7 +1606,7 @@ Make it conversational but professional. Include transition phrases between sect
   (setq org-roam-capture-templates
         '(
           ;; General TODO
-          ("t" "Todo" entry (file+headline "~/org/gtd/inbox.org" "Inbox")
+          ("t" "Todo" entry (file+headline (expand-file-name "gtd/inbox.org" orgdir) "Inbox")
            "* TODO %?\n%i\n%a")
           ;; General Meeting (m)
           ("m" "General Meeting" plain
@@ -1622,7 +1630,7 @@ Make it conversational but professional. Include transition phrases between sect
           ;; Project Meeting (j)
           ("j" "Project Meeting" plain
            "
-* 📝 Raw Notes / Transcript
+* ✍️ Raw Notes / Transcript
 %?
 
 * ✨ AI-Generated Summary & Action Items as TODO Header
@@ -1660,7 +1668,7 @@ Make it conversational but professional. Include transition phrases between sect
           ;; One-on-One Meeting (o)
           ("o" "One-on-One Meeting" plain
            "
-* 📝 Raw Notes / Discussion Points (Paste here)
+* 📔 Raw Notes / Discussion Points (Paste here)
 %?
 
 * ✨ AI-Generated Summary & Action Items as TODO Header
@@ -1678,7 +1686,7 @@ Make it conversational but professional. Include transition phrases between sect
           ;; Topic (t)
           ("T" "Topic (General Knowledge/Concept)" plain
            "
-* 📝 Topic Notes: ${title}
+* 📔 ${title}
 
 %?
 
@@ -1696,7 +1704,7 @@ Make it conversational but professional. Include transition phrases between sect
           ;; Work Topic (w)
           ("w" "Work Topic (Company Specific)" plain
            "
-* 📝 Work Topic Notes: ${title}
+* 📔 Work Topic: ${title}
 
 %?
 * ✨ AI-Generated Topic Text
@@ -1713,9 +1721,9 @@ Make it conversational but professional. Include transition phrases between sect
            :unnarrowed t)
 
           ;; Learn Topic (l)
-          ("l" "Learn Topic (Skill/Tool Focused)" plain
+          ("l" "Learn Topic (Skill/Tool to learn)" plain
            "
-* 📝 Topic Notes: ${title}
+* 💡 ${title}
 
 %?
 
@@ -1766,7 +1774,7 @@ Make it conversational but professional. Include transition phrases between sect
 ** 💫 Action Items (from/for this person)
 -
 
-** 📝 Personal Notes
+** ✒️ Personal Notes
 -
 
 ** 🧠 Strategy
@@ -1795,23 +1803,23 @@ Make it conversational but professional. Include transition phrases between sect
           ;; Project Capture Template (P)
           ("P" "Project" plain
            "
-* 📝 Project Overview
+* 🏛️ Project Overview
 %?
 
-* 🎯 Goals & Objectives
+* 🏁 Goals & Objectives
 
-* 💫 Key Deliverables
+* 💰 Key Deliverables
 
 * ⚠️ Risks & Mitigations
 
-* 📚 Resources
+* 🌐 Resources
+
+* 📈 Tasks & Roadmap
 
 * 📅 Meeting History
 #+BEGIN_QUERY
 { :query [:and [:from \"file\"] [:filetags \"meeting:project\"] [:or [:id \"${id}\"] [:in-alias \"${id}\"]]] }
 #+END_QUERY
-
-* 🗺️ Tasks & Roadmap
 "
            :target (file+head "projects/${slug}.org"
                               "#+TITLE: ${title}
@@ -1867,7 +1875,7 @@ Make it conversational but professional. Include transition phrases between sect
 - [ ] Idea 2...
 - [ ] Idea 3...
 
-* 📝 Troubleshooting Steps Taken
+* 🔎 Troubleshooting Steps Taken
 -
 
 * Analysis & Hypothesis
@@ -1946,21 +1954,21 @@ Make it conversational but professional. Include transition phrases between sect
   (setq gnuplot-program "/usr/bin/gnuplot"))
 
 ;; Org-babel language configuration
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((python . t)
-   (shell . t)
-   (emacs-lisp . t)
-   (groovy . t)
-   (sed . t)
-   (js . t)
-   (sql . t)
-   (sqlite . t)
-   (dot . t) ; For Graphviz diagrams
-   (mermaid . t)
-   (go . t)
-   (gnuplot . t)
-   ))
+(with-eval-after-load 'org
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((python . t)
+     (shell . t)
+     (emacs-lisp . t)
+     (groovy . t)
+     (sed . t)
+     (js . t)
+     (sql . t)
+     (sqlite . t)
+     (dot . t) ; For Graphviz diagrams
+     (mermaid . t)
+     (go . t)
+     (gnuplot . t))))
 
 (setq org-confirm-babel-evaluate t)
 ;; You might need to set specific interpreter paths if they are not in your PATH
@@ -1983,6 +1991,7 @@ Make it conversational but professional. Include transition phrases between sect
   (after-save . magit-after-save-refresh-status)
   :init
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+  (add-hook 'git-commit-mode-hook (lambda () (setq-local corfu-auto nil)))
   :config
   (defun le/magit-display-buffer-pop-up-frame (buffer)
     (if (with-current-buffer buffer (eq major-mode 'magit-status-mode))
@@ -2030,7 +2039,7 @@ Make it conversational but professional. Include transition phrases between sect
   (load-theme 'doom-material t)
 
   (doom-themes-visual-bell-config)
-  (doom-themes-neotree-config)
+  ;; (doom-themes-neotree-config)
   ;; (doom-themes-treemacs-config)
   ;; (doom-themes-treemacs-theme)
   (doom-themes-org-config))
@@ -2045,7 +2054,7 @@ Make it conversational but professional. Include transition phrases between sect
               ("DEL" . vertico-directory-delete-char)
               ("M-DEL" . vertico-directory-delete-word))
   :custom
-  (setq vertico-cycle t)
+  (vertico-cycle t)
   (vertico-count 20))
 
 (use-package vertico-posframe
@@ -2057,26 +2066,27 @@ Make it conversational but professional. Include transition phrases between sect
         '((left-fringe . 8)
           (right-fringe . 8)))
 
-
   (setq le-bottom-center-width-7-posframe-config
-      '(posframe
-        (vertico-posframe-poshandler . posframe-poshandler-frame-bottom-center)
-        (vertico-posframe-border-width . 7)
-        (vertico-posframe-fallback-mode . vertico-buffer-mode)))
+        '(posframe
+          (vertico-posframe-poshandler . posframe-poshandler-frame-bottom-center)
+          (vertico-posframe-border-width . 7)
+          (vertico-posframe-fallback-mode . vertico-buffer-mode)))
 
   (setq vertico-multiform-commands
-      (append
-       (mapcar (lambda (cmd) (cons cmd le-bottom-center-width-7-posframe-config))
-               '(consult-line consult-buffer consult-ls-git consult-grep
-                              consult-ripgrep consult-imenu consult-bookmark
-                              org-todo))
-       '((consult-projectile
-          posframe
-          ;; (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
-          (vertico-posframe-border-width . 7)
-          (vertico-posframe-fallback-mode . vertico-buffer-mode))
-         (t posframe)
-         (execute-extended-command unobtrusive))))
+        (append
+         (mapcar (lambda (cmd) (cons cmd le-bottom-center-width-7-posframe-config))
+                 '(consult-line consult-buffer consult-ls-git consult-grep
+                   consult-ripgrep consult-imenu consult-bookmark
+                   org-todo))
+         ;; Individual command overrides
+         '((recentf-open (vertico-sort-function . nil) posframe)
+           (recentf-open-files (vertico-sort-function . nil) posframe)
+           (consult-projectile
+            posframe
+            (vertico-posframe-border-width . 7)
+            (vertico-posframe-fallback-mode . vertico-buffer-mode))
+           (t posframe)
+           (execute-extended-command unobtrusive))))
 
   (setq vertico-multiform-categories
         '((file grid)
@@ -2113,7 +2123,7 @@ Make it conversational but professional. Include transition phrases between sect
    ("C-c i" . consult-info)
    ([remap Info-search] . consult-info)
 
-   ("C-c p p" . consult-projectile-switch-project)
+   ;; ("C-c p p" . consult-projectile-switch-project)
 
    ;; C-x bindings in `ctl-x-map'
    ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
@@ -2213,16 +2223,16 @@ Make it conversational but professional. Include transition phrases between sect
                           magit-blame-mode tags-table-mode))
        "Magit")
 
-      ;; Development/Prog mode grouping [cite: 271]
+      ;; Development/Prog mode grouping
       ((derived-mode-p 'prog-mode) "Development")
 
-      ;; Dired grouping [cite: 271]
+      ;; Dired grouping
       ((derived-mode-p 'dired-mode) "Dired")
 
-      ;; Help grouping [cite: 271]
+      ;; Help grouping
       ((memq major-mode '(helpful-mode help-mode)) "Help")
 
-      ;; OrgMode grouping [cite: 272-274]
+      ;; OrgMode grouping
       ((memq major-mode '(org-mode org-agenda-clockreport-mode org-src-mode
                           org-agenda-mode org-beamer-mode org-indent-mode
                           org-bullets-mode org-cdlatex-mode org-agenda-log-mode
@@ -2327,51 +2337,6 @@ Make it conversational but professional. Include transition phrases between sect
   :bind (:map minibuffer-local-map
          ("M-A" . marginalia-cycle)))
 
-;; (use-package company
-;;   :ensure t
-;;   :init
-;;   (add-hook 'after-init-hook 'global-company-mode)
-;;   :config
-;;   ;; Completion trigger settings
-;;   (setq company-minimum-prefix-length 2           ;; require 3 chars before showing candidates
-;;         company-idle-delay 1.0                    ;; show popup after 1 second of inactivity
-
-;;         ;; Selection behavior
-;;         company-selection-wrap-around t           ;; cycle selection: end wraps to start
-;;         company-require-match nil                 ;; allow completing text not in candidate list
-
-;;         ;; Tooltip appearance
-;;         company-tooltip-annotation-padding 5      ;; 5 spaces between text and annotation
-;;         company-tooltip-margin 3                  ;; 3-char margin on right side of tooltip
-
-;;         ;; Mode filtering
-;;         company-global-modes '(not text-mode fundamental-mode)  ;; enable everywhere except text/fundamental modes
-
-;;         ;; Candidate filtering
-;;         company-dabbrev-ignore-case t           ;; case-sensitive matching (reduces false matches)
-;;         company-dabbrev-code-ignore-case t      ;; case-sensitive matching in code (reduces false matches)
-;;         company-abort-manual-when-away t)         ;; dismiss popup if cursor moves away from completion point
-
-;;   ;; ;; Add case-insensitive sorting
-;;   (setq company-transformers '(company-sort-by-occurrence
-;;                                company-sort-by-backend-importance))
-;;   (setq completion-ignore-case nil)  ;; global setting for all completers
-
-;;   ;; company-ansible: Ansible playbook completion
-;;   ;; systemd-company-backend: systemd unit file completion
-;;   (add-to-list 'company-backends 'company-ansible 'systemd-company-backend)
-;;   (define-key company-active-map (kbd "<tab>") #'company-complete-selection)
-;;   (define-key company-active-map (kbd "TAB") #'company-complete-selection)
-;;   (define-key company-active-map (kbd "<escape>") #'company-abort)
-;;   (define-key company-active-map (kbd "C-g") #'company-abort))
-
-
-;; (use-package company-quickhelp
-;;   :ensure t
-;;   :hook (company-mode . company-quickhelp-mode)
-;;   :config
-;;   (setq company-quickhelp-delay 3))
-
 ;; 1. UI: Corfu (The interface)
 (use-package corfu
   :ensure t
@@ -2421,17 +2386,24 @@ Make it conversational but professional. Include transition phrases between sect
 
 (use-package lsp-mode
   :ensure t
-  :hook ((terraform-mode . lsp-deferred)
-         (go-mode . lsp)
-         (java-mode . lsp)
+  :hook ((sh-mode . lsp-deferred)
+         (python-mode . lsp-deferred)
+         (yaml-mode . lsp-deferred)
+         ;; (yaml-ts-mode . lsp-deferred)
+         (json-ts-mode . lsp-deferred)
+         (terraform-mode . lsp-deferred)
+         (go-mode . lsp-deferred)
+         (java-mode . lsp-deferred)
          (lsp-mode . lsp-enable-which-key-integration))
-  ;; :custom
-  ;; (lsp-completion-provider :none) ;; STOP lsp from setting up company!
+  :custom
+  (lsp-completion-provider :none) ;; STOP lsp from setting up company!
   :init
   ;; This ensures Orderless works with LSP (fuzzy matching candidates)
   (defun le/lsp-mode-setup-completion ()
-    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-          '(orderless)))
+    (setq-local completion-category-defaults
+                        '((lsp-capf . (corfu-capf orderless)))))
+    ;; (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+    ;;       '(orderless)))
   :hook
   (lsp-completion-mode . le/lsp-mode-setup-completion)
   :config (setq lsp-enable-links t
@@ -2604,23 +2576,6 @@ Make it conversational but professional. Include transition phrases between sect
   :hook (after-init . le/emojify-setup)
   :config (setq emojify-display-style 'unicode))
 
-;; (defun le/enable-company-emoji ()
-;;   "Add company-emoji backend to company-backends."
-;;   (interactive)
-;;   (unless (member 'company-emoji company-backends)
-;;     (setq company-backends (push 'company-emoji company-backends))
-;;     (message "company-emoji backend enabled.")))
-
-;; (defun le/disable-company-emoji ()
-;;   "Remove company-emoji backend from `'company-backends."
-;;   (interactive)
-;;   (when (member 'company-emoji company-backends)
-;;     (setq company-backends (remove 'company-emoji company-backends))
-;;     (message "company-emoji backend disabled.")))
-
-;; (use-package company-emoji
-;;   :ensure t)
-
 (use-package helpful
   :ensure t
   :custom
@@ -2642,7 +2597,7 @@ Make it conversational but professional. Include transition phrases between sect
 
 (use-package systemd
   :ensure t
-  :hook (systemd-mode . company-mode)
+  :defer t
   :mode ("\\.container\\'"))
 
 (use-package eterm-256color
@@ -2755,169 +2710,27 @@ Make it conversational but professional. Include transition phrases between sect
         ("C-x L r" . gptel-rewrite))
  :config
  (setq-local show-trailing-whitespace nil)
+
+ ;;; GPTel Gemini Model Reference:
+;;; | Model                        | Task                     | Benefits                                   |
+;;; |------------------------------+--------------------------+--------------------------------------------|
+;;; | gemini-3.1-pro-preview       | Complex Refactoring      | Deepest reasoning; best for MLOps/Coding.  |
+;;; | gemini-3-flash-preview       | Interactive Chat/Docs    | Optimal speed-to-logic ratio; Daily Driver.|
+;;; | gemini-3.1-flash-lite-preview| Bulk Data Extraction     | Extremely cost-efficient; high-volume tasks.|
+
+(setq gptel-model 'gemini-3-flash-preview)
  (setq gptel-track-response nil
        gptel-log-level 'info
        ;; gptel-model 'deepseek-r1:70b
-       gptel-model 'gemini-2.5-flash
+       gptel-model 'gemini-3-flash-preview
        gptel-backend (gptel-make-gemini "Gemini"
                        :host "generativelanguage.googleapis.com"
                        :key #'gptel-api-key-from-auth-source
-                       ;; :key (getenv "GEMINI_API_KEY")
                        :stream t
-                       :models '("gemini-2.5-flash"
-                                 "gemini-2.5-pro")))
-       ;; gptel-backend (gptel-make-ollama "Ollama"
-       ;;                 :host "localhost:11434"
-       ;;                 :stream t
-       ;;                 :models '("deepseek-r1:70b"
-       ;;                           "codegemma:7b-instruct-fp16"
-       ;;                           "codegemma:latest"
-       ;;                           "deepseek-coder-v2:16b-lite-instruct-fp16"
-       ;;                           "deepseek-coder:33b-base-q8_0"
-       ;;                           "dolphin-mixtral:8x22b"
-       ;;                           "llama3.2-vision:90b"
-       ;;                           "llama3.3:latest"
-       ;;                           "qwen2.5-coder:32b"
-       ;;                           "qwen2.5:72b")))
+                       :models '(gemini-3.1-pro-preview
+                                 gemini-3-flash-preview
+                                 gemini-3.1-flash-lite-preview)))
 
- (add-to-list 'gptel-directives
-              `(Ai-bm-automation-Expert . ,(concat
-                              "# HPC/AI Bare Metal Provisioning Expert\n\n"
-                              "You are a system architect specializing in **HPC and AI infrastructure provisioning**. Focus on production-ready, scalable solutions.\n\n"
-                              "## Core Areas\n"
-                              "- **Bare metal provisioning** for HPC/AI workloads\n"
-                              "- **Network topology** for high-bandwidth, low-latency compute\n"
-                              "- **Storage systems** for large datasets and checkpointing\n"
-                              "- **Automation and CI/CD** for infrastructure lifecycle\n\n"
-                              "## Key Technologies\n"
-                              "- **Provisioning**: PXE, Kickstart, Foreman, MaaS, Cloud-Init\n"
-                              "- **Infrastructure as Code**: Terraform, Ansible, Puppet\n"
-                              "- **Asset Management**: NetBox for DCIM and network documentation\n"
-                              "- **CI/CD**: Jenkins pipelines for automated deployment\n"
-                              "- **Orchestration**: Kubernetes, Slurm integration\n"
-                              "- **Networking**: InfiniBand, RDMA, SR-IOV\n"
-                              "- **Storage**: Lustre, GPFS, BeeGFS, NVMe-oF\n"
-                              "- **Monitoring**: Prometheus, Grafana for HPC metrics\n\n"
-                              "## Response Requirements\n"
-                              "- Prioritize **performance, scalability, reliability**\n"
-                              "- Consider **NUMA topology, GPU clustering, power/cooling**\n"
-                              "- Provide **specific tools and implementation steps**\n"
-                              "- Address **automation workflows and CI/CD integration**\n"
-                              "- Include **vendor optimizations** (NVIDIA, Intel, AMD)\n")))
-
- (add-to-list 'gptel-directives
-              `(Ai-Expert . ,(concat
-                              "You are an AI research expert specializing in:\n"
-                              "1. Large Language Models - including architecture, training, and deployment\n"
-                              "2. Stable Diffusion and text-to-image systems - including models, samplers, and parameters\n"
-                              "3. AI video generation - covering text-to-video, video-to-video, and frame interpolation\n\n"
-                              "Provide technical, accurate responses focused on current techniques and best practices.\n"
-                              "When discussing implementations, reference specific models, frameworks, and tools.\n"
-                              "If you're uncertain about any detail, acknowledge the limitation rather than speculate.\n"
-                              "Include relevant parameter settings and technical constraints when explaining processes.")))
-
-(add-to-list 'gptel-directives
-             `(Linux-Admin . ,(concat
-                               "You are a Fedora Linux Server 40 expert. Write concise command examples "
-                               "with essential flags and proper error handling. Include verification steps "
-                               "for critical operations. Focus on security and stability. If asked for help, "
-                               "provide a concise and simple solution with a brief explanation after.\n"
-                               "If uncertain about anything, just say so.")))
-
-(add-to-list 'gptel-directives
-             `(Python-Coder . ,(concat
-                                "You're a Python software engineer.\n"
-                                "Generate Python code only, no explanations. Follow these rules when writing code:\n\n"
-                                "1. Use type hints\n"
-                                "2. Handle errors with specific try/except blocks\n"
-                                "3. Write clear docstrings as described in the Google Python Style Guide\n"
-                                "4. Keep functions small and single-purpose\n"
-                                "5. Use comments only for complex logic\n"
-                                "6. Follow SOLID principles, especially single responsibility and dependency inversion")))
-
-(add-to-list 'gptel-directives
-             `(Bash-Coder . ,(concat
-                              "You are a Bash shell programming expert. Write code only, no explanation. Follow these rules when writing code:\n"
-                              "1. Always include proper error handling with 'set -euo pipefail' and quote all variables\n"
-                              "2. Write clear code with meaningful variable/function names, only comment complex logic\n"
-                              "3. Prioritize built-in commands over external tools when possible\n"
-                              "4. Consider security implications and validate all inputs\n"
-                              "5. Optimize for both performance and maintainability\n"
-                              "6. Ensure proper file permissions and handle cleanup appropriately\n")))
-
- (add-to-list 'gptel-directives
-              `(Ansible-Coder . ,(concat
-                               "You are an Ansible automation expert. Write code only, no explanation. Follw these rules when writing code:\n"
-                               "1. Always use YAML syntax correctly with proper indentation and format\n"
-                               "2. Write clear task names and use meaningful variable names\n"
-                               "3. Follow idempotency principles - tasks should be repeatable without side effects\n"
-                               "4. Use built-in Ansible modules over shell/command modules when possible\n"
-                               "5. Include proper error handling and validate all inputs\n"
-                               "6. Follow least privilege principle and use proper permissions\n"
-                               "7. Use loops and conditionals effectively to avoid task repetition\n")))
-
-(add-to-list 'gptel-directives
-            `(OCI-Container-Coder . ,(concat
-                             "You are an OCI container engineer. Write code only, no explanation. Follow these rules when writing code:\n"
-                             "1. Follow multi-stage build patterns to minimize final image size\n"
-                             "2. Use specific base image tags, never 'latest'\n"
-                             "3. Group RUN commands with && to reduce layers\n"
-                             "4. Place frequently changing files and commands later in the Dockerfile\n"
-                             "5. Include proper health checks and set appropriate user permissions\n"
-                             "6. Remove unnecessary files and cleanup package manager caches\n")))
-
-(add-to-list 'gptel-directives
-            `(Golang-Coder . ,(concat
-                             "You are a Golang expert engineer. Write code only, no explanation. Follow these rules when writing code:\n"
-                             "2. Use proper error handling with meaningful error messages\n"
-                             "3. Implement interfaces only where needed and keep them small\n"
-                             "4. Write concurrent code safely using proper synchronization\n"
-                             "5. Follow standard naming conventions (CamelCase for exported)\n"
-                             "6. Use the standard library over external packages when possible\n"
-                             "7. Implement appropriate logging and tracing mechanisms\n"
-                             "8. Use context for cancellation and timeout handling\n"
-                             "9. Structure code for dependency injection when applicable\n"
-                             "10. Follow SOLID principles, especially single responsibility and dependency inversion")))
-
-(add-to-list 'gptel-directives
-            `(Javascript-Coder . ,(concat
-                             "You are a JavaScript expert engineer. Write code only, no explanation. Follow these rules when writing code:\n"
-                             "1. Use modern ES6+ features and syntax appropriately\n"
-                             "2. Implement proper async/await patterns for asynchronous code\n"
-                             "3. Use appropriate error handling with try/catch blocks\n"
-                             "4. Follow proper closure and scope management\n"
-                             "5. Implement proper type checking and validation\n"
-                             "6. Use appropriate design patterns when applicable\n"
-                             "7. Follow SOLID principles, especially single responsibility and dependency inversion\n"
-                             "8. Optimize for performance and browser compatibility\n")))
-
-(add-to-list 'gptel-directives
-            `(Java-Coder . ,(concat
-                             "You are a Java expert engineer. Write code only, no explanation. Follow these rules when writing code:\n"
-                             "1. Follow clean code principles and SOLID design patterns\n"
-                             "2. Use proper exception handling with meaningful messages\n"
-                             "3. Implement appropriate logging mechanisms\n"
-                             "4. Use streams and lambdas for functional programming\n"
-                             "5. Follow proper memory management and resource cleanup\n"
-                             "6. Implement thread-safe code when needed\n"
-                             "7. Use appropriate collections and data structures\n"
-                             "8. Follow standard naming conventions (camelCase, PascalCase)\n"
-                             "9. Use dependency injection when appropriate\n"
-                             "10. Write testable code with proper unit tests\n")))
-
-(add-to-list 'gptel-directives
-            `(Cpp-Coder . ,(concat
-                             "You are a C++ expert engineer. Produce code only, no explanation. When writing C++ code:\n"
-                             "1. Use modern C++ features (C++17/20) when appropriate\n"
-                             "2. Follow RAII principles and smart pointers for resource management\n"
-                             "3. Implement proper error handling with exceptions or error codes\n"
-                             "4. Use const correctness and appropriate access specifiers\n"
-                             "5. Write thread-safe code with proper synchronization\n"
-                             "6. Optimize for performance while maintaining readability\n"
-                             "7. Use STL containers and algorithms when applicable\n"
-                             "8. Implement proper memory management to prevent leaks\n"
-                             "9. Follow consistent naming conventions and formatting\n"
-                             "10. Use forward declarations to minimize compilation dependencies\n")))
 (add-to-list 'gptel-directives
              `(Anki-Card-Generator . ,(concat
                              "You are an expert Anki flashcard creator specialized in generating high-quality spaced repetition cards from learning content in anki-editor format.\n"
@@ -2959,83 +2772,7 @@ Make it conversational but professional. Include transition phrases between sect
                              "- Keep note titles descriptive but concise\n"
                              "- Ensure answers are complete and self-contained\n"
                              "- Use the filename (without .org extension) as the ANKI_DECK value\n"
-                             "- NEVER analyze content from the \"Anki Cards Data\" section itself")))
-
-;;;; gptel tool functions
-;;;; ====================
-
-;; Create a file
-(gptel-make-tool
- :function (lambda (rel-path script-content)
-             "Create a file at a given path relative to the home directory,
-   creating any necessary directories.  If the file already exists,
-   signal an error."
-             (let* ((full-path (expand-file-name rel-path (expand-file-name "~")))
-                    (dir-path (file-name-directory full-path)))
-               (when (file-exists-p full-path)
-                 (error "File already exists: %s" full-path))
-               (condition-case err
-                   (progn
-                     (when dir-path
-                       (make-directory dir-path t))
-                     (write-region script-content nil full-path)
-                     full-path)  ; Return the created file path
-                 (error (error "Failed to create file: %s (%s)"
-                               full-path (error-message-string err))))))
-
- :name "create_file"
- :description "Create a file with text"
- :args (list '(:name "rel-path"
-                     :type string
-                     :description "file path relative to home directory")
-             '(:name "script-content"
-                     :type string
-                     :description "file text data")))
-
-;; Create a directory
-(gptel-make-tool
- :function (lambda (rel-path)
-  "Create directories specified by a relative path, relative to the
-   home directory. Creates parent directories as needed.  Errors if
-   any part of the path already exists as a file."
-  (let ((full-path (expand-file-name rel-path (expand-file-name "~"))))
-    (when (file-exists-p full-path)
-      (error "ERROR: Path already exists (as a file): %s" full-path))
-    (unless (file-directory-p full-path)
-      (condition-case err
-          (progn
-            (make-directory full-path t)
-            (message "Created directory: %s" full-path)
-            full-path)  ; Return the created path
-        (error (error "ERROR: Failed to create directory: %s (%s)"
-                     full-path (error-message-string err)))))))
- :name "create_directory"
- :description "Create a directory"
- :args (list '(:name "rel-path"
-                     :type string
-                     :description "directory path relative to home directory")))
-
-;; List files
-(gptel-make-tool
- :function (lambda (dir-path)
-             "List files recursively in a directory, appending / to empty directories."
-             (let* ((full-dir-path (expand-file-name dir-path (expand-file-name "~")))
-                    (all-paths (directory-files-recursively full-dir-path ".*" t nil t)))
-               (unless (file-directory-p full-dir-path)
-                 (error "Invalid directory path: %s" full-dir-path))
-               (mapcar (lambda (path)
-                         (if (and (file-directory-p path)
-                                  (equal (directory-files path nil "^[^.]" t) nil))
-                             (concat path "/")
-                           path))
-                       all-paths)))
- :name "list_files"
- :description "List files in a directory"
- :args (list '(:name "dir-path"
-                     :type string
-                     :description "directory path relative to home directory")))
-
-)
+                             "- NEVER analyze content from the \"Anki Cards Data\" section itself"))))
 
 (use-package multi-vterm
   :ensure t
@@ -3074,7 +2811,7 @@ Make it conversational but professional. Include transition phrases between sect
   :ensure t
   :after (consult yasnippet)
   :custom
-  (consult-gh-default-clone-directory "~/git/personal/")
+  (consult-gh-default-clone-directory (expand-file-name "personal" gitdir))
   (consult-gh-show-preview t)
   (consult-gh-repo-action #'consult-gh--repo-browse-files-action)
   (consult-gh-issue-action #'consult-gh--issue-view-action)
@@ -3255,56 +2992,62 @@ Make it conversational but professional. Include transition phrases between sect
   ;; Global mode to track usage history for sorting
   (prescient-persist-mode +1))
 
-;; (use-package company-prescient
+;; (use-package slime
 ;;   :ensure t
-;;   :config
-;;   ;; Enable company-prescient globally for all company backends
-;;   (company-prescient-mode +1)
+;;   :init
+;;   (setq inferior-lisp-program "/usr/bin/sbcl"))
 
-;;   ;; Crucial step: Tell company-prescient to use the orderless matching function.
-;;   ;; This connects your existing orderless setup to the company UI.
-;;   (setq company-prescient-prefix-length 0 ; Start matching immediately
-;;         company-prescient-filter-alist '((t . prescient-filter-orderless))))
+;; (use-package slime-company
+;;   :after (slime company)
+;;   :config (setq slime-company-completion 'fuzzy
+;;                 slime-company-after-completion 'slime-company-just-one-space))
 
-;; (use-package simpleclip
-;;   :ensure t
-;;   :config
-;;   (simpleclip-mode 1))
+;; (use-package rainbow-mode
+;;   :ensure t)
 
-(use-package slime
-  :ensure t
-  :init
-  (setq inferior-lisp-program "/usr/bin/sbcl"))
+;; (use-package org-preview-html
+;;   :ensure t)
 
-(use-package slime-company
-  :after (slime company)
-  :config (setq slime-company-completion 'fuzzy
-                slime-company-after-completion 'slime-company-just-one-space))
+;; (use-package org-project-capture
+;;   :ensure t)
 
-(use-package rainbow-mode
-  :ensure t)
+;; (use-package pdf-tools
+;;   :ensure t)
 
-(use-package ansible
-  :ensure t)
 
-(use-package org-preview-html
-  :ensure t)
+;;; -*- lexical-binding: t; -*-
 
-(use-package org-project-capture
-  :ensure t)
+;; 1. Sync the systemd Env Var to Elisp
 
-(use-package pdf-tools
-  :ensure t)
+;; 2. Ensure org-protocol is loaded properly
+(use-package org-protocol
+  :ensure nil
+  :after org)
+
+;; 3. Use backticks to "bake in" the path to the template
+(setq org-capture-templates
+      `(("N" "Protocol Link" entry
+         (file+headline ,(expand-file-name "gtd/inbox.org" orgdir) "Links to Process")
+         "* [[%:link][%:description]] :website:\n%U\n%:initial\n")))
+
+
+
 
 (use-package org-protocol
   :ensure nil
   :after org
   :config
-  (setq org-capture-templates
-        '(("N" "Protocol Link" entry
-           (file+headline "~/org/gtd/inbox.org" "Links to Process")
-           "* [[%:link][%:description]] :website:\n%U\n%:initial\n"))))
+  (setq orgdir "~/org/"))
+  ;; (setq org-capture-templates
+  ;;       '(("N" "Protocol Link" entry
+  ;;          (file+headline (expand-file-name "gtd/inbox.org" orgdir) "Links to Process")
+  ;;          "* [[%:link][%:description]] :website:\n%U\n%:initial\n"))))
 
+
+(setq org-capture-templates
+      `(("N" "Protocol Link" entry
+         (file+headline ,(expand-file-name "gtd/inbox.org" orgdir) "Links to Process")
+         "* [[%:link][%:description]] :website:\n%U\n\n%:initial\n")))
 
 (defun le/org-todo-with-completion (orig-fun &rest args)
   "Force `org-todo' to use the Vertico minibuffer."
@@ -3313,6 +3056,60 @@ Make it conversational but professional. Include transition phrases between sect
     (apply orig-fun args)))
 
 (advice-add 'org-todo :around #'le/org-todo-with-completion)
+
+
+(use-package agent-shell
+  :ensure t
+  :bind (:map agent-shell-mode-map
+              ("RET" . newline)
+              ("M-RET" . shell-maker-submit))
+  :config
+  (setq agent-shell-google-authentication
+        (agent-shell-google-make-authentication
+         :api-key (lambda () (auth-source-pass-get "secret" "google-api-key"))))
+  (setq agent-shell-container-command-runner
+        (lambda (buffer)
+          (let ((config (agent-shell-get-config buffer)))
+            (pcase (map-elt config :identifier)
+              ('gemini-cli  '("podman" "run" "--rm" "-it"
+                              "--net=host"
+                              "-w" "/workspace"
+                              "gemini-cli-image"
+                              "xvfb" "-a" "gemini" "--experimental-acp")))))))
+
+(use-package ansible
+  :ensure t
+  :hook ((yaml-mode . ansible-mode)
+         (yaml-ts-mode . ansible-mode))
+  :config
+  (remove-hook 'ansible-hook 'ansible-lint-errors))
+
+(use-package ansible-doc
+  :ensure t
+  :hook ((yaml-mode . ansible-doc-mode)
+         (yaml-ts-mode . ansible-doc-mode))
+  :config
+  (defadvice ansible-doc (after ansi-color activate)
+    (with-current-buffer (get-buffer (format "*ansible-doc %s*" (ad-get-arg 0)))
+      (let ((inhibit-read-only t))
+        (ansi-color-apply-on-region (point-min) (point-max))))))
+
+;; (use-package ansible-vault
+;;   :ensure t
+;;   :custom
+;;   (ansible-vault-password-file "~/.vault-pass") ; set to nil to prompt instead
+;;   :hook ((yaml-mode . ansible-vault-mode)
+;;          (yaml-ts-mode . ansible-vault-mode)))
+
+(use-package yaml-ts-mode
+  :ensure nil  ; built-in
+  :hook
+  ((yaml-ts-mode . outline-minor-mode)
+   (yaml-ts-mode . display-line-numbers-mode)
+   (yaml-ts-mode . highlight-indent-guides-mode)
+   (yaml-ts-mode . display-line-numbers-mode)
+   (yaml-ts-mode . hl-line-mode))
+  :mode "\\.ya?ml\\'")
 
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)

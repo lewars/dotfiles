@@ -1,0 +1,93 @@
+version: '3'
+
+vars:
+  VENV_BIN: .venv/bin
+  ANSIBLE_PLAYBOOK: "{{.VENV_BIN}}/ansible-playbook"
+
+tasks:
+  setup:dev:
+    desc: Setup local development environment using uv
+    cmds:
+      - uv venv .venv
+      - uv pip install -r requirements.txt --python {{.VENV_BIN}}/python
+      - "{{.VENV_BIN}}/ansible-galaxy collection install community.general"
+    sources:
+      - requirements.txt
+    generates:
+      - .venv/bin/ansible-playbook
+
+  setup:workspace:
+    desc: Create symbolic link for .dotfiles in home directory
+    cmds:
+      - "[ -L ~/.dotfiles ] || ln -s {{.USER_WORKING_DIR}} ~/.dotfiles"
+
+  all:
+    desc: Run the complete dotfiles playbook
+    deps: [setup:workspace]
+    cmds:
+      - "{{.ANSIBLE_PLAYBOOK}} dotfiles.yml --tags all"
+
+  apply:
+    desc: Run a specific role (e.g. task apply -- git)
+    deps: [setup:workspace]
+    cmds:
+      - "{{.ANSIBLE_PLAYBOOK}} -vvv -t {{.CLI_ARGS}} dotfiles.yml"
+
+  clean:
+    desc: Clean the development environment
+    cmds:
+      - rm -rf .venv
+
+  lint:
+    desc: Run yamllint and ansible-lint on roles and playbooks
+    cmds:
+      - cmd: "{{.VENV_BIN}}/yamllint ."
+        ignore_error: true
+      - cmd: "{{.VENV_BIN}}/ansible-lint dotfiles.yml roles/"
+        ignore_error: true
+
+  diff:
+    desc: Diff a specific role config (e.g. task diff -- bash)
+    cmds:
+      - task: "diff-{{.CLI_ARGS}}"
+
+  save:
+    desc: Save a specific role config (e.g. task save -- emacs)
+    cmds:
+      - task: "save-{{.CLI_ARGS}}"
+
+  # Internal Tasks
+  diff-emacs:
+    internal: true
+    cmds:
+      - diff --color=always roles/emacs/files/emacs ~/.emacs
+
+  save-emacs:
+    internal: true
+    cmds:
+      - cp -v ~/.emacs roles/emacs/files/emacs
+
+  diff-git:
+    internal: true
+    cmds:
+      - diff --color=always roles/git/templates/gitconfig.j2 ~/.gitconfig
+
+  save-git:
+    internal: true
+    cmds:
+      - 'echo "WARNING: Can''t import gitignore_global config!!"'
+      - 'echo "WARNING: It is a symbolic link"'
+      - 'echo "WARNING: Hand edit roles/bash/template/gitconfig.j2"'
+
+  diff-bash:
+    internal: true
+    cmds:
+      - diff --color=always roles/bash/files/bashrc ~/.bashrc
+      - diff --color=always roles/bash/templates/bash_profile.j2 ~/.bash_profile
+
+  save-bash:
+    internal: true
+    cmds:
+      - 'echo "WARNING: Can''t import bash configs!!"'
+      - 'echo "WARNING: .bashrc should be a symbolic link"'
+      - 'echo "WARNING: Hand edit roles/bash/template/bash_profiles.j2"'

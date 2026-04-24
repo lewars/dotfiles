@@ -1,0 +1,7 @@
+flatpaks:
+  flathub:
+    - io.kubernetes.kubectl
+    - com.mailspringlabs.Mailspring
+    - com.slack.Slack
+    - com.spotify.Client
+    - com.visualstudio.code

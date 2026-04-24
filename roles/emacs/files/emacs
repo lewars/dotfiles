@@ -1,5 +1,5 @@
 ;;; .emacs --- Emacs initialization file -*- mode: emacs-lisp; lexical-binding: t; -*-
-;; Copyright (C) 1996-2025 Alistair Y. Lewars
+;; Copyright (C) 1996-2026 Alistair Y. Lewars
 
 ;; Author: Alistair Y. Lewars
 
@@ -28,15 +28,28 @@
 
 ;; Global settings
 (setq gc-cons-threshold 100000000)
-(defvar my-default-font-height 120)
+(defvar my-default-font-height 105)
 (setq fill-column 120)
 (setq tab-bar-show nil)
 (setq scroll-up-aggressively 0.5)
 (setq scroll-down-aggressively 0.5)
 (global-unset-key (kbd "C-x C-z"))
 (global-unset-key (kbd "C-z"))
-(defvar gitdir (expand-file-name "~/git"))
-(defvar orgdir (expand-file-name "~/org"))
+(setq gitdir (or (getenv "gitdir")
+                 (expand-file-name "~/git")))
+(setq orgdir (or (getenv "orgdir")
+                 (expand-file-name "~/org")))
+
+(require 'bookmark)
+(bookmark-store "gtd"
+                `((filename . ,(expand-file-name "gtd/gtd.org" orgdir)))
+                nil)
+(defun le/open-gtd ()
+  "Open or switch to the file specified by the 'gtd' bookmark."
+  (interactive)
+  (bookmark-jump "gtd"))
+(global-set-key (kbd "C-c g") 'le/open-gtd)
+
 
 ;; Configure Emacs to use the flatpak Brave Browser
 (defun brave-browser-flatpak (url &optional _new-window)
@@ -123,6 +136,9 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
                 "\\.git/.*")
               recentf-exclude))
 
+;; (add-to-list 'treesit-language-source-alist
+;;              '(yaml "https://github.com/ikatyang/tree-sitter-yaml"))
+
 ;; A few more useful configurations...
 (use-package emacs
   :init
@@ -151,14 +167,15 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 ;; prog-mode settings and hooks
 (defun le/my-prog-mode-settings ()
   (display-line-numbers-mode)
-  ;; (hl-line-mode)
+  (hl-line-mode)
   (hs-minor-mode) ;; hideshow
   (outline-minor-mode)
+  (subword-mode)
   (setq auto-fill-mode 0)
   (setq toggle-word-wrap 1)
   (setq fill-column 160)
   (setq display-fill-column-indicator 1)
-  (setq display-fill-column-indicator-column 80)
+  (setq display-fill-column-indicator-column 88)
   (setq indent-tabs-mode nil)
   (setq tab-width 4)
   (setq show-trailing-whitespace t)
@@ -171,11 +188,13 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 
 (add-hook 'prog-mode-hook 'le/my-prog-mode-settings)
 (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode t)
+(add-hook 'config-mode-hook 'show-trailing-whitespace t)
 
 ;; text-mode settings and hooks
 (defun le/my-text-mode-settings ()
   (setq-local show-trailing-whitespace nil)
   (visual-line-mode)
+  (subword-mode)
   (setq fill-column 220)
   (setq sentence-end-double-space nil)
   ;; (flyspell-mode)
@@ -386,8 +405,8 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 (setq use-dialog-box nil)
 
 ;; Start emacs server
-(if (display-graphic-p)
-    '(server-mode t))
+;; (if (display-graphic-p)
+;;     '(server-mode t))
 (require 'server)
 (unless (server-running-p)
   (server-start))
@@ -545,6 +564,8 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
          (display-buffer-in-side-window)
          (window-height . 0.2)
          (side . bottom)
+         (reusable-frames . visible)
+         (window-height   . 0.33)
          (slot . 0))
         ))
 
@@ -692,8 +713,6 @@ If the side window is being created, it prompts for the source buffer."
                ;; (reusable-frames . visible) ; Standard practice
               ) t) ; 't' appends this rule to the list
 
-;; --- Example Keybindings ---
-;; You can set these to whatever you prefer.
 (global-set-key (kbd "C-c j") #'my-toggle-journalctl-window)
 (global-set-key (kbd "C-c b") #'my-toggle-copied-buffer-window) ; Example: C-c (then) c (then) b
 
@@ -742,10 +761,31 @@ If the side window is being created, it prompts for the source buffer."
  '(frame-background-mode nil)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
- '(org-agenda-files
-   '("/home/slams/org/gtd/gtd.org" "/home/slams/org/gtd/inbox.org"))
- '(package-selected-packages nil)
- '(safe-local-variable-values '((eval org-babel-execute-buffer)))
+ '(package-selected-packages
+   '(agent-shell anki-editor ansible ansible-doc ansible-vault
+                 atomic-chrome blacken cape casual centaur-tabs
+                 colorful-mode consult-flycheck consult-gh-forge
+                 consult-lsp consult-yasnippet corfu dashboard demap
+                 dockerfile-mode doom-modeline doom-themes dotenv-mode
+                 dumb-jump emojify eterm-256color expreg
+                 flycheck-posframe flyspell-correct fzf gnuplot
+                 go-mode gptel groovy-mode helpful
+                 highlight-indent-guides htmlize ibuffer-projectile
+                 idle-highlight-mode imenu-list jinja2-mode k8s-mode
+                 latex-preview-pane lorem-ipsum lsp-java lsp-pyright
+                 lsp-ui marginalia mermaid-mode multi-vterm
+                 multiple-cursors nerd-icons-completion
+                 nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer
+                 ob-go ob-mermaid orderless org-appear org-bullets
+                 org-roam-ui prescient py-isort python-mode pyvenv
+                 quelpa-use-package systemd terraform-mode
+                 textile-mode treemacs-all-the-icons treemacs-magit
+                 treemacs-nerd-icons treemacs-projectile
+                 vertico-posframe visual-fill-column
+                 whitespace-cleanup-mode yaml-pro))
+ '(safe-local-variable-values
+   '((gptel-model . gemini-3.1-pro-preview)
+     (eval org-babel-execute-buffer)))
  '(show-paren-context-when-offscreen t)
  '(show-paren-style 'mixed)
  '(tramp-default-method "ssh")
@@ -761,6 +801,9 @@ If the side window is being created, it prompts for the source buffer."
  '(doom-modeline-icon ((t (:foreground "white"))))
  '(doom-themes-treemacs-root-face ((t (:inherit font-lock-string-face :height 0.85))))
  '(horizontal-border ((t (:weight thin :background "#364248" :foreground "#364248"))))
+ '(mode-line ((t (:background "#202B30" :foreground "#9BA3A7"))))
+ '(mode-line-inactive ((t (:background "#3b464b" :foreground "#556369"))))
+ '(region ((t (:extend t :background "#455649" :weight bold))))
  '(show-paren-match ((t (:background "#3A6A80" :foreground "#FFFFFF" :weight ultra-bold))))
  '(show-paren-match-expression ((t (:background "#3e4452" :foreground "white"))))
  '(show-paren-mismatch ((t (:background "#E06C75" :foreground "#FFFFFF"))))
@@ -781,15 +824,6 @@ If the side window is being created, it prompts for the source buffer."
 (use-package all-the-icons
   :ensure t
   :if (display-graphic-p))
-
-(use-package nerd-icons
-  :ensure t
-  :custom
-  (nerd-icons--cache-limit 4096)
-  (nerd-icons-font-family "SauceCodePro Nerd Font"))
-
-(use-package nerd-icons-ibuffer
-  :ensure t)
 
 ;; ========== Developer configurations ===========
 (use-package fzf
@@ -828,9 +862,17 @@ If the side window is being created, it prompts for the source buffer."
                        :weight bold :underline t))))
   :config (setq idle-highlight-idle-time 1))
 
-;; (use-package expand-region
-;;   :ensure t
-;;   :bind ("C-=" . er/expand-region))
+(use-package expreg
+  :ensure t
+  :bind (("C-=" . expreg-expand)
+         ("C--" . expreg-contract))
+  :custom
+  (expreg-restore-point-on-quit t)
+  :config
+  (add-hook 'text-mode-hook
+            (lambda ()
+              (setq-local expreg-functions
+                          (append expreg-functions '(expreg--sentence))))))
 
 (use-package multiple-cursors
   :ensure t
@@ -887,6 +929,15 @@ If the side window is being created, it prompts for the source buffer."
                                               "*mm*" "*copilot*"))
   (projectile-discover-projects-in-search-path))
 
+(use-package nerd-icons
+  :ensure t
+  :custom
+  (nerd-icons--cache-limit 4096)
+  (nerd-icons-font-family "SauceCodePro Nerd Font"))
+
+(use-package nerd-icons-ibuffer
+  :ensure t)
+
 (use-package treemacs
   :ensure t
   :diminish
@@ -905,11 +956,12 @@ If the side window is being created, it prompts for the source buffer."
           treemacs-project-follow-mode             t
           treemacs-follow-after-init               t
           treemacs-width-is-initially-locked       nil
-          treemacs-text-scale                      -1)
+          treemacs-text-scale                      -1
+          treemacs--icon-size 24)
 
     ;; The default width and height of the icons is 22 pixels. If you are
     ;; using a Hi-DPI display, uncomment this to double the icon size.
-    (setq treemacs-resize-icons 10)
+    (setq treemacs-resize-icons 2)
 
     (treemacs-follow-mode t)
     (treemacs-project-follow-mode t)
@@ -938,8 +990,9 @@ If the side window is being created, it prompts for the source buffer."
 
 (use-package treemacs-nerd-icons
   :ensure t
-  :after treemacs nerd-icons all-the-icons
+  :after doom-themes doom-modeline treemacs nerd-icons all-the-icons
   :config
+  (treemacs-nerd-icons-config)
   (treemacs-load-theme "nerd-icons")
   (treemacs-refresh))
 
@@ -998,8 +1051,8 @@ If the side window is being created, it prompts for the source buffer."
   (setf (alist-get "Jenkinsfile.+$" auto-mode-alist) 'groovy-mode)
   (setq compile 'jenkins-lint))
 
-(defvar yaml-formatting-enabled nil
-  "Whether YAML formatting is currently enabled.")
+;; (defvar yaml-formatting-enabled nil
+;;   "Whether YAML formatting is currently enabled.")
 
 (use-package yaml-mode
   :ensure t
@@ -1008,6 +1061,9 @@ If the side window is being created, it prompts for the source buffer."
    (yaml-mode . display-line-numbers-mode)
    (yaml-mode . le/yaml-mode-setup)
    (yaml-mode . highlight-indent-guides-mode)
+   (yaml-mode . display-line-numbers-mode)
+   (yaml-mode . hl-line-mode)
+
    ;; (yaml-mode . ansible-mode)
    (yaml-mode . (lambda ()
                   (add-hook 'after-save-hook 'le/yaml-frmt nil t)
@@ -1033,6 +1089,11 @@ If the side window is being created, it prompts for the source buffer."
     (setq-default display-fill-column-indicator-column 160)
     (require 'lsp)
     (lsp-deferred)))
+
+;; (use-package yaml-pro
+;;   :ensure t
+;;   :mode "\\.ya?ml\\'"
+;;   :config (yaml-pro-mode))
 
 (use-package terraform-mode
   :ensure t
@@ -1080,21 +1141,16 @@ If the side window is being created, it prompts for the source buffer."
 (use-package flycheck
   :ensure t
   ;; :init (global-flycheck-mode)
-  :config (setq-default flycheck-checker-error-threshold 2048)
-  ;; add a lambda for flycheck-rror-list-mode-hook
-  (add-hook 'flycheck-error-list-mode-hook
-            (lambda ()
-              (setq tabulated-list-format '[("Line" 5 flycheck-error-list-entry-< :right-align t)
-                                            ("Col" 3 nil :right-align t)
-                                            ("Level" 8 flycheck-error-list-entry-level-<)
-                                            ("ID" 20 t)
-                                            (#("Message (Checker)" 0 9
-                                               (face default)
-                                               9 16
-                                               (face flycheck-error-list-checker-name)
-                                               16 17
-                                               (face default))
-                                             0 t)]))))
+  :config (setq-default flycheck-checker-error-threshold 2048))
+  ;; ;; add a lambda for flycheck-rror-list-mode-hook
+  ;; (add-hook 'flycheck-error-list-mode-hook
+  ;;           (lambda ()
+  ;;             (setq tabulated-list-format `[("File" 6)
+  ;;                                           ("Line" 5 flycheck-error-list-entry-< :right-align t)
+  ;;                                           ("Col" 3 nil :right-align t)
+  ;;                                           ("Level" 5 flycheck-error-list-entry-level-<)
+  ;;                                           ("ID" 7 t)
+  ;;                                           (,(flycheck-error-list-make-last-column "Message" 'Checker) 0 t)]))))
 
 ;;  :config (setq-default flycheck-disabled-checkers '(emacs-lisp)))
 
@@ -1288,9 +1344,9 @@ If the side window is being created, it prompts for the source buffer."
 (defun le/my-org-buffer-setup ()
   "Apply all buffer-local visual and minor-mode settings for Org."
   ;; --- Visuals and Layout ---
-  (setq-local visual-fill-column-width 120)          ; Set line wrap width of characters for this buffer
-  (setq-local line-spacing 0.1)                      ; Add extra spacing between lines
-  (setq-default visual-fill-column-center-text t)    ; Center text globally (affects all buffers)
+  (setq-local visual-fill-column-width 120)         ; Set line wrap width of characters for this buffer
+  (setq-local line-spacing 0.1)                     ; Add extra spacing between lines
+  (setq-default visual-fill-column-center-text t)   ; Center text globally (affects all buffers)
   (visual-fill-column-mode 1)                       ; Enable visual-fill-column mode
 
   ;; --- Minor Modes ---
@@ -1299,8 +1355,12 @@ If the side window is being created, it prompts for the source buffer."
   (org-appear-mode 1)
 
   ;; --- YASnippet Integration ---
-  (setq-local yas-trigger-key [tab])                   ; Designate the TAB key to trigger yasnippet expansions.
-  (define-key yas-keymap [tab] 'yas-next-field-or-maybe-expand))
+  (setq-local yas-trigger-key [tab])               ; Designate the TAB key to trigger yasnippet expansions.
+  (define-key yas-keymap [tab] 'yas-next-field-or-maybe-expand)
+
+  ;; --- Corfu auto complete setup ---
+  (setq-local corfu-auto nil)
+  )
 
 ;; ob-mermaid configuration
 (use-package ob-mermaid
@@ -1324,7 +1384,8 @@ If the side window is being created, it prompts for the source buffer."
   :bind (("C-c c" . org-capture)
          ("C-c a" . org-agenda))
   :config
-  (setq org-agenda-files (expand-file-name "gtd/" orgdir))
+  (setq org-agenda-files (list (expand-file-name "gtd/gtd.org" orgdir)
+                               (expand-file-name "gtd/inbox.org" orgdir)))
   (setq
    org-catch-invisible-edits 'show-and-error ; Check if in invisible region before modification
    org-clock-sound (expand-file-name "org/media/alarm.mp3" user-emacs-directory) ; Sound for timeout - promodoro
@@ -1930,6 +1991,7 @@ Make it conversational but professional. Include transition phrases between sect
   (after-save . magit-after-save-refresh-status)
   :init
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+  (add-hook 'git-commit-mode-hook (lambda () (setq-local corfu-auto nil)))
   :config
   (defun le/magit-display-buffer-pop-up-frame (buffer)
     (if (with-current-buffer buffer (eq major-mode 'magit-status-mode))
@@ -1977,7 +2039,7 @@ Make it conversational but professional. Include transition phrases between sect
   (load-theme 'doom-material t)
 
   (doom-themes-visual-bell-config)
-  (doom-themes-neotree-config)
+  ;; (doom-themes-neotree-config)
   ;; (doom-themes-treemacs-config)
   ;; (doom-themes-treemacs-theme)
   (doom-themes-org-config))
@@ -2324,9 +2386,14 @@ Make it conversational but professional. Include transition phrases between sect
 
 (use-package lsp-mode
   :ensure t
-  :hook ((terraform-mode . lsp-deferred)
-         (go-mode . lsp)
-         (java-mode . lsp)
+  :hook ((sh-mode . lsp-deferred)
+         (python-mode . lsp-deferred)
+         (yaml-mode . lsp-deferred)
+         ;; (yaml-ts-mode . lsp-deferred)
+         (json-ts-mode . lsp-deferred)
+         (terraform-mode . lsp-deferred)
+         (go-mode . lsp-deferred)
+         (java-mode . lsp-deferred)
          (lsp-mode . lsp-enable-which-key-integration))
   :custom
   (lsp-completion-provider :none) ;; STOP lsp from setting up company!
@@ -2643,18 +2710,26 @@ Make it conversational but professional. Include transition phrases between sect
         ("C-x L r" . gptel-rewrite))
  :config
  (setq-local show-trailing-whitespace nil)
+
+ ;;; GPTel Gemini Model Reference:
+;;; | Model                        | Task                     | Benefits                                   |
+;;; |------------------------------+--------------------------+--------------------------------------------|
+;;; | gemini-3.1-pro-preview       | Complex Refactoring      | Deepest reasoning; best for MLOps/Coding.  |
+;;; | gemini-3-flash-preview       | Interactive Chat/Docs    | Optimal speed-to-logic ratio; Daily Driver.|
+;;; | gemini-3.1-flash-lite-preview| Bulk Data Extraction     | Extremely cost-efficient; high-volume tasks.|
+
+(setq gptel-model 'gemini-3-flash-preview)
  (setq gptel-track-response nil
        gptel-log-level 'info
        ;; gptel-model 'deepseek-r1:70b
-       gptel-model 'gemini-2.5-flash
+       gptel-model 'gemini-3-flash-preview
        gptel-backend (gptel-make-gemini "Gemini"
                        :host "generativelanguage.googleapis.com"
                        :key #'gptel-api-key-from-auth-source
                        :stream t
-                       :models '("gemini-2.5-flash"
-                                 "gemini-2.5-pro"
-                                 "gemini-3.0-flash"
-                                 "gemini-3.0-pro")))
+                       :models '(gemini-3.1-pro-preview
+                                 gemini-3-flash-preview
+                                 gemini-3.1-flash-lite-preview)))
 
 (add-to-list 'gptel-directives
              `(Anki-Card-Generator . ,(concat
@@ -2930,9 +3005,6 @@ Make it conversational but professional. Include transition phrases between sect
 ;; (use-package rainbow-mode
 ;;   :ensure t)
 
-;; (use-package ansible
-;;   :ensure t)
-
 ;; (use-package org-preview-html
 ;;   :ensure t)
 
@@ -2942,15 +3014,40 @@ Make it conversational but professional. Include transition phrases between sect
 ;; (use-package pdf-tools
 ;;   :ensure t)
 
+
+;;; -*- lexical-binding: t; -*-
+
+;; 1. Sync the systemd Env Var to Elisp
+
+;; 2. Ensure org-protocol is loaded properly
+(use-package org-protocol
+  :ensure nil
+  :after org)
+
+;; 3. Use backticks to "bake in" the path to the template
+(setq org-capture-templates
+      `(("N" "Protocol Link" entry
+         (file+headline ,(expand-file-name "gtd/inbox.org" orgdir) "Links to Process")
+         "* [[%:link][%:description]] :website:\n%U\n%:initial\n")))
+
+
+
+
 (use-package org-protocol
   :ensure nil
   :after org
   :config
-  (setq org-capture-templates
-        '(("N" "Protocol Link" entry
-           (file+headline (expand-file-name "gtd/inbox.org" orgdir) "Links to Process")
-           "* [[%:link][%:description]] :website:\n%U\n%:initial\n"))))
+  (setq orgdir "~/org/"))
+  ;; (setq org-capture-templates
+  ;;       '(("N" "Protocol Link" entry
+  ;;          (file+headline (expand-file-name "gtd/inbox.org" orgdir) "Links to Process")
+  ;;          "* [[%:link][%:description]] :website:\n%U\n%:initial\n"))))
 
+
+(setq org-capture-templates
+      `(("N" "Protocol Link" entry
+         (file+headline ,(expand-file-name "gtd/inbox.org" orgdir) "Links to Process")
+         "* [[%:link][%:description]] :website:\n%U\n\n%:initial\n")))
 
 (defun le/org-todo-with-completion (orig-fun &rest args)
   "Force `org-todo' to use the Vertico minibuffer."
@@ -2959,6 +3056,60 @@ Make it conversational but professional. Include transition phrases between sect
     (apply orig-fun args)))
 
 (advice-add 'org-todo :around #'le/org-todo-with-completion)
+
+
+(use-package agent-shell
+  :ensure t
+  :bind (:map agent-shell-mode-map
+              ("RET" . newline)
+              ("M-RET" . shell-maker-submit))
+  :config
+  (setq agent-shell-google-authentication
+        (agent-shell-google-make-authentication
+         :api-key (lambda () (auth-source-pass-get "secret" "google-api-key"))))
+  (setq agent-shell-container-command-runner
+        (lambda (buffer)
+          (let ((config (agent-shell-get-config buffer)))
+            (pcase (map-elt config :identifier)
+              ('gemini-cli  '("podman" "run" "--rm" "-it"
+                              "--net=host"
+                              "-w" "/workspace"
+                              "gemini-cli-image"
+                              "xvfb" "-a" "gemini" "--experimental-acp")))))))
+
+(use-package ansible
+  :ensure t
+  :hook ((yaml-mode . ansible-mode)
+         (yaml-ts-mode . ansible-mode))
+  :config
+  (remove-hook 'ansible-hook 'ansible-lint-errors))
+
+(use-package ansible-doc
+  :ensure t
+  :hook ((yaml-mode . ansible-doc-mode)
+         (yaml-ts-mode . ansible-doc-mode))
+  :config
+  (defadvice ansible-doc (after ansi-color activate)
+    (with-current-buffer (get-buffer (format "*ansible-doc %s*" (ad-get-arg 0)))
+      (let ((inhibit-read-only t))
+        (ansi-color-apply-on-region (point-min) (point-max))))))
+
+;; (use-package ansible-vault
+;;   :ensure t
+;;   :custom
+;;   (ansible-vault-password-file "~/.vault-pass") ; set to nil to prompt instead
+;;   :hook ((yaml-mode . ansible-vault-mode)
+;;          (yaml-ts-mode . ansible-vault-mode)))
+
+(use-package yaml-ts-mode
+  :ensure nil  ; built-in
+  :hook
+  ((yaml-ts-mode . outline-minor-mode)
+   (yaml-ts-mode . display-line-numbers-mode)
+   (yaml-ts-mode . highlight-indent-guides-mode)
+   (yaml-ts-mode . display-line-numbers-mode)
+   (yaml-ts-mode . hl-line-mode))
+  :mode "\\.ya?ml\\'")
 
 (put 'narrow-to-region 'disabled nil)
 (provide 'emacs)

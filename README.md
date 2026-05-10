@@ -2,4 +2,4 @@
 
 A dotfiles repo that is managed by Ansible roles.
 
-It is a work in progress.
+It's a work in progress.

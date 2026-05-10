@@ -526,7 +526,7 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
   :hook (emacs-lisp-mode . (lambda () (yas-minor-mode -1)))
   :bind ("M-/" . hippie-expand)
   :config
-  (setq yas-snippet-dirs (list (expand-file-name "contrib/yasnippet-snippets/snippets" gitdir))
+  (setq yas-snippet-dirs (list (expand-file-name "personal/yasnippet-snippets/snippets" gitdir))
         yas-wrap-around-region t
         yas-triggers-in-field t)
   (yas-global-mode 1)
@@ -1384,6 +1384,7 @@ If the side window is being created, it prompts for the source buffer."
   :bind (("C-c c" . org-capture)
          ("C-c a" . org-agenda))
   :config
+  (add-to-list 'org-src-lang-modes '("markdown" . markdown))
   (setq org-agenda-files (list (expand-file-name "gtd/gtd.org" orgdir)
                                (expand-file-name "gtd/inbox.org" orgdir)))
   (setq
@@ -2347,18 +2348,23 @@ Make it conversational but professional. Include transition phrases between sect
   (corfu-popupinfo-delay 0.2)    ;; Delay for documentation popup (like company-quickhelp)
   ;; (corfu-preselect 'prompt)      ;; Always preselect the prompt first
   :init
-  (global-corfu-mode)
+  ;; (global-corfu-mode)
   (corfu-popupinfo-mode)         ;; Enable documentation popup
+
+  :hook (prog-mode . corfu-mode)
+
   :config
   ;; Make it look like the minibuffer (VSCode-ish width)
   (setq corfu-max-width 80)
+  (setq global-corfu-modes '((not org-mode markdown-mode ) t))
   :bind
   (:map corfu-map
         ("C-g" . corfu-quit)
         ;; This restores the "Enter to complete" behavior
         ("RET" . corfu-insert)
         ;; Ensure the graphical Enter key works too
-        ("<return>" . corfu-insert)))
+        ("<return>" . corfu-insert)
+        ("C-c C-l" . completion-at-point)))
 
 ;; 2. VISUALS: Nerd Icons for Corfu
 ;; This replaces kind-icon or company-box

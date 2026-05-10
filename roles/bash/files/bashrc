@@ -259,7 +259,7 @@ alias wp="waypipe -c lz4=9 ssh aroma"
 
 # security
 alias check="dnf check-update --refresh"
-alias update="sudo dnf update --refresh -y; flatpak update -y; npm install -g @google/gemini-cli@latest"
+# alias update="sudo dnf update --refresh -y; flatpak update -y; npm install -g @google/gemini-cli@latest"
 alias dhi="dnf history info"
 alias dhl="dnf history list | fzf --preview 'dnf history info {1}' --preview-window=right:50% | awk '{print $1}' | xargs -I {} dnf history info {}"
 alias scan='sudo freshclam; clamscan -o -a -r'
@@ -432,8 +432,18 @@ function frg(){
               --preview-window ~8,+{2}-5
 }
 
-# . $HOME/.asdf/asdf.sh
-# . $HOME/.asdf/completions/asdf.bash
+function update() {
+    printf "=============== Update dnf ===========================\n"
+    sudo dnf update --refresh -y
+    printf "=============== Update flatpack ======================\n"
+    flatpak update -y
+    # printf "=============== Update Gemini CLI ====================\n"
+    # npm install -g @google/gemini-cli@latest
+    # printf "=============== Update Gemini Custom Sandbox =========\n"
+    # pushd "${HOME}/git/personal/gemini-custom-sandbox/" || return
+    # task build
+    # popd || return
+}
 
 #source <(op completion bash)
 
@@ -447,13 +457,6 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 fi
 
 export CLOUDSDK_PYTHON=/usr/bin/python3.13
-
-# >>> talisman >>>
-# Below environment variables should not be modified unless you know what you are doing
-export TALISMAN_HOME="${HOME}/.talisman/bin"
-alias talisman="${TALISMAN_HOME}/talisman_linux_amd64"
-export TALISMAN_INTERACTIVE=false
-# <<< talisman <<<
 
 export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
   --color=fg:#89e76a,fg+:#ffd000,bg:#191919,bg+:#262626
@@ -498,3 +501,9 @@ if command -v kubectl &> /dev/null; then
     complete -o default -F __start_kubectl k
 fi
 export PATH="$PATH:${HOME}/.cargo/bin:${KREW_ROOT:-$HOME/.krew}/bin"
+
+# uv
+export PATH="/home/slams/.local/bin:$PATH"
+
+# zoxide
+eval "$(zoxide init bash)"

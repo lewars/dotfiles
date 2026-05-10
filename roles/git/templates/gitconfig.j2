@@ -3,7 +3,7 @@
 [user]
         name = {{ full_name }}
         email = {{ git_email }}
-        signingkey = {{ gpg_key_id }}
+        signingkey = {{ ssh_pub_key }}
 [alias]
         a = add
         st = status
@@ -71,28 +71,14 @@
         default = simple
         followTags = true
         autoSetupRemote = true
-{#         gpgSign = true #}
 [github]
         user = {{ git_user }}
-{% if ansible_os_family == 'RedHat' %}
-[credential "https://github.com"]
-        helper = !/usr/bin/gh auth git-credential
-[credential "https://gist.github.com"]
-        helper = !/usr/bin/gh auth git-credential
-{% elif ansible_os_family == 'Darwin' %}
-[credential "https://github.com"]
-        helper = !/usr/local/bin/gh auth git-credential
-[credential "https://gist.github.com"]
-        helper = !/usr/local/bin/gh auth git-credential
-{% endif %}
 [filter "lfs"]
         required = true
         clean = git-lfs clean -- %f
         smudge = git-lfs smudge -- %f
         process = git-lfs filter-process
-{% if ansible_os_family == 'Darwin' %}
-[safe]
-        directory = /Users/yalewa0104/git/cbsi-cbscom/cbssre-jenkins-agent
-{% endif %}
 [hub]
         protocol = https
+[gpg]
+	format = ssh

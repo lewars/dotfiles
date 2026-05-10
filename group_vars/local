@@ -7,3 +7,4 @@ git_user: lewars
 git_email: alistair.lewars@gmail.com
 user: "{{ lookup('env', 'USER') }}"
 gpg_key_id: 3552DBE371D298AD
+ssh_pub_key: "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAINx8tAaCpGcgIAxGM0+FBEdmPW5oR0giBaoJdiXXJ4sQAAAABHNzaDo= alistair.lewars@gmail.com"

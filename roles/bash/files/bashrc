@@ -280,6 +280,7 @@ alias quicknote='function _qn() { emacsclient "org-protocol://capture?template=N
 
 # apps
 alias brave='flatpak run com.brave.Browser'
+# alias ocs='opencode-sandbox'
 
 # functions
 gitrealclean() {
@@ -507,3 +508,15 @@ export PATH="/home/slams/.local/bin:$PATH"
 
 # zoxide
 eval "$(zoxide init bash)"
+
+# opencode
+export PATH=/home/slams/.opencode/bin:$PATH
+
+# hf
+export HF_HOME="${HF_HOME:-/srv/bwf/hf-cache}"
+export HF_HUB_ENABLE_HF_TRANSFER=1
+export HF_HUB_DOWNLOAD_TIMEOUT=60
+
+export MODELS_DIR="${MODELS_DIR:-/srv/bwf/models}"
+export EXL3_DIR="$MODELS_DIR/exl3"
+export GGUF_DIR="$MODELS_DIR/gguf"

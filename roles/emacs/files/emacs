@@ -2708,25 +2708,18 @@ Make it conversational but professional. Include transition phrases between sect
  :config
  (setq-local show-trailing-whitespace nil)
 
- ;;; GPTel Gemini Model Reference:
-;;; | Model                        | Task                     | Benefits                                   |
-;;; |------------------------------+--------------------------+--------------------------------------------|
-;;; | gemini-3.1-pro-preview       | Complex Refactoring      | Deepest reasoning; best for MLOps/Coding.  |
-;;; | gemini-3-flash-preview       | Interactive Chat/Docs    | Optimal speed-to-logic ratio; Daily Driver.|
-;;; | gemini-3.1-flash-lite-preview| Bulk Data Extraction     | Extremely cost-efficient; high-volume tasks.|
-
-(setq gptel-model 'gemini-3-flash-preview)
+ (setq gptel-model 'gemini-3.1-flash-lite)
  (setq gptel-track-response nil
        gptel-log-level 'info
        ;; gptel-model 'deepseek-r1:70b
-       gptel-model 'gemini-3-flash-preview
+       gptel-model 'gemini-3.1-flash-lite
        gptel-backend (gptel-make-gemini "Gemini"
                        :host "generativelanguage.googleapis.com"
                        :key #'gptel-api-key-from-auth-source
                        :stream t
-                       :models '(gemini-3.1-pro-preview
-                                 gemini-3-flash-preview
-                                 gemini-3.1-flash-lite-preview)))
+                       :models '(gemini-3.1-flash-lite
+                                 gemini-3.1-pro-preview
+                                 gemini-3.5-flash)))
 
 (add-to-list 'gptel-directives
              `(Anki-Card-Generator . ,(concat

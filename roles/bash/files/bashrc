@@ -177,7 +177,8 @@ export HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S  "
 export SOPS_AGE_KEY_FILE="${HOME}/.config/sops/age/keys.txt"
 GPG_TTY=$(tty)
 export GPG_TTY
-
+export REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
+export SSL_CERT_FILE=/etc/pki/tls/certs/ca-bundle.crt
 # source "${HOME}/.bashrc.secrets"
 
 # shopts

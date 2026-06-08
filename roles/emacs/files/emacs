@@ -758,6 +758,7 @@ If the side window is being created, it prompts for the source buffer."
  '(frame-background-mode nil)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
+ '(org-agenda-timegrid-use-ampm t)
  '(package-selected-packages
    '(agent-shell anki-editor ansible ansible-doc ansible-vault atomic-chrome blacken cape casual centaur-tabs colorful-mode consult-flycheck consult-gh-forge
                  consult-lsp consult-yasnippet corfu dashboard demap dockerfile-mode doom-modeline doom-themes dotenv-mode dumb-jump emojify eterm-256color
@@ -785,6 +786,7 @@ If the side window is being created, it prompts for the source buffer."
  '(horizontal-border ((t (:weight thin :background "#364248" :foreground "#364248"))))
  '(mode-line ((t (:background "#202B30" :foreground "#9BA3A7"))))
  '(mode-line-inactive ((t (:background "#3b464b" :foreground "#556369"))))
+ '(org-tag ((t (:background "#3c4447" :foreground "#929e9f" :weight normal))))
  '(region ((t (:extend t :background "#455649" :weight bold))))
  '(show-paren-match ((t (:background "#3A6A80" :foreground "#FFFFFF" :weight ultra-bold))))
  '(show-paren-match-expression ((t (:background "#3e4452" :foreground "white"))))
@@ -1375,7 +1377,7 @@ If the side window is being created, it prompts for the source buffer."
    org-default-notes-file (expand-file-name "gtd/inbox.org" orgdir) ; Default org note file saved by org-capture
    org-edit-src-code t            ; Enable editing source code blocks in separate buffer
    org-edit-src-content-indentation 0 ; controls the relative indentation of the source code within the src block
-   org-ellipsis "➲"            ; Change the symbol shown for folded headlines.
+   org-ellipsis " ➲"            ; Change the symbol shown for folded headlines.
    org-hide-block-properties nil  ; Always show the :PROPERTIES: drawer under headlines.
    org-hide-emphasis-markers t    ; Hide * / _ = ~
    org-image-actual-width nil     ; Display images at their actual width, or nil to scale down
@@ -1390,12 +1392,12 @@ If the side window is being created, it prompts for the source buffer."
    org-use-fast-todo-selection 'buffer ; TODO workflow configuration with fast keys
    org-latex-pdf-process '("lualatex -interaction nonstopmode -output-directory %o %f"
                            "lualatex -interaction nonstopmode -output-directory %o %f")
-   ;; org-tags-column 40             ; Align Org tags to column 40
+   org-tags-column 40             ; Align Org tags to column 40
 
    ;; Define grid type (daily) and task blocking behavior.
    org-agenda-time-grid
-   '((daily potentially-blocked)
-     (0900 1000 1100 1200 1300 1400 1500 1600 1700) ; Specify the hours to display in the grid.
+   '((daily today require-timed)
+     (800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000)
      "......"                     ; String used to represent busy time slots in the agenda.
      "----------------")          ; String used to represent free time slots in the agenda.
 
@@ -1419,12 +1421,12 @@ If the side window is being created, it prompts for the source buffer."
   (org-document-info-keyword  ((t (:inherit (org-drawer)))))
   (org-level-1                ((t (:inherit (bold variable-pitch) :height 0.95 :foreground "gray90"))))
   (org-level-2                ((t (:inherit (bold variable-pitch) :height 0.92 :foreground "gray90"))))
-  (org-level-3                ((t (:inherit (bold variable-pitch) :height 0.92 :foreground "gray90"))))
-  (org-level-4                ((t (:inherit (bold variable-pitch) :height 0.85 :foreground "gray90"))))
-  (org-level-5                ((t (:inherit (bold variable-pitch) :height 0.85 :foreground "gray90"))))
-  (org-level-6                ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
-  (org-level-7                ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
-  (org-level-8                ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
+  (org-level-3                ((t (:inherit (normal variable-pitch) :height 0.85 :foreground "gray90"))))
+  (org-level-4                ((t (:inherit (normal variable-pitch) :height 0.85 :foreground "gray90"))))
+  (org-level-5                ((t (:inherit (normal variable-pitch) :height 0.85 :foreground "gray90"))))
+  (org-level-6                ((t (:inherit (normal variable-pitch) :foreground "gray90"))))
+  (org-level-7                ((t (:inherit (normal variable-pitch) :foreground "gray90"))))
+  (org-level-8                ((t (:inherit (normal variable-pitch) :foreground "gray90"))))
   (org-headline-done          ((t (:foreground "#777979"))))
   (org-ellipsis               ((t (:foreground "#c79933" :inherit nil))))
 

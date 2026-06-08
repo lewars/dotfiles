@@ -414,7 +414,11 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 ;; Raise the frame when an emacsclient connects.
 (add-hook 'server-after-make-frame-hook 'raise-frame)
 
-(windmove-default-keybindings)
+;; Bind windmove keys globally so major modes (like Org) can override them
+(global-set-key (kbd "S-<left>")  'windmove-left)
+(global-set-key (kbd "S-<right>") 'windmove-right)
+(global-set-key (kbd "S-<up>")    'windmove-up)
+(global-set-key (kbd "S-<down>")  'windmove-down)
 (global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
 (global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
 (global-set-key (kbd "S-C-<down>") 'shrink-window)

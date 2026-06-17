@@ -546,6 +546,7 @@ export PATH=/home/slams/.opencode/bin:$PATH
 export HF_HOME="${HF_HOME:-/srv/bwf/hf-cache}"
 export HF_HUB_ENABLE_HF_TRANSFER=1
 export HF_HUB_DOWNLOAD_TIMEOUT=60
+export HF_XET_HIGH_PERFORMANCE=1
 
 export MODELS_DIR="${MODELS_DIR:-/srv/bwf/models}"
 export EXL3_DIR="$MODELS_DIR/exl3"

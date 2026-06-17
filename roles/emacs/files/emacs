@@ -1423,10 +1423,10 @@ If the side window is being created, it prompts for the source buffer."
   (org-level-2                ((t (:inherit (bold variable-pitch) :height 0.92 :foreground "gray90"))))
   (org-level-3                ((t (:inherit (normal variable-pitch) :height 0.85 :foreground "gray90"))))
   (org-level-4                ((t (:inherit (normal variable-pitch) :height 0.85 :foreground "gray90"))))
-  (org-level-5                ((t (:inherit (normal variable-pitch) :height 0.85 :foreground "gray90"))))
-  (org-level-6                ((t (:inherit (normal variable-pitch) :foreground "gray90"))))
-  (org-level-7                ((t (:inherit (normal variable-pitch) :foreground "gray90"))))
-  (org-level-8                ((t (:inherit (normal variable-pitch) :foreground "gray90"))))
+  (org-level-5                ((t (:inherit (normal variable-pitch) :height 0.80 :foreground "gray90"))))
+  (org-level-6                ((t (:inherit (normal variable-pitch) :height 0.80 :foreground "gray90"))))
+  (org-level-7                ((t (:inherit (normal variable-pitch) :height 0.80 :foreground "gray90"))))
+  (org-level-8                ((t (:inherit (normal variable-pitch) :height 0.80 :foreground "gray90"))))
   (org-headline-done          ((t (:foreground "#777979"))))
   (org-ellipsis               ((t (:foreground "#c79933" :inherit nil))))
 
@@ -2387,7 +2387,11 @@ Make it conversational but professional. Include transition phrases between sect
          (terraform-mode . lsp-deferred)
          (go-mode . lsp-deferred)
          (java-mode . lsp-deferred)
-         (lsp-mode . lsp-enable-which-key-integration))
+         (lsp-mode . lsp-enable-which-key-integration)
+         (lsp-completion-mode . le/lsp-mode-setup-completion)
+         (lsp-managed-mode . (lambda ()
+                         (when (derived-mode-p 'python-mode)
+                           (flycheck-add-next-checker 'lsp 'python-ruff)))))
   :custom
   (lsp-completion-provider :none) ;; STOP lsp from setting up company!
   :init
@@ -2397,15 +2401,13 @@ Make it conversational but professional. Include transition phrases between sect
                         '((lsp-capf . (corfu-capf orderless)))))
     ;; (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
     ;;       '(orderless)))
-  :hook
-  (lsp-completion-mode . le/lsp-mode-setup-completion)
   :config (setq lsp-enable-links t
                 read-process-output-max (* 2048 2048)
                 lsp-use-plists t
                 lsp-log-io nil
                 lsp-semantic-tokens-enable t
                 lsp-semantic-tokens-honor-refresh-requests t
-                lsp-disabled-clients '(tfls)
+                lsp-disabled-clients '(tfls semgrep-ls)
                 lsp-terraform-ls-enable-show-reference t
                 lsp-terraform-ls-prefill-required-fields t
                 lsp-enable-links t
@@ -2438,8 +2440,8 @@ Make it conversational but professional. Include transition phrases between sect
                 lsp-ui-peek-enable t
                 lsp-ui-peek-show-directory t
                 lsp-ui-doc-enable t
-                lsp-ui-doc-delay 0
-                lsp-ui-doc-show-with-cursor nil
+                lsp-ui-doc-delay 3             ; Prevent aggressive flashing while moving cursor
+                lsp-ui-doc-show-with-cursor t    ; FIXED: Enables popup when point is on a symbol
                 lsp-ui-doc-show-with-mouse t
                 lsp-ui-doc-position 'top))
 

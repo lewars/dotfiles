@@ -146,7 +146,7 @@ export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
 if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='emacs -nw'
+  export EDITOR='emacsclient -n -c'
 else
   export EDITOR='emacs -nw'
 fi
@@ -170,7 +170,7 @@ fi
 
 export LSP_USE_PLISTS=true
 export TEMP="${HOME}/tmp/"
-export EDITOR='emacs -nw'
+export EDITOR='emacsclient -n -r'
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 export TODO_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/todo"
 export HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S  "
@@ -438,13 +438,42 @@ function update() {
     printf "=============== Update dnf ===========================\n"
     sudo dnf update --refresh -y
     printf "=============== Update flatpack ======================\n"
-    flatpak update -y
+    flatpak --user update -y
     # printf "=============== Update Gemini CLI ====================\n"
     # npm install -g @google/gemini-cli@latest
     # printf "=============== Update Gemini Custom Sandbox =========\n"
     # pushd "${HOME}/git/personal/gemini-custom-sandbox/" || return
     # task build
     # popd || return
+}
+
+gguf-inspect() {
+    if [ -z "$1" ]; then
+        echo "Usage: gguf-inspect <path_to_first_shard.gguf>"
+        return 1
+    fi
+
+    uv run --quiet --with gguf python3 -c "
+import gguf
+import sys
+
+try:
+    reader = gguf.GGUFReader(sys.argv[1])
+    print(f'\n\033[1;34m=== GGUF Header Metadata: {sys.argv[1].split(\"/\")[-1]} ===\033[0m')
+    for key, field in reader.fields.items():
+        if any(k in key.lower() for k in ['name', 'url', 'repo', 'author', 'description', 'quant', 'version']):
+            if not field.parts: continue
+            part = field.parts[-1]
+            if hasattr(part, 'tobytes'): raw_bytes = part.tobytes()
+            elif isinstance(part, (bytes, bytearray)): raw_bytes = part
+            else:
+                try: raw_bytes = bytes(part)
+                except: raw_bytes = str(part).encode('utf-8')
+            val = ''.join(c for c in raw_bytes.decode('utf-8', errors='ignore').strip() if c.isprintable())
+            print(f'  \033[1;32m{key}:\033[0m {val}')
+except Exception as e:
+    print(f'\033[1;31mError reading GGUF:\033[0m {e}')
+" "$1"
 }
 
 #source <(op completion bash)

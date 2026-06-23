@@ -538,6 +538,7 @@ export PATH="/home/slams/.local/bin:$PATH"
 
 # zoxide
 eval "$(zoxide init bash)"
+alias cd=zoxide
 
 # opencode
 export PATH=/home/slams/.opencode/bin:$PATH

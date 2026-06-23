@@ -10,7 +10,7 @@
     mode: '0755'
   become: false
 - name: Back up .emacs configuration
-  command: mv ~/.emacs ~/.emacs.bak.{{ ansible_date_time.iso8601 }}
+  command: cp ~/.emacs ~/.emacs.bak.{{ ansible_date_time.iso8601 }}
   when: emacsconfig_stat.stat.exists
   become: false
 - name: Create a symbolic link of .emacs in home folder
@@ -20,12 +20,10 @@
     owner: '{{ user }}'
     state: link
   become: false
-- name: Create a symbolic link of a directory
-  file:
-    src: '{{ dotfiles_home }}/roles/emacs/files/emacs.d/snippets'
-    dest: '{{ dotfiles_user_home }}/.emacs.d/snippets'
-    owner: '{{ user }}'
-    state: link
+- name: Clone personal fork of yasnippets repo
+  ansible.builtin.git:
+    repo: 'https://github.com/lewars/yasnippet-snippets.git'
+    dest: '{{ dotfiles_user_home }}/contrib/yasnippet-snippets'
   become: false
 - name: Make sure org mode media directory exists
   file:
@@ -53,3 +51,16 @@
         - gh
     state: present
   become: true
+- name: Install mermaid command line interface
+  community.general.npm:
+    name: "@mermaid-js/mermaid-cli"
+    global: true
+  become: false
+  when: 0>1
+- name: Install mermaid configuration file
+  ansible.builtin.copy:
+    src: 'mermaid-config.json'
+    dest: '{{ dotfiles_user_home }}/.config/mmdc/.mermaid-config.json'
+    owner: '{{ user }}'
+  become: false
+  when: 0>1

@@ -3,3 +3,6 @@
 \#*\#
 *.elc
 *.DS_Store
+.claude
+.gemini
+PROMPT.md

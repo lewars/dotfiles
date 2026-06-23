@@ -1,5 +1,10 @@
 # -*- Mode: yaml -*-
 extends: default
+
+ignore: |
+  .venv/
+  oh-my-bash/
+
 rules:
   document-start: disable
   comments:

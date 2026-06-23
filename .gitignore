@@ -7,3 +7,7 @@ TAGS
 #*#
 .\#*
 package*.json
+.env*
+.venv/
+.python-version
+.task

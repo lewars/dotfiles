@@ -3,6 +3,7 @@
 [user]
         name = {{ full_name }}
         email = {{ git_email }}
+        signingkey = {{ ssh_pub_key }}
 [alias]
         a = add
         st = status
@@ -44,14 +45,14 @@
 
         remote-branches = "!f() { git ls-remote --heads ${1:origin} | sed 's?.*refs/heads/??'; }; f "
 
-	pre = !sh -c 'git push origin +master:precommit_$(git config --get user.email | sed s,@.*,,)'
+        pre = !sh -c 'git push origin +master:precommit_$(git config --get user.email | sed s,@.*,,)'
 [color]
         diff = auto
         status = auto
         branch = auto
         ui = true
 [core]
-	editor = emacs -nw
+        editor = emacs -nw
         excludesfile = ~/.gitignore_global
 [status]
         short = true
@@ -62,31 +63,22 @@
 #         keepBackup = false
 # [difftool]
 #         prompt = false
+[commit]
+        gpgsign = true
+[tag]
+        gpgSign = true
 [push]
         default = simple
         followTags = true
-	autoSetupRemote = true
+        autoSetupRemote = true
 [github]
         user = {{ git_user }}
-{% if ansible_os_family == 'RedHat' %}
-[credential "https://github.com"]
-        helper = !/usr/bin/gh auth git-credential
-[credential "https://gist.github.com"]
-	helper = !/usr/bin/gh auth git-credential
-{% elif ansible_os_family == 'Darwin' %}
-[credential "https://github.com"]
-	helper = !/usr/local/bin/gh auth git-credential
-[credential "https://gist.github.com"]
-	helper = !/usr/local/bin/gh auth git-credential
-{% endif %}
 [filter "lfs"]
-	required = true
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-{% if ansible_os_family == 'Darwin' %}
-[safe]
-        directory = /Users/yalewa0104/git/cbsi-cbscom/cbssre-jenkins-agent
-{% endif %}
+        required = true
+        clean = git-lfs clean -- %f
+        smudge = git-lfs smudge -- %f
+        process = git-lfs filter-process
 [hub]
         protocol = https
+[gpg]
+	format = ssh

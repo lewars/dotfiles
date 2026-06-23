@@ -12,7 +12,7 @@ export OSH="${HOME}/.dotfiles/oh-my-bash"
 # it'll load a random theme each time that oh-my-bash is loaded.
 
 # if running on aroma set the theme to powerbash10k
-if [[ "$HOSTNAME" == "aroma" ]]; then
+if [[ "$HOSTNAME" =~ ^aroma ]]; then
     OSH_THEME="powerbash10k"
 else
     # OSH_THEME="powerline-icon"
@@ -23,7 +23,16 @@ else
 fi
 
 # Show Python virtual environment and conda environment
-THEME_SHOW_PYTHON=true
+export THEME_SHOW_PYTHON=true
+
+# Handle dumb terminals
+if [[ "$TERM" == "dumb" ]]; then
+    # Unset OSH's theme
+    export OSH_THEME=""
+
+    # Use a simple, standard prompt like "$" or "> "
+    PS1='\$ '
+fi
 
 # Uncomment the following line to use case-sensitive completion.
 # OMB_CASE_SENSITIVE="true"
@@ -127,7 +136,6 @@ plugins=(
 #  if [ "$DISPLAY" ] || [ "$SSH" ]; then
 #      plugins+=(tmux-autoattach)
 #  fi
-
 source "$OSH"/oh-my-bash.sh
 
 # User configuration
@@ -138,7 +146,7 @@ export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
 if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='emacs -nw'
+  export EDITOR='emacsclient -n -c'
 else
   export EDITOR='emacs -nw'
 fi
@@ -162,12 +170,16 @@ fi
 
 export LSP_USE_PLISTS=true
 export TEMP="${HOME}/tmp/"
-export EDITOR='emacs -nw'
+export EDITOR='emacsclient -n -r'
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 export TODO_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/todo"
 export HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S  "
-
-source "${HOME}/.bashrc.secrets"
+export SOPS_AGE_KEY_FILE="${HOME}/.config/sops/age/keys.txt"
+GPG_TTY=$(tty)
+export GPG_TTY
+export REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
+export SSL_CERT_FILE=/etc/pki/tls/certs/ca-bundle.crt
+# source "${HOME}/.bashrc.secrets"
 
 # shopts
 set +o noclobber
@@ -218,6 +230,7 @@ alias a01='ssh a01'
 
 # system/admin
 alias s='sudo systemctl'
+alias specs='fastfetch --localip-show-all-ips --localip-show-loop'
 
 # development
 alias gcsheet='gcloud cheat-sheet'
@@ -247,12 +260,68 @@ alias wp="waypipe -c lz4=9 ssh aroma"
 
 # security
 alias check="dnf check-update --refresh"
-alias update="sudo dnf update --refresh"
+# alias update="sudo dnf update --refresh -y; flatpak update -y; npm install -g @google/gemini-cli@latest"
 alias dhi="dnf history info"
 alias dhl="dnf history list | fzf --preview 'dnf history info {1}' --preview-window=right:50% | awk '{print $1}' | xargs -I {} dnf history info {}"
-alias scan='sudo freshclam; clamscan'
+alias scan='sudo freshclam; clamscan -o -a -r'
+
+# container development
+alias usU="podman unshare chown -R $(id -u):$(id -g) ."
+alias us0='podman unshare chown -R 0:0 .'
+alias gemcli='SANDBOX_FLAGS="--userns=keep-id --network=slirp4netns" gemini -s'
+alias update-gemcli='npm install -g @google/gemini-cli@latest'
+
+# jenkins and datadog container management aliases
+alias jclean='podman stop jenkins_server; sleep 4; podman container rm jenkins_server'
+alias dclean='podman stop datadog_agent; sleep 4; podman rm datadog_agent'
+
+# emacs
+alias ec='emacsclient -c -n'
+alias quicknote='function _qn() { emacsclient "org-protocol://capture?template=N&url=shell&title=QuickNote&body=$1"; }; _qn'
+
+# apps
+alias brave='flatpak run com.brave.Browser'
+# alias ocs='opencode-sandbox'
 
 # functions
+gitrealclean() {
+    # 1. Determine the default branch name
+    local default_branch
+    default_branch=$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')
+    default_branch=${default_branch:-main}
+
+    # 2. Get the most recent non-default branch
+    local recent_branch
+    recent_branch=$(git for-each-ref --sort=-committerdate refs/heads/ \
+        --count=1 \
+        --format='%(refname:short)' \
+        --exclude="refs/heads/$default_branch")
+
+    if [ -z "$recent_branch" ]; then
+        echo "No non-default branches found to delete."
+        return 1
+    fi
+
+    # 3. Execute the cleanup
+    echo "Switching to $default_branch and deleting $recent_branch..."
+    git switch "$default_branch" && \
+    git pull && \
+    git branch -d "$recent_branch"
+}
+
+# Capture stdout to Emacs Org-Inbox
+# Usage: ls -la | emacspipe "Folder Listing"
+emacspipe() {
+    local title="${1:-CLI Capture}"
+    # local body
+    # body=$(cat) # Read from stdin
+
+    # URL encode the body using python
+    local encoded_body
+    encoded_body=$(python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.stdin.read()))")
+    emacsclient "org-protocol://capture?template=N&url=shell-pipe&title=${title}&body=${encoded_body}"
+}
+
 las(){
     local -r pflg="$1"
     local cmd='echo {} | awk -F"[^[:alnum:]]+" "{print \$2}"'
@@ -263,12 +332,13 @@ las(){
         local bindcmd="enter:become($cmd)"
     fi
 
-    local alias=$(alias | fzf --preview 'bat --color=always {}' --preview-window '~3' --bind "$bindcmd")
+    an_alias=$(an_alias | fzf --preview 'bat --color=always {}' --preview-window '~3' --bind "$bindcmd")
+    local an_alias
 
     if [[ "$pflg" =~ (a|p) ]] ;then
-        echo "$alias"
+        echo "$an_alias"
     else
-        eval "$alias"
+        eval "$an_alias"
     fi
 }
 
@@ -324,60 +394,6 @@ function k8sh() {
     kubectl exec -it "$1" -c "$2" -- sh -c $"$cmd"
 }
 
-## A function to abstract the obtaining the shell on jenkins{,-stg}.tools
-function jenkins-tools() {
-
-    # setup namespace
-    k8ns prod-cicd
-
-    # Select jenkins by environment
-    environment="$1"
-    if [ -z "$1" ]; then
-        environment="prod"
-    fi
-
-    # Select command to run
-    cmd="$2"
-    if [ -z "$cmd" ]; then
-        cmd="/bin/bash"
-    fi
-
-    k8sh "$environment"-jenkins-0 jenkins "$cmd"
-}
-
-## A generic function that obtains a shell on a jenkins agent
-function jenkins-agent() {
-    # setup namespace
-    k8ns prod-cicd
-
-    # Select jenkins agent by number
-    if [ -z "$1" ]; then
-        echo "Usage: jenkins-can-agent <agent_number> [cmd]"
-        return 1
-    fi
-
-    # Select command to run
-    cmd="$2"
-    if [ -z "$cmd" ]; then
-        cmd="/bin/bash"
-    fi
-
-    k8sh prod-cicd-jenkins-slave-"$1" prod-cicd-jenkins-slave "$cmd"
-}
-
-## A function that obtains a shell on a jenkins-ui agent
-function jenkins-ui-agent() {
-    k8cluster gke_i-cbscom-dev_us-central1_pplus-tools-cluster
-    jenkins-agent "$1"
-}
-
-## A function that obtains a shell on a jenkins can agent
-function jenkins-can-agent() {
-    # switch to can cluster
-    k8cluster gke_i-can-dev_us-central1_can-tools-cluster
-    jenkins-agent "$1"
-}
-
 ## A function that quickly cd's to a directory
 function qcd() {
     if [ -z "$1" ]; then
@@ -418,41 +434,60 @@ function frg(){
               --preview-window ~8,+{2}-5
 }
 
+function update() {
+    printf "=============== Update dnf ===========================\n"
+    sudo dnf update --refresh -y
+    printf "=============== Update flatpack ======================\n"
+    flatpak --user update -y
+    # printf "=============== Update Gemini CLI ====================\n"
+    # npm install -g @google/gemini-cli@latest
+    # printf "=============== Update Gemini Custom Sandbox =========\n"
+    # pushd "${HOME}/git/personal/gemini-custom-sandbox/" || return
+    # task build
+    # popd || return
+}
 
-export -f k8ns
-export -f k8listns
-export -f k8sh
-export -f k8cluster
-export -f k8listcluster
-export -f jenkins-ui-agent
-export -f jenkins-can-agent
-export -f qcd
-export -f jenkins-tools
+gguf-inspect() {
+    if [ -z "$1" ]; then
+        echo "Usage: gguf-inspect <path_to_first_shard.gguf>"
+        return 1
+    fi
 
-# . $HOME/.asdf/asdf.sh
-# . $HOME/.asdf/completions/asdf.bash
+    uv run --quiet --with gguf python3 -c "
+import gguf
+import sys
+
+try:
+    reader = gguf.GGUFReader(sys.argv[1])
+    print(f'\n\033[1;34m=== GGUF Header Metadata: {sys.argv[1].split(\"/\")[-1]} ===\033[0m')
+    for key, field in reader.fields.items():
+        if any(k in key.lower() for k in ['name', 'url', 'repo', 'author', 'description', 'quant', 'version']):
+            if not field.parts: continue
+            part = field.parts[-1]
+            if hasattr(part, 'tobytes'): raw_bytes = part.tobytes()
+            elif isinstance(part, (bytes, bytearray)): raw_bytes = part
+            else:
+                try: raw_bytes = bytes(part)
+                except: raw_bytes = str(part).encode('utf-8')
+            val = ''.join(c for c in raw_bytes.decode('utf-8', errors='ignore').strip() if c.isprintable())
+            print(f'  \033[1;32m{key}:\033[0m {val}')
+except Exception as e:
+    print(f'\033[1;31mError reading GGUF:\033[0m {e}')
+" "$1"
+}
 
 #source <(op completion bash)
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     export JAVA_HOME=/usr/local/opt/openjdk@17
-    export CLASSPATH=${HOME}/git/cbsi-cbscom/cbssre-jenkins-migration-tools/scripts/integration/libs/jenkins-core-2.319.jar
-    source ${HOME}/.op/plugins.sh
 fi
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-17.0.8.0.7-1.fc37.x86_64/
-    # source "${HOME}/.config/op/plugins.sh"
+    export JAVA_HOME="/usr/lib/jvm/java-21-openjdk"
+    export PATH="$PATH:$JAVA_HOME/bin"
 fi
 
-export CLOUDSDK_PYTHON=python3
-
-# >>> talisman >>>
-# Below environment variables should not be modified unless you know what you are doing
-export TALISMAN_HOME=${HOME}/.talisman/bin
-alias talisman=$TALISMAN_HOME/talisman_linux_amd64
-export TALISMAN_INTERACTIVE=false
-# <<< talisman <<<
+export CLOUDSDK_PYTHON=/usr/bin/python3.13
 
 export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
   --color=fg:#89e76a,fg+:#ffd000,bg:#191919,bg+:#262626
@@ -477,7 +512,11 @@ then
 fi
 
 # # Set up gcloud auto complete
-source /usr/share/google-cloud-sdk/completion.bash.inc
+if [[ "$HOSTNAME" =~ ^penguin ]]; then
+    if [ -f "/usr/share/google-cloud-sdk/completion.bash.inc" ]; then
+        source /usr/share/google-cloud-sdk/completion.bash.inc
+    fi
+fi
 
 # # Make sure 'g' alias to 'gcloud' works as well
 _gcloud_alias_completion() {
@@ -492,4 +531,25 @@ if command -v kubectl &> /dev/null; then
     alias k=kubectl
     complete -o default -F __start_kubectl k
 fi
-export PATH="${HOME}/.cargo/bin:${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+export PATH="$PATH:${HOME}/.cargo/bin:${KREW_ROOT:-$HOME/.krew}/bin"
+
+# uv
+export PATH="/home/slams/.local/bin:$PATH"
+
+# zoxide
+eval "$(zoxide init bash)"
+alias cd=zoxide
+
+# opencode
+export PATH=/home/slams/.opencode/bin:$PATH
+
+# hf
+export HF_HOME="${HF_HOME:-/srv/bwf/hf-cache}"
+export HF_HUB_ENABLE_HF_TRANSFER=1
+export HF_HUB_DOWNLOAD_TIMEOUT=60
+export HF_XET_HIGH_PERFORMANCE=1
+
+export MODELS_DIR="${MODELS_DIR:-/srv/bwf/models}"
+export EXL3_DIR="$MODELS_DIR/exl3"
+export GGUF_DIR="$MODELS_DIR/gguf"
+

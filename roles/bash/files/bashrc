@@ -552,3 +552,4 @@ export HF_XET_HIGH_PERFORMANCE=1
 export MODELS_DIR="${MODELS_DIR:-/srv/bwf/models}"
 export EXL3_DIR="$MODELS_DIR/exl3"
 export GGUF_DIR="$MODELS_DIR/gguf"
+

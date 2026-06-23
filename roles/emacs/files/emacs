@@ -311,77 +311,77 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
             (line-number-at-pos)
           nil)))))
 
-(defadvice ffap-file-at-point (after ffap-store-line-column-number activate)
-  "Search `ffap-string-at-point' for file patterns and store line/column/function numbers."
-  (let* ((string (ffap-string-at-point))
-         (name (or (condition-case nil
-                       (and (not (string-match "//" string)) ; Avoid URLs like http://
-                            (substitute-in-file-name string))
-                     (error nil))
-                   string))
-         ;; Standard patterns for line:column
-         (line-col-match (string-match ":\\([0-9]+\\):\\([0-9]+\\)" name))
-         (line-match (string-match ":\\([0-9]+\\)\\(:\\|$\\)" name))
-         ;; Improved pytest pattern to extract function name
-         (pytest-match (string-match "\\([^[:space:]]+\\.py\\)::\\([^[:space:]]+\\)" name))
-         line-number column-number file-path function-name)
+;; (define-advice ffap-file-at-point (after ffap-store-line-column-number activate)
+;;   "Search `ffap-string-at-point' for file patterns and store line/column/function numbers."
+;;   (let* ((string (ffap-string-at-point))
+;;          (name (or (condition-case nil
+;;                        (and (not (string-match "//" string)) ; Avoid URLs like http://
+;;                             (substitute-in-file-name string))
+;;                      (error nil))
+;;                    string))
+;;          ;; Standard patterns for line:column
+;;          (line-col-match (string-match ":\\([0-9]+\\):\\([0-9]+\\)" name))
+;;          (line-match (string-match ":\\([0-9]+\\)\\(:\\|$\\)" name))
+;;          ;; Improved pytest pattern to extract function name
+;;          (pytest-match (string-match "\\([^[:space:]]+\\.py\\)::\\([^[:space:]]+\\)" name))
+;;          line-number column-number file-path function-name)
 
-    ;; Extract paths and position info based on pattern matches
-    (cond
-     ;; Handle pytest output format
-     (pytest-match
-      (setq file-path (match-string 1 name)
-            function-name (match-string 2 name))
-      ;; Check if we're in a pytest output line or similar context
-      (save-excursion
-        (let ((line (buffer-substring-no-properties
-                     (line-beginning-position) (line-end-position))))
-          ;; Check if we're in a pytest output line
-          (when (string-match "FAILED\\|ERROR\\|test_" line)
-            ;; Override the ffap results with our extracted path
-            (setq ad-return-value file-path)
-            ;; Store the function name for later use
-            (setq ffap-file-at-point-function-name function-name)))))
+;;     ;; Extract paths and position info based on pattern matches
+;;     (cond
+;;      ;; Handle pytest output format
+;;      (pytest-match
+;;       (setq file-path (match-string 1 name)
+;;             function-name (match-string 2 name))
+;;       ;; Check if we're in a pytest output line or similar context
+;;       (save-excursion
+;;         (let ((line (buffer-substring-no-properties
+;;                      (line-beginning-position) (line-end-position))))
+;;           ;; Check if we're in a pytest output line
+;;           (when (string-match "FAILED\\|ERROR\\|test_" line)
+;;             ;; Override the ffap results with our extracted path
+;;             (setq ad-return-value file-path)
+;;             ;; Store the function name for later use
+;;             (setq ffap-file-at-point-function-name function-name)))))
 
-     ;; Handle line:column format
-     (line-col-match
-      (setq line-number (string-to-number (match-string 1 name))
-            column-number (string-to-number (match-string 2 name))))
+;;      ;; Handle line:column format
+;;      (line-col-match
+;;       (setq line-number (string-to-number (match-string 1 name))
+;;             column-number (string-to-number (match-string 2 name))))
 
-     ;; Handle line only format
-     (line-match
-      (setq line-number (string-to-number (match-string 1 name)))))
+;;      ;; Handle line only format
+;;      (line-match
+;;       (setq line-number (string-to-number (match-string 1 name)))))
 
-    ;; Set the variables if we found valid numbers
-    (if (and line-number (> line-number 0))
-        (setq ffap-file-at-point-line-number line-number)
-      (setq ffap-file-at-point-line-number nil))
+;;     ;; Set the variables if we found valid numbers
+;;     (if (and line-number (> line-number 0))
+;;         (setq ffap-file-at-point-line-number line-number)
+;;       (setq ffap-file-at-point-line-number nil))
 
-    (if (and column-number (> column-number 0))
-        (setq ffap-file-at-point-column-number column-number)
-      (setq ffap-file-at-point-column-number nil))))
+;;     (if (and column-number (> column-number 0))
+;;         (setq ffap-file-at-point-column-number column-number)
+;;       (setq ffap-file-at-point-column-number nil))))
 
-(defadvice find-file-at-point (after ffap-goto-line-column-function activate)
-  "If line/column numbers or function name were found, jump to that position."
-  (cond
-   ;; If we have a function name, find and jump to it
-   (ffap-file-at-point-function-name
-    (let ((line-num (ffap-find-function-definition
-                     (buffer-file-name)
-                     ffap-file-at-point-function-name)))
-      (when line-num
-        (goto-char (point-min))
-        (forward-line (1- line-num)))
-      (setq ffap-file-at-point-function-name nil)))
+;; (define-advice find-file-at-point (after ffap-goto-line-column-function activate)
+;;   "If line/column numbers or function name were found, jump to that position."
+;;   (cond
+;;    ;; If we have a function name, find and jump to it
+;;    (ffap-file-at-point-function-name
+;;     (let ((line-num (ffap-find-function-definition
+;;                      (buffer-file-name)
+;;                      ffap-file-at-point-function-name)))
+;;       (when line-num
+;;         (goto-char (point-min))
+;;         (forward-line (1- line-num)))
+;;       (setq ffap-file-at-point-function-name nil)))
 
-   ;; Otherwise use line/column numbers if available
-   (ffap-file-at-point-line-number
-    (goto-char (point-min))
-    (forward-line (1- ffap-file-at-point-line-number))
-    (when ffap-file-at-point-column-number
-      (move-to-column (1- ffap-file-at-point-column-number)))
-    (setq ffap-file-at-point-line-number nil
-          ffap-file-at-point-column-number nil))))
+;;    ;; Otherwise use line/column numbers if available
+;;    (ffap-file-at-point-line-number
+;;     (goto-char (point-min))
+;;     (forward-line (1- ffap-file-at-point-line-number))
+;;     (when ffap-file-at-point-column-number
+;;       (move-to-column (1- ffap-file-at-point-column-number)))
+;;     (setq ffap-file-at-point-line-number nil
+;;          ffap-file-at-point-column-number nil))))
 
 ;; todo: fix this
 ;; (global-set-key "\C-x\ \C-r" 'fzf-recentf)
@@ -414,7 +414,11 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 ;; Raise the frame when an emacsclient connects.
 (add-hook 'server-after-make-frame-hook 'raise-frame)
 
-(windmove-default-keybindings)
+;; Bind windmove keys globally so major modes (like Org) can override them
+(global-set-key (kbd "S-<left>")  'windmove-left)
+(global-set-key (kbd "S-<right>") 'windmove-right)
+(global-set-key (kbd "S-<up>")    'windmove-up)
+(global-set-key (kbd "S-<down>")  'windmove-down)
 (global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
 (global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
 (global-set-key (kbd "S-C-<down>") 'shrink-window)
@@ -744,48 +748,27 @@ If the side window is being created, it prompts for the source buffer."
  '(centaur-tabs-bar-height 22)
  '(column-number-mode 1)
  '(custom-safe-themes
-   '("088cd6f894494ac3d4ff67b794467c2aa1e3713453805b93a8bcb2d72a0d1b53"
-     "f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33"
-     "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294"
-     "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb"
-     "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8"
-     "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77"
-     "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da"
-     "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a"
-     "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d"
-     "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae"
-     "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4"
-     "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561"
-     "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350"
-     default))
+   '("088cd6f894494ac3d4ff67b794467c2aa1e3713453805b93a8bcb2d72a0d1b53" "f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33"
+     "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294" "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb"
+     "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8" "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77"
+     "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da" "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a"
+     "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d" "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae"
+     "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4" "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561"
+     "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350" default))
  '(frame-background-mode nil)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
+ '(org-agenda-timegrid-use-ampm t)
  '(package-selected-packages
-   '(agent-shell anki-editor ansible ansible-doc ansible-vault
-                 atomic-chrome blacken cape casual centaur-tabs
-                 colorful-mode consult-flycheck consult-gh-forge
-                 consult-lsp consult-yasnippet corfu dashboard demap
-                 dockerfile-mode doom-modeline doom-themes dotenv-mode
-                 dumb-jump emojify eterm-256color expreg
-                 flycheck-posframe flyspell-correct fzf gnuplot
-                 go-mode gptel groovy-mode helpful
-                 highlight-indent-guides htmlize ibuffer-projectile
-                 idle-highlight-mode imenu-list jinja2-mode k8s-mode
-                 latex-preview-pane lorem-ipsum lsp-java lsp-pyright
-                 lsp-ui marginalia mermaid-mode multi-vterm
-                 multiple-cursors nerd-icons-completion
-                 nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer
-                 ob-go ob-mermaid orderless org-appear org-bullets
-                 org-roam-ui prescient py-isort python-mode pyvenv
-                 quelpa-use-package systemd terraform-mode
-                 textile-mode treemacs-all-the-icons treemacs-magit
-                 treemacs-nerd-icons treemacs-projectile
-                 vertico-posframe visual-fill-column
-                 whitespace-cleanup-mode yaml-pro))
+   '(agent-shell anki-editor ansible ansible-doc ansible-vault atomic-chrome blacken cape casual centaur-tabs colorful-mode consult-flycheck consult-gh-forge
+                 consult-lsp consult-yasnippet corfu dashboard demap dockerfile-mode doom-modeline doom-themes dotenv-mode dumb-jump emojify eterm-256color
+                 expreg flycheck-posframe flyspell-correct fzf gnuplot go-mode gptel groovy-mode helpful highlight-indent-guides htmlize ibuffer-projectile
+                 idle-highlight-mode imenu-list jinja2-mode k8s-mode latex-preview-pane lorem-ipsum lsp-java lsp-pyright lsp-ui marginalia mermaid-mode
+                 multi-vterm multiple-cursors nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer ob-go ob-mermaid orderless org-appear
+                 org-bullets org-roam-ui prescient py-isort python-mode pyvenv quelpa-use-package systemd terraform-mode textile-mode treemacs-all-the-icons
+                 treemacs-magit treemacs-nerd-icons treemacs-projectile vertico vertico-posframe visual-fill-column whitespace-cleanup-mode yaml-pro))
  '(safe-local-variable-values
-   '((gptel-model . gemini-3.1-pro-preview)
-     (eval org-babel-execute-buffer)))
+   '((gptel-model . gemini-3.1-pro-preview) (eval org-babel-execute-buffer)))
  '(show-paren-context-when-offscreen t)
  '(show-paren-style 'mixed)
  '(tramp-default-method "ssh")
@@ -803,6 +786,7 @@ If the side window is being created, it prompts for the source buffer."
  '(horizontal-border ((t (:weight thin :background "#364248" :foreground "#364248"))))
  '(mode-line ((t (:background "#202B30" :foreground "#9BA3A7"))))
  '(mode-line-inactive ((t (:background "#3b464b" :foreground "#556369"))))
+ '(org-tag ((t (:background "#3c4447" :foreground "#929e9f" :weight normal))))
  '(region ((t (:extend t :background "#455649" :weight bold))))
  '(show-paren-match ((t (:background "#3A6A80" :foreground "#FFFFFF" :weight ultra-bold))))
  '(show-paren-match-expression ((t (:background "#3e4452" :foreground "white"))))
@@ -810,10 +794,10 @@ If the side window is being created, it prompts for the source buffer."
  '(treemacs-window-background-face ((t (:inherit default :background "#293539")))))
 
 (require 'use-package-ensure)
-(use-package quelpa-use-package
-  :demand
-  :config
-  (quelpa-use-package-activate-advice))
+;; (use-package quelpa-use-package
+;;   :demand
+;;   :config
+;;   (quelpa-use-package-activate-advice))
 
 ;; Misc
 (use-package hideshow
@@ -1393,7 +1377,7 @@ If the side window is being created, it prompts for the source buffer."
    org-default-notes-file (expand-file-name "gtd/inbox.org" orgdir) ; Default org note file saved by org-capture
    org-edit-src-code t            ; Enable editing source code blocks in separate buffer
    org-edit-src-content-indentation 0 ; controls the relative indentation of the source code within the src block
-   org-ellipsis " !!!"            ; Change the symbol shown for folded headlines.
+   org-ellipsis " ➲"            ; Change the symbol shown for folded headlines.
    org-hide-block-properties nil  ; Always show the :PROPERTIES: drawer under headlines.
    org-hide-emphasis-markers t    ; Hide * / _ = ~
    org-image-actual-width nil     ; Display images at their actual width, or nil to scale down
@@ -1408,22 +1392,23 @@ If the side window is being created, it prompts for the source buffer."
    org-use-fast-todo-selection 'buffer ; TODO workflow configuration with fast keys
    org-latex-pdf-process '("lualatex -interaction nonstopmode -output-directory %o %f"
                            "lualatex -interaction nonstopmode -output-directory %o %f")
+   org-tags-column 40             ; Align Org tags to column 40
 
    ;; Define grid type (daily) and task blocking behavior.
    org-agenda-time-grid
-   '((daily potentially-blocked)
-     (0900 1000 1100 1200 1300 1400 1500 1600 1700) ; Specify the hours to display in the grid.
+   '((daily today require-timed)
+     (800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000)
      "......"                     ; String used to represent busy time slots in the agenda.
      "----------------")          ; String used to represent free time slots in the agenda.
 
    ;; TODO workflow configuration
-   org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "IN PROG...(p)" "REVIEW(v)" "REPEAT(r)" "BLOCKED(b)" "|" "DONE(d)" "CANCELED(c)"))
+   org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "ONGOING(o)" "REVIEW(v)" "REPEAT(r)" "BLOCKED(b)" "|" "DONE(d)" "CANCELED(c)"))
 
    ;; TODO keyword faces with darker, less saturated background colors
    org-todo-keyword-faces '(
                             ("TODO" . (:foreground "black" :background "#6d97ba" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("NEXT" . (:foreground "black" :background "#c79933" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
-                            ("IN PROG..." . (:foreground "white" :background "#518fe8" :weight normal :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
+                            ("ONGOING" . (:foreground "#fff5f0" :background "#dd7000" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("REVIEW" . (:foreground "white" :background "#9369d9" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("REPEAT" . (:foreground "black" :background "#89b5d9" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
                             ("BLOCKED" . (:foreground "white" :background "#d95252" :weight bold :height 0.88 :box (:line-width 3 :style nil :color "#263238")))
@@ -1436,14 +1421,16 @@ If the side window is being created, it prompts for the source buffer."
   (org-document-info-keyword  ((t (:inherit (org-drawer)))))
   (org-level-1                ((t (:inherit (bold variable-pitch) :height 0.95 :foreground "gray90"))))
   (org-level-2                ((t (:inherit (bold variable-pitch) :height 0.92 :foreground "gray90"))))
-  (org-level-3                ((t (:inherit (bold variable-pitch) :height 0.92 :foreground "gray90"))))
-  (org-level-4                ((t (:inherit (bold variable-pitch) :height 0.85 :foreground "gray90"))))
-  (org-level-5                ((t (:inherit (bold variable-pitch) :height 0.85 :foreground "gray90"))))
-  (org-level-6                ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
-  (org-level-7                ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
-  (org-level-8                ((t (:inherit (bold variable-pitch) :foreground "gray90"))))
+  (org-level-3                ((t (:inherit (normal variable-pitch) :height 0.85 :foreground "gray90"))))
+  (org-level-4                ((t (:inherit (normal variable-pitch) :height 0.85 :foreground "gray90"))))
+  (org-level-5                ((t (:inherit (normal variable-pitch) :height 0.80 :foreground "gray90"))))
+  (org-level-6                ((t (:inherit (normal variable-pitch) :height 0.80 :foreground "gray90"))))
+  (org-level-7                ((t (:inherit (normal variable-pitch) :height 0.80 :foreground "gray90"))))
+  (org-level-8                ((t (:inherit (normal variable-pitch) :height 0.80 :foreground "gray90"))))
   (org-headline-done          ((t (:foreground "#777979"))))
-)
+  (org-ellipsis               ((t (:foreground "#c79933" :inherit nil))))
+
+  )
 
 ;; --- Custom Helper Functions for Capture Templates ---
 (defun le/org-roam-select-node (prompt &optional tags)
@@ -2286,7 +2273,7 @@ Make it conversational but professional. Include transition phrases between sect
                          face)))))))
 
 (use-package centaur-tabs
-  :after (org dashboard)
+  ;; :after (org dashboard)
   :ensure t
   :demand
   :init
@@ -2326,8 +2313,8 @@ Make it conversational but professional. Include transition phrases between sect
               (put-text-property 0 (length icon) 'face new-face icon)))))
       icon))
 
-  (advice-add 'centaur-tabs--icon-for-file :around #'le/fix-icons-without-inherit) ;;
-  (advice-add 'centaur-tabs--icon-for-mode :around #'le/fix-icons-without-inherit) ;;
+  ;; (advice-add 'centaur-tabs--icon-for-file :around #'le/fix-icons-without-inherit) ;;
+  ;; (advice-add 'centaur-tabs--icon-for-mode :around #'le/fix-icons-without-inherit) ;;
   (set-face-attribute 'centaur-tabs-unselected nil :foreground "gray40")
 )
 
@@ -2400,7 +2387,11 @@ Make it conversational but professional. Include transition phrases between sect
          (terraform-mode . lsp-deferred)
          (go-mode . lsp-deferred)
          (java-mode . lsp-deferred)
-         (lsp-mode . lsp-enable-which-key-integration))
+         (lsp-mode . lsp-enable-which-key-integration)
+         (lsp-completion-mode . le/lsp-mode-setup-completion)
+         (lsp-managed-mode . (lambda ()
+                         (when (derived-mode-p 'python-mode)
+                           (flycheck-add-next-checker 'lsp 'python-ruff)))))
   :custom
   (lsp-completion-provider :none) ;; STOP lsp from setting up company!
   :init
@@ -2410,15 +2401,13 @@ Make it conversational but professional. Include transition phrases between sect
                         '((lsp-capf . (corfu-capf orderless)))))
     ;; (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
     ;;       '(orderless)))
-  :hook
-  (lsp-completion-mode . le/lsp-mode-setup-completion)
   :config (setq lsp-enable-links t
                 read-process-output-max (* 2048 2048)
                 lsp-use-plists t
                 lsp-log-io nil
                 lsp-semantic-tokens-enable t
                 lsp-semantic-tokens-honor-refresh-requests t
-                lsp-disabled-clients '(tfls)
+                lsp-disabled-clients '(tfls semgrep-ls)
                 lsp-terraform-ls-enable-show-reference t
                 lsp-terraform-ls-prefill-required-fields t
                 lsp-enable-links t
@@ -2451,8 +2440,8 @@ Make it conversational but professional. Include transition phrases between sect
                 lsp-ui-peek-enable t
                 lsp-ui-peek-show-directory t
                 lsp-ui-doc-enable t
-                lsp-ui-doc-delay 0
-                lsp-ui-doc-show-with-cursor nil
+                lsp-ui-doc-delay 3             ; Prevent aggressive flashing while moving cursor
+                lsp-ui-doc-show-with-cursor t    ; FIXED: Enables popup when point is on a symbol
                 lsp-ui-doc-show-with-mouse t
                 lsp-ui-doc-position 'top))
 
@@ -2474,37 +2463,41 @@ Make it conversational but professional. Include transition phrases between sect
   :after nerd-icons
   :bind (("<s-f10>" . dashboard-open))
   :init
-  (dashboard-setup-startup-hook)
-
+  ;; (dashboard-setup-startup-hook)
   ;; Ensure the dashboard buffer is created on startup
   ;; (add-hook 'after-init-hook
   ;;           (lambda ()
   ;;             (require 'org) ;; Ensure org mode is explicitly loaded
   ;;             (org-agenda-list)  ;; Run the agenda command
   ;;             ))
-  (add-hook 'emacs-startup-hook 'dashboard-open)
+  ;; (add-hook 'emacs-startup-hook 'dashboard-open)
+  ;; (add-hook 'server-after-make-frame-hook
+  ;;         (lambda ()
+  ;;           (when (get-buffer "*dashboard*")
+  ;;             (with-current-buffer "*dashboard*"
+  ;;               (dashboard-refresh-buffer)))))
   :config
   ;; Set the initial buffer choice to the dashboard buffer.
-  (setq initial-buffer-choice
-        #'(lambda ()
-            ;; Use 'get-buffer-create' to ensure the buffer exists
-            (get-buffer-create dashboard-buffer-name)))
+  ;; (setq initial-buffer-choice
+  ;;       #'(lambda ()
+  ;;           ;; Use 'get-buffer-create' to ensure the buffer exists
+  ;;           (get-buffer-create dashboard-buffer-name)))
 
-  ;; Ensures dashboard items are up-to-date.
-  (add-hook 'server-after-make-frame-hook
-            #'(lambda ()
-                ;; Only refresh if the dashboard buffer is actually displayed
-                (when (eq (current-buffer) (get-buffer dashboard-buffer-name))
-                  (dashboard-refresh-buffer))))
+  ;; ;; Ensures dashboard items are up-to-date.
+  ;; (add-hook 'server-after-make-frame-hook
+  ;;           #'(lambda ()
+  ;;               ;; Only refresh if the dashboard buffer is actually displayed
+  ;;               (when (eq (current-buffer) (get-buffer dashboard-buffer-name))
+  ;;                 (dashboard-refresh-buffer))))
 
   ;; ;; Format: "(icon title help action face prefix suffix)"
-  (setq dashboard-navigator-buttons
-        `(
-          ((,(nerd-icons-faicon "nf-fa-github" :height 1.1 :v-adjust 0.0)
-            " Homepage"
-            "Browse homepage"
-            (lambda (&rest _) (browse-url "https://github.com/lewars"))))
-          ))
+  ;; (setq dashboard-navigator-buttons
+  ;;       `(
+  ;;         ((,(nerd-icons-faicon "nf-fa-github" :height 1.1 :v-adjust 0.0)
+  ;;           " Homepage"
+  ;;           "Browse homepage"
+  ;;           (lambda (&rest _) (browse-url "https://github.com/lewars"))))
+  ;;         ))
   :custom
   (dashboard-startup-banner 'logo)
   (dashboard-icon-type 'nerd-icons)
@@ -2521,14 +2514,14 @@ Make it conversational but professional. Include transition phrases between sect
                      (recents . 10)
                      (projects  . 10)
                      (bookmarks . 7)
-                     ;; (agenda    . 14)
+                     (agenda    . 14)
                      (registers . 7)
                      ))
   (dashboard-item-shortcuts '(
                               (recents   . "r")
                               (projects  . "p")
                               (bookmarks . "m")
-                              (agenda    . "a")
+                              ;; (agenda    . "a")
                               (registers . "e"))
                             )
   (dashboard-startupify-list '(
@@ -2562,7 +2555,7 @@ Make it conversational but professional. Include transition phrases between sect
   (remove-hook 'server-after-make-frame-hook #'le/inject-dashboard-agenda))
 
 ;; Run this when the client connects
-(add-hook 'server-after-make-frame-hook #'le/inject-dashboard-agenda)
+;; (add-hook 'server-after-make-frame-hook #'le/inject-dashboard-agenda)
 
 
 (use-package which-key
@@ -2717,25 +2710,18 @@ Make it conversational but professional. Include transition phrases between sect
  :config
  (setq-local show-trailing-whitespace nil)
 
- ;;; GPTel Gemini Model Reference:
-;;; | Model                        | Task                     | Benefits                                   |
-;;; |------------------------------+--------------------------+--------------------------------------------|
-;;; | gemini-3.1-pro-preview       | Complex Refactoring      | Deepest reasoning; best for MLOps/Coding.  |
-;;; | gemini-3-flash-preview       | Interactive Chat/Docs    | Optimal speed-to-logic ratio; Daily Driver.|
-;;; | gemini-3.1-flash-lite-preview| Bulk Data Extraction     | Extremely cost-efficient; high-volume tasks.|
-
-(setq gptel-model 'gemini-3-flash-preview)
+ (setq gptel-model 'gemini-3.1-flash-lite)
  (setq gptel-track-response nil
        gptel-log-level 'info
        ;; gptel-model 'deepseek-r1:70b
-       gptel-model 'gemini-3-flash-preview
+       gptel-model 'gemini-3.1-flash-lite
        gptel-backend (gptel-make-gemini "Gemini"
                        :host "generativelanguage.googleapis.com"
                        :key #'gptel-api-key-from-auth-source
                        :stream t
-                       :models '(gemini-3.1-pro-preview
-                                 gemini-3-flash-preview
-                                 gemini-3.1-flash-lite-preview)))
+                       :models '(gemini-3.1-flash-lite
+                                 gemini-3.1-pro-preview
+                                 gemini-3.5-flash)))
 
 (add-to-list 'gptel-directives
              `(Anki-Card-Generator . ,(concat
@@ -2891,7 +2877,7 @@ Make it conversational but professional. Include transition phrases between sect
 ;;   ;; ("C-x G" . google-this-mode-submap)                                   ;;
 ;;   :config                                                                  ;;
 ;;   (google-this-mode 1)                                                     ;;
-;;   (defadvice google-this (around region-search activate)                   ;;
+;;   (define-advice google-this (around region-search activate)                   ;;
 ;;     "If region is active and RET is pressed, use it for search"            ;;
 ;;     (if (and (region-active-p) (eq (car-safe last-command-event) 'return)) ;;
 ;;         (google-this-region nil)                                           ;;
@@ -3061,7 +3047,7 @@ Make it conversational but professional. Include transition phrases between sect
         (org-use-fast-todo-selection 'buffer))
     (apply orig-fun args)))
 
-(advice-add 'org-todo :around #'le/org-todo-with-completion)
+;; (advice-add 'org-todo :around #'le/org-todo-with-completion)
 
 
 (use-package agent-shell
@@ -3094,11 +3080,7 @@ Make it conversational but professional. Include transition phrases between sect
   :ensure t
   :hook ((yaml-mode . ansible-doc-mode)
          (yaml-ts-mode . ansible-doc-mode))
-  :config
-  (defadvice ansible-doc (after ansi-color activate)
-    (with-current-buffer (get-buffer (format "*ansible-doc %s*" (ad-get-arg 0)))
-      (let ((inhibit-read-only t))
-        (ansi-color-apply-on-region (point-min) (point-max))))))
+    )
 
 ;; (use-package ansible-vault
 ;;   :ensure t

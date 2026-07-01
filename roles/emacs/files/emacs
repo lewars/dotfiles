@@ -1364,13 +1364,26 @@ If the side window is being created, it prompts for the source buffer."
 (use-package org
   :ensure t
   :hook ((org-mode . le/my-org-buffer-setup)
-         (org-todo-repeat-hook . org-reset-checkbox-state-subtree))
+         (org-todo-repeat-hook . org-reset-checkbox-state-subtree)
+         (org-mode . le/org-windmove-setup)
+         (org-agenda-mode . le/org-windmove-setup)
+         (org-capture-mode . le/org-windmove-setup))
   :bind (("C-c c" . org-capture)
          ("C-c a" . org-agenda))
+
+  :init
+  (defun le/org-windmove-setup ()
+    "Bind Super+Shift+Arrows to windmove in Org mode buffers."
+    (local-set-key (kbd "s-S-<up>")    #'windmove-up)
+    (local-set-key (kbd "s-S-<down>")  #'windmove-down)
+    (local-set-key (kbd "s-S-<left>")  #'windmove-left)
+    (local-set-key (kbd "s-S-<right>") #'windmove-right))
+
   :config
   (add-to-list 'org-src-lang-modes '("markdown" . markdown))
   (setq org-agenda-files (list (expand-file-name "gtd/gtd.org" orgdir)
-                               (expand-file-name "gtd/inbox.org" orgdir)))
+                               (expand-file-name "gtd/inbox.org" orgdir)
+                               (expand-file-name "bitwisefilms/bwf-ai-factory-wwii-uk-novel-writer/docs/todo.org" gitdir)))
   (setq
    org-catch-invisible-edits 'show-and-error ; Check if in invisible region before modification
    org-clock-sound (expand-file-name "org/media/alarm.mp3" user-emacs-directory) ; Sound for timeout - promodoro
@@ -1390,6 +1403,7 @@ If the side window is being created, it prompts for the source buffer."
    org-startup-with-inline-images t ; Display inline images automatically when Org mode loads a file.
    org-agenda-use-time-grid t     ; Enable the use of a time grid in the Org agenda.
    org-use-fast-todo-selection 'buffer ; TODO workflow configuration with fast keys
+   org-link-frame-setup '((file . find-file)) ; Open link in frame
    org-latex-pdf-process '("lualatex -interaction nonstopmode -output-directory %o %f"
                            "lualatex -interaction nonstopmode -output-directory %o %f")
    org-tags-column 40             ; Align Org tags to column 40
@@ -1475,6 +1489,18 @@ If the side window is being created, it prompts for the source buffer."
                    selected-titles
                    " ")
       "")))
+
+;; Bind Super+Shift+Arrows for Org and related modes
+(defun my/org-windmove-setup ()
+  "Bind Super+Shift+Arrows to windmove in Org mode buffers."
+  (local-set-key (kbd "s-S-<up>")    #'windmove-up)
+  (local-set-key (kbd "s-S-<down>")  #'windmove-down)
+  (local-set-key (kbd "s-S-<left>")  #'windmove-left)
+  (local-set-key (kbd "s-S-<right>") #'windmove-right))
+
+(add-hook 'org-mode-hook #'my/org-windmove-setup)
+(add-hook 'org-agenda-mode-hook #'my/org-windmove-setup)
+(add-hook 'org-capture-mode-hook #'my/org-windmove-setup)
 
 ;; --- Org-roam Configuration ---
 (use-package org-roam

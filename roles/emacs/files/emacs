@@ -286,6 +286,11 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 (require 'ffap)
 (ffap-bindings)
 
+;; Disable ffap in dired buffers
+(add-hook 'dired-mode-hook
+          (lambda ()
+            (local-set-key [remap find-file-at-point] 'find-file)))
+
 ;; ----------------------------------------------------------------
 ;; ffap enhancements to open file:line:column or file:line:function
 ;; ----------------------------------------------------------------

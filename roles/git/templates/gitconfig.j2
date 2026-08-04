@@ -38,8 +38,9 @@
         l = log --graph --decorate --oneline --abbrev-commit --all
         h = log --graph --decorate --oneline --abbrev-commit
 
-        issues = !hub browse -- issues
-        url = "!f() { sha=$(git rev-parse ${1:-HEAD}); hub browse -u -- commit/$sha; }; f"
+        issues = !gh issue list --web
+        url = "!f() { sha=$(git rev-parse ${1:-HEAD}); gh browse --commit \"$sha\"; }; f"
+
         # Copy current branch name to clipboard (macOS only)
         cb = "!git rev-parse --abbrev-ref HEAD | tr -d '\n' | pbcopy"
 

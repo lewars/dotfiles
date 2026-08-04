@@ -437,7 +437,7 @@ function update() {
     printf "=============== Update dnf ===========================\n"
     sudo dnf update --refresh -y
     printf "=============== Update flatpack ======================\n"
-    flatpak --user update -y
+    flatpak update -y
     # printf "=============== Update Gemini CLI ====================\n"
     # npm install -g @google/gemini-cli@latest
     # printf "=============== Update Gemini Custom Sandbox =========\n"

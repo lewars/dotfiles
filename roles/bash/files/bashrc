@@ -4,7 +4,7 @@ case $- in
   *i*) ;;
     *) return;;
 esac
-
+# test
 # Path to your oh-my-bash installation.
 export OSH="${HOME}/.dotfiles/oh-my-bash"
 
@@ -106,7 +106,6 @@ OMB_PROMPT_SHOW_PYTHON_VENV=true  # enable
 # Add wisely, as too many completions slow down shell startup.
 completions=(
   git
-  docker
   gh
   makefile
   kubectl
@@ -118,7 +117,6 @@ completions=(
 # Add wisely, as too many aliases slow down shell startup.
 aliases=(
     general
-    docker
 )
 
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-bash/plugins/*)
@@ -229,7 +227,8 @@ alias m01='sshp m01'
 alias a01='ssh a01'
 
 # system/admin
-alias s='sudo systemctl'
+alias s='systemctl --no-pager --full'
+alias systemctl='systemctl --no-pager --full'
 alias specs='fastfetch --localip-show-all-ips --localip-show-loop'
 
 # development
@@ -538,7 +537,7 @@ export PATH="/home/slams/.local/bin:$PATH"
 
 # zoxide
 eval "$(zoxide init bash)"
-alias cd=zoxide
+alias cd=z
 
 # opencode
 export PATH=/home/slams/.opencode/bin:$PATH
@@ -553,3 +552,5 @@ export MODELS_DIR="${MODELS_DIR:-/srv/bwf/models}"
 export EXL3_DIR="$MODELS_DIR/exl3"
 export GGUF_DIR="$MODELS_DIR/gguf"
 
+export LESS=-iXMr
+# source -- ~/.local/share/blesh/ble.sh

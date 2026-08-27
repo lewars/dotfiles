@@ -2740,18 +2740,16 @@ Make it conversational but professional. Include transition phrases between sect
  :config
  (setq-local show-trailing-whitespace nil)
 
- (setq gptel-model 'gemini-3.1-flash-lite)
  (setq gptel-track-response nil
        gptel-log-level 'info
-       ;; gptel-model 'deepseek-r1:70b
-       gptel-model 'gemini-3.1-flash-lite
+       gptel-model 'gemini-lite-latest
        gptel-backend (gptel-make-gemini "Gemini"
                        :host "generativelanguage.googleapis.com"
                        :key #'gptel-api-key-from-auth-source
                        :stream t
-                       :models '(gemini-3.1-flash-lite
-                                 gemini-3.1-pro-preview
-                                 gemini-3.5-flash)))
+                       :models '(gemini-pro-latest
+                                 gemini-lite-latest
+                                 gemini-3.7-flash)))
 
 (add-to-list 'gptel-directives
              `(Anki-Card-Generator . ,(concat

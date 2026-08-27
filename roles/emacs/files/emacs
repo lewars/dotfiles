@@ -1368,12 +1368,12 @@ If the side window is being created, it prompts for the source buffer."
 (use-package org
   :ensure t
   :hook ((org-mode . le/my-org-buffer-setup)
-         (org-todo-repeat-hook . org-reset-checkbox-state-subtree)
          (org-mode . le/org-windmove-setup)
          (org-agenda-mode . le/org-windmove-setup)
          (org-capture-mode . le/org-windmove-setup))
   :bind (("C-c c" . org-capture)
-         ("C-c a" . org-agenda))
+         ("C-c a" . org-agenda)
+         ("C-c l" . org-store-link))
 
   :init
   (defun le/org-windmove-setup ()
@@ -1383,7 +1383,49 @@ If the side window is being created, it prompts for the source buffer."
     (local-set-key (kbd "s-S-<left>")  #'windmove-left)
     (local-set-key (kbd "s-S-<right>") #'windmove-right))
 
+  (defun le/org-cycle-before-ellipsis ()
+    "Expand or fold entry and place point at the end of the header line."
+    (let ((target-pos
+           (save-excursion
+             (condition-case nil
+                 (cond
+                  ;; Case 1: Point is in/after invisible fold (after ellipsis or on folded child)
+                  ((or (invisible-p (point))
+                       (and (fboundp 'org-fold-folded-p) (org-fold-folded-p (point)))
+                       (and (> (point) (point-min))
+                            (or (invisible-p (1- (point)))
+                                (and (fboundp 'org-fold-folded-p) (org-fold-folded-p (1- (point)))))))
+                   (let ((p (point)))
+                     (if (or (org-at-drawer-p) (org-at-block-p))
+                         p
+                       (org-back-to-heading-or-point-min t)
+                       ;; If cursor is inside a hidden child heading, ascend to visible parent
+                       (while (and (invisible-p (point))
+                                   (org-up-heading-safe)))
+                       (when (or (org-at-heading-p)
+                                 (org-at-drawer-p)
+                                 (org-at-block-p))
+                         (point)))))
+                  ;; Case 2: Point is on a visible heading/drawer/block line (before or on ellipsis)
+                  ((or (org-at-heading-p)
+                       (org-at-drawer-p)
+                       (org-at-block-p))
+                   (point))
+                  (t nil))
+               (error nil)))))
+      (when target-pos
+        (goto-char target-pos)
+        (let ((org-tab-first-hook nil))
+          (org-cycle))
+        (goto-char target-pos)
+        (org-end-of-line)
+        t)))
+
   :config
+  ;; Explicitly add hooks that already end in -hook
+  (add-hook 'org-tab-first-hook #'le/org-cycle-before-ellipsis)
+  (add-hook 'org-todo-repeat-hook #'org-reset-checkbox-state-subtree)
+
   (add-to-list 'org-src-lang-modes '("markdown" . markdown))
   (setq org-agenda-files (list (expand-file-name "gtd/gtd.org" orgdir)
                                (expand-file-name "gtd/inbox.org" orgdir)

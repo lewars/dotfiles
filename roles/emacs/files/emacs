@@ -495,8 +495,7 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
   :bind
   ("C-c w" . whitespace-cleanup)
   :init (setq whitespace-cleanup-mode-ignore-modes '(special-mode))
-  :hook ((prog-mode . whitespace-cleanup-mode)
-         (org-mode . whitespace-cleanup-mode)))
+  :hook ((prog-mode . whitespace-cleanup-mode)))
 
 (use-package paren
   :ensure nil

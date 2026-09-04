@@ -215,7 +215,9 @@ alias c1='ssh k8s-control-01'
 alias w1='ssh k8s-worker-01'
 alias w2='ssh k8s-worker-02'
 
-alias open='xdg-open'
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    alias open='xdg-open'
+fi
 alias di='sudo dnf install'
 alias diy='sudo dnf install -y'
 alias fa='alias|fzf'

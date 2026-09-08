@@ -1454,7 +1454,7 @@ If the side window is being created, it prompts for the source buffer."
    org-special-ctrl-a/e nil       ; Make C-a/C-e jump to the beginning/end of headline text, not the stars.
    org-startup-indented t         ; Start Org buffers with indentation
    org-startup-with-inline-images t ; Display inline images automatically when Org mode loads a file.
-   org-startup-folded 'overview)  ; Configure properties drawer to start in a closed position by default.
+   org-startup-folded 'overview  ; Configure properties drawer to start in a closed position by default.
    org-agenda-use-time-grid t     ; Enable the use of a time grid in the Org agenda.
    org-use-fast-todo-selection 'buffer ; TODO workflow configuration with fast keys
    org-link-frame-setup '((file . find-file)) ; Open link in frame

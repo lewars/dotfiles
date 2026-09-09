@@ -11,16 +11,15 @@ export OSH="${HOME}/.dotfiles/oh-my-bash"
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-bash is loaded.
 
-# if running on aroma set the theme to powerbash10k
-if [[ "$HOSTNAME" =~ ^aroma ]]; then
-    OSH_THEME="powerbash10k"
-else
-    # OSH_THEME="powerline-icon"
-    # OSH_THEME="powerline-plain"
-    # OSH_THEME="primer"
-    OSH_THEME="nekolight"
-    # POWERLINE_PROMPT_USER_INFO_MODE="sudo"
+OSH_THEME="nekolight"
+
+# Source local environment and aliases if present
+_local_bash_config="${XDG_STATE_HOME:-$HOME/.local/state}/bash/local"
+if [[ -f "$_local_bash_config" ]]; then
+    # shellcheck source=/dev/null
+    source "$_local_bash_config"
 fi
+unset _local_bash_config
 
 # Show Python virtual environment and conda environment
 export THEME_SHOW_PYTHON=true
@@ -177,14 +176,6 @@ export GPG_TTY
 export REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
 export SSL_CERT_FILE=/etc/pki/tls/certs/ca-bundle.crt
 
-# Source local, uncommitted private environment and aliases if present
-_local_bash_config="${XDG_STATE_HOME:-$HOME/.local/state}/bash/local"
-if [[ -f "$_local_bash_config" ]]; then
-    # shellcheck source=/dev/null
-    source "$_local_bash_config"
-fi
-unset _local_bash_config
-
 # shopts
 set +o noclobber
 
@@ -245,12 +236,6 @@ alias mytime='date +%H:%M:%S'
 alias tstamp='date "+%Y%m%dT%H%M%S"'
 alias today='date +"%A, %B %-d, %Y"'
 alias weeknum='date +%V'
-
-# hosts
-alias ai='ssh aroma'
-
-# Wayland
-alias wp="waypipe -c lz4=9 ssh aroma"
 
 # security
 alias check="dnf check-update --refresh"

@@ -6,8 +6,9 @@ case "$*" in
   *"-Y sign"*)
     if [ -w /dev/tty ]; then
       printf '\033[0;33m%s\033[0m\n' "{{ git_ssh_prompt_message }}" > /dev/tty
+    else
+      printf '\033[0;33m%s\033[0m\n' "{{ git_ssh_prompt_message }}" >&2
     fi
-    printf '\033[0;33m%s\033[0m\n' "{{ git_ssh_prompt_message }}" >&2
     ;;
 esac
 

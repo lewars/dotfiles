@@ -28,9 +28,9 @@ export VISUAL=$EDITOR
 export LSCOLORS=exgxcxfxbxegedabagacad
 export CLICOLOR=1
 
-# create tmp dir if not present
+# create tmp dir if not present with private permissions
 export TMPDIR=$HOME/tmp
-[ ! -d "$TMPDIR" ] && mkdir -p "$TMPDIR"
+[ ! -d "$TMPDIR" ] && mkdir -m 700 -p "$TMPDIR" || chmod 700 "$TMPDIR"
 
 # The next line enables shell command completion for gcloud.
 if [ -f "${HOME}/bin/google-cloud-sdk/completion.bash.inc" ]; then . "${HOME}/bin/google-cloud-sdk/completion.bash.inc"; fi

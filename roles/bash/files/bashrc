@@ -172,12 +172,18 @@ export EDITOR='emacsclient -n -r'
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 export TODO_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/todo"
 export HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S  "
-export SOPS_AGE_KEY_FILE="${HOME}/.config/sops/age/keys.txt"
 GPG_TTY=$(tty)
 export GPG_TTY
 export REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
 export SSL_CERT_FILE=/etc/pki/tls/certs/ca-bundle.crt
-# source "${HOME}/.bashrc.secrets"
+
+# Source local, uncommitted private environment and aliases if present
+_local_bash_config="${XDG_STATE_HOME:-$HOME/.local/state}/bash/local"
+if [[ -f "$_local_bash_config" ]]; then
+    # shellcheck source=/dev/null
+    source "$_local_bash_config"
+fi
+unset _local_bash_config
 
 # shopts
 set +o noclobber
@@ -210,23 +216,12 @@ alias qpv=fpv
 alias jcli=jenkins-cli
 alias task=go-task
 
-alias jmp='ssh k8s-jumpserver'
-alias c1='ssh k8s-control-01'
-alias w1='ssh k8s-worker-01'
-alias w2='ssh k8s-worker-02'
-
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     alias open='xdg-open'
 fi
 alias di='sudo dnf install'
 alias diy='sudo dnf install -y'
 alias fa='alias|fzf'
-
-# ssh aliases
-alias sshp=sshp.sh
-alias getip=getip.sh
-alias m01='sshp m01'
-alias a01='ssh a01'
 
 # system/admin
 alias s='systemctl --no-pager --full'
@@ -235,7 +230,6 @@ alias specs='fastfetch --localip-show-all-ips --localip-show-loop'
 
 # development
 alias gcsheet='gcloud cheat-sheet'
-alias pyact='source .venv/bin/activate'
 
 # networking
 alias lsock='sudo lsof -i -P'                   # lsock:        Display open sockets
@@ -254,7 +248,6 @@ alias weeknum='date +%V'
 
 # hosts
 alias ai='ssh aroma'
-alias aroma='ssh aroma'
 
 # Wayland
 alias wp="waypipe -c lz4=9 ssh aroma"
@@ -278,7 +271,15 @@ alias dclean='podman stop datadog_agent; sleep 4; podman rm datadog_agent'
 
 # emacs
 alias ec='emacsclient -c -n'
-alias quicknote='function _qn() { emacsclient "org-protocol://capture?template=N&url=shell&title=QuickNote&body=$1"; }; _qn'
+quicknote() {
+    if [ $# -eq 0 ]; then
+        echo "Usage: quicknote <text>"
+        return 1
+    fi
+    local encoded_body
+    encoded_body=$(python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1]))" "$*")
+    emacsclient "org-protocol://capture?template=N&url=shell&title=QuickNote&body=${encoded_body}"
+}
 
 # apps
 alias brave='flatpak run com.brave.Browser'
@@ -314,13 +315,9 @@ gitrealclean() {
 # Usage: ls -la | emacspipe "Folder Listing"
 emacspipe() {
     local title="${1:-CLI Capture}"
-    # local body
-    # body=$(cat) # Read from stdin
-
-    # URL encode the body using python
-    local encoded_body
-    encoded_body=$(python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.stdin.read()))")
-    emacsclient "org-protocol://capture?template=N&url=shell-pipe&title=${title}&body=${encoded_body}"
+    local query
+    query=$(python3 -c "import sys, urllib.parse; t = urllib.parse.quote(sys.argv[1]); b = urllib.parse.quote(sys.stdin.read()); print(f'title={t}&body={b}')" "$title")
+    emacsclient "org-protocol://capture?template=N&url=shell-pipe&${query}"
 }
 
 las(){
@@ -374,25 +371,20 @@ function k8listns() {
 
 ## A function obtains a shell on a running container
 function k8sh() {
-    # Set pod name
-    if [ -z "$1" ]; then
-        echo "Usage: k8sh <pod-name> <container-name>"
+    if [ -z "$1" ] || [ -z "$2" ]; then
+        echo "Usage: k8sh <pod-name> <container-name> [cmd [args...]]"
         return 1
     fi
 
-    # Set container name
-    if [ -z "$2" ]; then
-        echo "Usage: k8sh <pod-name> <container-name>"
-        return 1
-    fi
+    local pod="$1"
+    local container="$2"
+    shift 2
 
-    # Select command to run
-    cmd="$3"
-    if [ -z "$cmd" ]; then
-        cmd="/bin/bash"
+    if [ $# -eq 0 ]; then
+        kubectl exec -it "$pod" -c "$container" -- /bin/bash
+    else
+        kubectl exec -it "$pod" -c "$container" -- "$@"
     fi
-
-    kubectl exec -it "$1" -c "$2" -- sh -c $"$cmd"
 }
 
 ## A function that quickly cd's to a directory
@@ -481,6 +473,7 @@ except Exception as e:
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     export JAVA_HOME=/usr/local/opt/openjdk@17
+    export PATH="${HOME}/Library/Python/3.9/bin:$PATH"
 fi
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -535,14 +528,14 @@ fi
 export PATH="$PATH:${HOME}/.cargo/bin:${KREW_ROOT:-$HOME/.krew}/bin"
 
 # uv
-export PATH="/home/slams/.local/bin:$PATH"
+export PATH="${HOME}/.local/bin:$PATH"
 
 # zoxide
 eval "$(zoxide init bash)"
 alias cd=z
 
 # opencode
-export PATH=/home/slams/.opencode/bin:$PATH
+export PATH="${HOME}/.opencode/bin:$PATH"
 
 # hf
 export HF_HOME="${HF_HOME:-/srv/bwf/hf-cache}"

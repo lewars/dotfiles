@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -e
+
+# Prompt user when pushing or fetching via SSH with a hardware key
+case "$*" in
+  *"git-receive-pack"*)
+    if [ -w /dev/tty ]; then
+      printf '\033[0;33m%s\033[0m\n' "{{ git_ssh_push_prompt_message }}" > /dev/tty
+    else
+      printf '\033[0;33m%s\033[0m\n' "{{ git_ssh_push_prompt_message }}" >&2
+    fi
+    ;;
+  *"git-upload-pack"*)
+    if [ -w /dev/tty ]; then
+      printf '\033[0;33m%s\033[0m\n' "{{ git_ssh_fetch_prompt_message }}" > /dev/tty
+    else
+      printf '\033[0;33m%s\033[0m\n' "{{ git_ssh_fetch_prompt_message }}" >&2
+    fi
+    ;;
+esac
+
+# Locate system ssh binary dynamically with fallback
+SSH_BIN="$(command -v ssh 2>/dev/null || true)"
+if [ -z "$SSH_BIN" ] || [ "$SSH_BIN" = "$0" ]; then
+  if [ -x "/usr/bin/ssh" ]; then
+    SSH_BIN="/usr/bin/ssh"
+  elif [ -x "/usr/local/bin/ssh" ]; then
+    SSH_BIN="/usr/local/bin/ssh"
+  elif [ -x "/opt/homebrew/bin/ssh" ]; then
+    SSH_BIN="/opt/homebrew/bin/ssh"
+  else
+    SSH_BIN="ssh"
+  fi
+fi
+
+exec "$SSH_BIN" "$@"

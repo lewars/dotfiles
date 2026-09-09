@@ -3,7 +3,7 @@
 [user]
         name = {{ full_name }}
         email = {{ git_email }}
-        signingkey = {{ ssh_pub_key }}
+        signingkey = {{ git_ssh_signing_key | default('~/.ssh/gh_sk.pub') }}
 [alias]
         a = add
         st = status
@@ -55,6 +55,9 @@
 [core]
         editor = emacs -nw
         excludesfile = ~/.gitignore_global
+{% if git_ssh_push_wrapper_enabled | default(true) %}
+        sshCommand = {{ git_ssh_push_wrapper_path }}
+{% endif %}
 [status]
         short = true
 
@@ -83,3 +86,10 @@
         protocol = https
 [gpg]
 	format = ssh
+{% if git_ssh_signing_enabled | default(true) %}
+[gpg "ssh"]
+	program = {{ git_ssh_wrapper_path }}
+{% if git_ssh_allowed_signers_file is defined and git_ssh_allowed_signers_file %}
+	allowedSignersFile = {{ git_ssh_allowed_signers_file }}
+{% endif %}
+{% endif %}

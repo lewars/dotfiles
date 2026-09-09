@@ -1,0 +1,6 @@
+---
+cursor_config_dir: >-
+  {{ (ansible_facts.get('os_family', '') == 'Darwin')
+     | ternary(dotfiles_user_home + '/Library/Application Support/Cursor/User',
+               dotfiles_user_home + '/.config/Cursor/User') }}
+cursor_dotfiles_dir: "{{ dotfiles_home }}/roles/cursor/files"

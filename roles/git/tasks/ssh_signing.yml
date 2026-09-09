@@ -1,0 +1,68 @@
+---
+- name: Resolve user home and expanded paths for SSH signing
+  ansible.builtin.set_fact:
+    git_ssh_user_home_resolved: >-
+      {{ ansible_facts.get('user_dir', ansible_facts.get('env', {}).get('HOME', lookup('env', 'HOME'))) }}
+
+- name: Set expanded wrapper paths
+  ansible.builtin.set_fact:
+    git_ssh_wrapper_dir_expanded: "{{ git_ssh_wrapper_dir | regex_replace('^~(?=/|$)', git_ssh_user_home_resolved) }}"
+    git_ssh_wrapper_path_expanded: "{{ git_ssh_wrapper_path | regex_replace('^~(?=/|$)', git_ssh_user_home_resolved) }}"
+    git_ssh_push_wrapper_path_expanded: >-
+      {{ git_ssh_push_wrapper_path | regex_replace('^~(?=/|$)', git_ssh_user_home_resolved) }}
+
+- name: Ensure SSH wrapper directory exists
+  ansible.builtin.file:
+    path: "{{ git_ssh_wrapper_dir_expanded }}"
+    state: directory
+    owner: "{{ ansible_facts.get('user_id', omit) }}"
+    mode: '0755'
+
+- name: Deploy Git SSH signing wrapper script
+  ansible.builtin.template:
+    src: git-ssh-wrapper.sh.j2
+    dest: "{{ git_ssh_wrapper_path_expanded }}"
+    owner: "{{ ansible_facts.get('user_id', omit) }}"
+    mode: '0755'
+
+- name: Deploy Git SSH push/fetch wrapper script
+  ansible.builtin.template:
+    src: git-ssh-push-wrapper.sh.j2
+    dest: "{{ git_ssh_push_wrapper_path_expanded }}"
+    owner: "{{ ansible_facts.get('user_id', omit) }}"
+    mode: '0755'
+  when: git_ssh_push_wrapper_enabled | default(true) | bool
+
+- name: Configure Git gpg.format
+  community.general.git_config:
+    name: gpg.format
+    scope: global
+    value: ssh
+
+- name: Configure Git commit.gpgsign
+  community.general.git_config:
+    name: commit.gpgsign
+    scope: global
+    value: "true"
+
+- name: Configure Git gpg.ssh.program
+  community.general.git_config:
+    name: gpg.ssh.program
+    scope: global
+    value: "{{ git_ssh_wrapper_path }}"
+
+- name: Configure Git gpg.ssh.allowedSignersFile
+  community.general.git_config:
+    name: gpg.ssh.allowedSignersFile
+    scope: global
+    value: "{{ git_ssh_allowed_signers_file }}"
+  when:
+    - git_ssh_allowed_signers_file is defined
+    - git_ssh_allowed_signers_file | length > 0
+
+- name: Configure Git core.sshCommand
+  community.general.git_config:
+    name: core.sshCommand
+    scope: global
+    value: "{{ git_ssh_push_wrapper_path }}"
+  when: git_ssh_push_wrapper_enabled | default(true) | bool

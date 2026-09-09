@@ -1,0 +1,11 @@
+---
+git_ssh_signing_enabled: true
+git_ssh_signing_key: "~/.ssh/gh_sk.pub"
+git_ssh_wrapper_dir: "~/.local/bin"
+git_ssh_wrapper_path: "{{ git_ssh_wrapper_dir }}/git-ssh-wrapper"
+git_ssh_prompt_message: ">> Touch hardware key to sign commit..."
+git_ssh_allowed_signers_file: "~/.config/git/allowed_signers"
+git_ssh_push_wrapper_enabled: true
+git_ssh_push_wrapper_path: "{{ git_ssh_wrapper_dir }}/git-ssh-push-wrapper"
+git_ssh_push_prompt_message: ">> Touch hardware key to push to remote..."
+git_ssh_fetch_prompt_message: ">> Touch hardware key to fetch from remote..."

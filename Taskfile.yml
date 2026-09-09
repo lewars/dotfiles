@@ -91,3 +91,17 @@ tasks:
       - 'echo "WARNING: Can''t import bash configs!!"'
       - 'echo "WARNING: .bashrc should be a symbolic link"'
       - 'echo "WARNING: Hand edit roles/bash/template/bash_profiles.j2"'
+
+  diff-cursor:
+    internal: true
+    cmds:
+      - diff --color=always roles/cursor/files/settings.json ~/.config/Cursor/User/settings.json || true
+      - diff --color=always roles/cursor/files/keybindings.json ~/.config/Cursor/User/keybindings.json || true
+
+  save-cursor:
+    internal: true
+    cmds:
+      - cp -v ~/.config/Cursor/User/settings.json roles/cursor/files/settings.json
+      - >-
+        test -f ~/.config/Cursor/User/keybindings.json &&
+        cp -v ~/.config/Cursor/User/keybindings.json roles/cursor/files/keybindings.json || true

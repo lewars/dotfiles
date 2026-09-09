@@ -43,3 +43,7 @@
       become: false
       tags:
         - bash
+    - role: cursor
+      become: false
+      tags:
+        - cursor

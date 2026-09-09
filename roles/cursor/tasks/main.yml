@@ -1,0 +1,56 @@
+---
+- name: Ensure Cursor configuration directory exists
+  ansible.builtin.file:
+    path: "{{ cursor_config_dir }}"
+    state: directory
+    owner: "{{ user }}"
+    mode: "0755"
+  become: false
+
+- name: Check for existing settings.json
+  ansible.builtin.stat:
+    path: "{{ cursor_config_dir }}/settings.json"
+  register: cursor_settings_stat
+  become: false
+
+- name: Back up existing settings.json
+  ansible.builtin.command: >-
+    mv {{ cursor_config_dir }}/settings.json
+    {{ cursor_config_dir }}/settings.json.bak.{{ ansible_facts['date_time']['iso8601'] }}
+  when:
+    - cursor_settings_stat.stat.exists
+    - not cursor_settings_stat.stat.islnk
+  changed_when: true
+  become: false
+
+- name: Symlink settings.json
+  ansible.builtin.file:
+    src: "{{ cursor_dotfiles_dir }}/settings.json"
+    dest: "{{ cursor_config_dir }}/settings.json"
+    state: link
+    force: true
+  become: false
+
+- name: Check for existing keybindings.json
+  ansible.builtin.stat:
+    path: "{{ cursor_config_dir }}/keybindings.json"
+  register: cursor_keybindings_stat
+  become: false
+
+- name: Back up existing keybindings.json
+  ansible.builtin.command: >-
+    mv {{ cursor_config_dir }}/keybindings.json
+    {{ cursor_config_dir }}/keybindings.json.bak.{{ ansible_facts['date_time']['iso8601'] }}
+  when:
+    - cursor_keybindings_stat.stat.exists
+    - not cursor_keybindings_stat.stat.islnk
+  changed_when: true
+  become: false
+
+- name: Symlink keybindings.json
+  ansible.builtin.file:
+    src: "{{ cursor_dotfiles_dir }}/keybindings.json"
+    dest: "{{ cursor_config_dir }}/keybindings.json"
+    state: link
+    force: true
+  become: false

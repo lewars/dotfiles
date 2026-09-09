@@ -8,6 +8,8 @@
   ansible.builtin.set_fact:
     git_ssh_wrapper_dir_expanded: "{{ git_ssh_wrapper_dir | regex_replace('^~(?=/|$)', git_ssh_user_home_resolved) }}"
     git_ssh_wrapper_path_expanded: "{{ git_ssh_wrapper_path | regex_replace('^~(?=/|$)', git_ssh_user_home_resolved) }}"
+    git_ssh_push_wrapper_path_expanded: >-
+      {{ git_ssh_push_wrapper_path | regex_replace('^~(?=/|$)', git_ssh_user_home_resolved) }}
 
 - name: Ensure SSH wrapper directory exists
   ansible.builtin.file:
@@ -22,6 +24,14 @@
     dest: "{{ git_ssh_wrapper_path_expanded }}"
     owner: "{{ ansible_facts.get('user_id', omit) }}"
     mode: '0755'
+
+- name: Deploy Git SSH push/fetch wrapper script
+  ansible.builtin.template:
+    src: git-ssh-push-wrapper.sh.j2
+    dest: "{{ git_ssh_push_wrapper_path_expanded }}"
+    owner: "{{ ansible_facts.get('user_id', omit) }}"
+    mode: '0755'
+  when: git_ssh_push_wrapper_enabled | default(true) | bool
 
 - name: Configure Git gpg.format
   community.general.git_config:
@@ -49,3 +59,10 @@
   when:
     - git_ssh_allowed_signers_file is defined
     - git_ssh_allowed_signers_file | length > 0
+
+- name: Configure Git core.sshCommand
+  community.general.git_config:
+    name: core.sshCommand
+    scope: global
+    value: "{{ git_ssh_push_wrapper_path }}"
+  when: git_ssh_push_wrapper_enabled | default(true) | bool

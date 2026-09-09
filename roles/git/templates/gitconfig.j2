@@ -55,6 +55,9 @@
 [core]
         editor = emacs -nw
         excludesfile = ~/.gitignore_global
+{% if git_ssh_push_wrapper_enabled | default(true) %}
+        sshCommand = {{ git_ssh_push_wrapper_path }}
+{% endif %}
 [status]
         short = true
 

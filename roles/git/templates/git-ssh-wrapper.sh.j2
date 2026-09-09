@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -e
+
+# Intercept ssh-keygen when signing commits or tags to prompt for hardware key touch
+case "$*" in
+  *"-Y sign"*)
+    printf '\033[0;33m%s\033[0m\n' "{{ git_ssh_prompt_message }}" >&2
+    ;;
+esac
+
+# Locate system ssh-keygen dynamically with fallback
+SSH_KEYGEN="$(command -v ssh-keygen 2>/dev/null || true)"
+if [ -z "$SSH_KEYGEN" ] || [ "$SSH_KEYGEN" = "$0" ]; then
+  if [ -x "/usr/bin/ssh-keygen" ]; then
+    SSH_KEYGEN="/usr/bin/ssh-keygen"
+  elif [ -x "/usr/local/bin/ssh-keygen" ]; then
+    SSH_KEYGEN="/usr/local/bin/ssh-keygen"
+  elif [ -x "/opt/homebrew/bin/ssh-keygen" ]; then
+    SSH_KEYGEN="/opt/homebrew/bin/ssh-keygen"
+  else
+    SSH_KEYGEN="ssh-keygen"
+  fi
+fi
+
+exec "$SSH_KEYGEN" "$@"

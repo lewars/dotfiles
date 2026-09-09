@@ -1,24 +1,37 @@
 - name: Install git
-  dnf: name=git state=present
+  ansible.builtin.dnf:
+    name: git
+    state: present
   become: true
   become_user: root
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   when: false
+
 - name: Link global gitignore file
-  file:
+  ansible.builtin.file:
     src: '{{ dotfiles_home }}/roles/git/files/gitignore_global'
     dest: '{{ dotfiles_user_home }}/.gitignore_global'
     state: link
     force: true
+
 - name: Check if gitconfig exists
-  stat: path="{{dotfiles_user_home}}/.gitconfig"
-  register: gitconfig_stat
+  ansible.builtin.stat:
+    path: "{{ dotfiles_user_home }}/.gitconfig"
+  register: git_gitconfig_stat
+
 - name: Back up gitconfig
-  command: mv ~/.gitconfig ~/.gitconfig.bak
+  ansible.builtin.command: mv ~/.gitconfig ~/.gitconfig.bak
   args:
-    creates: '{{dotfiles_user_home}}/.gitconfig.bak'
-  when: gitconfig_stat.stat.exists
+    creates: '{{ dotfiles_user_home }}/.gitconfig.bak'
+  when: git_gitconfig_stat.stat.exists
+
 - name: Make sure gitconfig is up to date
-  template:
+  ansible.builtin.template:
     src: gitconfig.j2
-    dest: '{{dotfiles_user_home}}/.gitconfig'
+    dest: '{{ dotfiles_user_home }}/.gitconfig'
+    mode: '0644'
+
+- name: Include SSH signing tasks
+  ansible.builtin.include_tasks:
+    file: ssh_signing.yml
+  when: git_ssh_signing_enabled | bool

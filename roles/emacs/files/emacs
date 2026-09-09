@@ -78,20 +78,30 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 (package-initialize)
 
 ;; Bootstrap Quelpa directly from GitHub if not installed
-;; This bypasses the "Package unavailable" error on fresh installs
+;; Pinned to commit e519810b3cb7453eff751ca9302aadc01a62f70f with sha256 checksum verification
 (unless (package-installed-p 'quelpa)
   (with-temp-buffer
-    (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
+    (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/e519810b3cb7453eff751ca9302aadc01a62f70f/quelpa.el")
+    (unless (string= (secure-hash 'sha256 (buffer-string))
+                     "809c891d0215f5494f7b60f63f4d4e5e1fe3779d8cd9a581eac676eb6bbf2a38")
+      (error "Quelpa bootstrap integrity check failed! Expected hash does not match"))
     (eval-buffer)
     (quelpa-self-upgrade)))
 
 (require 'quelpa)
 (require 'use-package-ensure)
 
-;; Install quelpa-use-package via Quelpa
+;; Pin Quelpa's self-recipe for upgrades
+(setq quelpa-recipe
+      '(quelpa :repo "quelpa/quelpa"
+               :fetcher github
+               :commit "e519810b3cb7453eff751ca9302aadc01a62f70f"))
+
+;; Install quelpa-use-package pinned to verified commit
 (quelpa '(quelpa-use-package
           :fetcher git
-          :url "https://github.com/quelpa/quelpa-use-package.git"))
+          :url "https://github.com/quelpa/quelpa-use-package.git"
+          :commit "d985c0326b66aa19581918deccdc5edcacccf953"))
 
 (require 'quelpa-use-package)
 
@@ -133,7 +143,11 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
                 "\\.ispell_english"
                 "\\.saves-"
                 "/elpa/"
-                "\\.git/.*")
+                "\\.git/.*"
+                "\\.ssh/"
+                "/sops/age/"
+                "\\.authinfo.*"
+                "\\.gpg\\'")
               recentf-exclude))
 
 ;; (add-to-list 'treesit-language-source-alist
@@ -633,7 +647,7 @@ The buffer is made read-only once the command completes."
 
     ;; Start the asynchronous shell command
     (let ((process (async-shell-command command output-buffer)))
-      (set_process_sentinel process
+      (set-process-sentinel process
         (lambda (proc _event-string) ; _event-string describes how process ended
           ;; Check if the process has actually finished
           (when (memq (process-status proc) '(exit signal))
@@ -752,27 +766,33 @@ If the side window is being created, it prompts for the source buffer."
  '(centaur-tabs-bar-height 22)
  '(column-number-mode 1)
  '(custom-safe-themes
-   '("088cd6f894494ac3d4ff67b794467c2aa1e3713453805b93a8bcb2d72a0d1b53" "f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33"
-     "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294" "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb"
-     "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8" "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77"
-     "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da" "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a"
-     "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d" "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae"
-     "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4" "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561"
-     "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350" default))
+   '("088cd6f894494ac3d4ff67b794467c2aa1e3713453805b93a8bcb2d72a0d1b53"
+     "f64189544da6f16bab285747d04a92bd57c7e7813d8c24c30f382f087d460a33"
+     "443e2c3c4dd44510f0ea8247b438e834188dc1c6fb80785d83ad3628eadf9294"
+     "adaf421037f4ae6725aa9f5654a2ed49e2cd2765f71e19a7d26a454491b486eb"
+     "60ada0ff6b91687f1a04cc17ad04119e59a7542644c7c59fc135909499400ab8"
+     "0c08a5c3c2a72e3ca806a29302ef942335292a80c2934c1123e8c732bb2ddd77"
+     "ce4234c32262924c1d2f43e6b61312634938777071f1129c7cde3ebd4a3028da"
+     "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a"
+     "1aa4243143f6c9f2a51ff173221f4fd23a1719f4194df6cef8878e75d349613d"
+     "eca44f32ae038d7a50ce9c00693b8986f4ab625d5f2b4485e20f22c47f2634ae"
+     "6945dadc749ac5cbd47012cad836f92aea9ebec9f504d32fe89a956260773ca4"
+     "636b135e4b7c86ac41375da39ade929e2bd6439de8901f53f88fde7dd5ac3561"
+     "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350"
+     default))
  '(frame-background-mode nil)
  '(imenu-auto-rescan t)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(org-agenda-timegrid-use-ampm t)
  '(package-selected-packages
-   '(agent-shell anki-editor ansible ansible-doc ansible-vault atomic-chrome blacken cape casual centaur-tabs colorful-mode consult-flycheck consult-gh-forge
+   '(anki-editor ansible ansible-doc ansible-vault atomic-chrome blacken cape casual centaur-tabs colorful-mode consult-flycheck consult-gh-forge
                  consult-lsp consult-yasnippet corfu dashboard demap dockerfile-mode doom-modeline doom-themes dotenv-mode dumb-jump emojify eterm-256color
                  expreg flycheck-posframe flyspell-correct fzf gnuplot go-mode gptel groovy-mode helpful highlight-indent-guides htmlize ibuffer-projectile
                  idle-highlight-mode imenu-list jinja2-mode k8s-mode latex-preview-pane lorem-ipsum lsp-java lsp-pyright lsp-ui marginalia mermaid-mode
                  multi-vterm multiple-cursors nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer ob-go ob-mermaid orderless org-appear
                  org-bullets org-roam-ui prescient py-isort python-mode pyvenv quelpa-use-package systemd terraform-mode textile-mode treemacs-all-the-icons
                  treemacs-magit treemacs-nerd-icons treemacs-projectile vertico vertico-posframe visual-fill-column whitespace-cleanup-mode yaml-pro))
- '(safe-local-variable-values
-   '((gptel-model . gemini-3.1-pro-preview) (eval org-babel-execute-buffer)))
+ '(safe-local-variable-values '((gptel-model . gemini-3.1-pro-preview)))
  '(show-paren-context-when-offscreen t)
  '(show-paren-style 'mixed)
  '(tramp-default-method "ssh")
@@ -2764,7 +2784,7 @@ Make it conversational but professional. Include transition phrases between sect
   ;; (define-key vterm-mode-map (kbd "s-c") 'simpleclip-copy)
   ;; (define-key vterm-mode-map (kbd "s-x") 'simpleclip-kill)
   ;; (define-key vterm-mode-map (kbd "s-v") 'simpleclip-paste)
-  (setq vterm-enable-manipulate-selection-data-by-osc52 t)
+  (setq vterm-enable-manipulate-selection-data-by-osc52 nil)
 
   :custom
   (vterm-copy-exclude-prompt t)
@@ -2791,7 +2811,7 @@ Make it conversational but professional. Include transition phrases between sect
  (setq-local show-trailing-whitespace nil)
 
  (setq gptel-track-response nil
-       gptel-log-level 'info
+       gptel-log-level nil
        gptel-model 'gemini-lite-latest
        gptel-backend (gptel-make-gemini "Gemini"
                        :host "generativelanguage.googleapis.com"
@@ -2852,7 +2872,20 @@ Make it conversational but professional. Include transition phrases between sect
 (use-package atomic-chrome
   :ensure t
   :config
-  (atomic-chrome-start-server)
+  (defun le/atomic-chrome-verify-origin (orig-fun socket frame)
+    "Verify that SOCKET connection origin is an authorized browser extension."
+    (let ((origin (websocket-origin socket)))
+      (if (or (null origin)
+              (string-match-p "\\`\\(chrome-extension://\\|moz-extension://\\)" origin))
+          (funcall orig-fun socket frame)
+        (message "atomic-chrome: Rejected unauthorized connection from origin: %s" origin)
+        (websocket-close socket))))
+  (advice-add 'atomic-chrome-on-message :around #'le/atomic-chrome-verify-origin)
+
+  ;; Server startup is disabled by default for security.
+  ;; Run M-x atomic-chrome-start-server manually when needed.
+  ;; (atomic-chrome-start-server)
+
   (setq atomic-chrome-url-major-mode-alist
         '(("github\\.com" . gfm-mode)
           ("redmine" . textile-mode)
@@ -3128,25 +3161,6 @@ Make it conversational but professional. Include transition phrases between sect
 ;; (advice-add 'org-todo :around #'le/org-todo-with-completion)
 
 
-(use-package agent-shell
-  :ensure t
-  :bind (:map agent-shell-mode-map
-              ("RET" . newline)
-              ("M-RET" . shell-maker-submit))
-  :config
-  (setq agent-shell-google-authentication
-        (agent-shell-google-make-authentication
-         :api-key (lambda () (auth-source-pass-get "secret" "google-api-key"))))
-  (setq agent-shell-container-command-runner
-        (lambda (buffer)
-          (let ((config (agent-shell-get-config buffer)))
-            (pcase (map-elt config :identifier)
-              ('gemini-cli  '("podman" "run" "--rm" "-it"
-                              "--net=host"
-                              "-w" "/workspace"
-                              "gemini-cli-image"
-                              "xvfb" "-a" "gemini" "--experimental-acp")))))))
-
 (use-package ansible
   :ensure t
   :hook ((yaml-mode . ansible-mode)
@@ -3159,13 +3173,6 @@ Make it conversational but professional. Include transition phrases between sect
   :hook ((yaml-mode . ansible-doc-mode)
          (yaml-ts-mode . ansible-doc-mode))
     )
-
-;; (use-package ansible-vault
-;;   :ensure t
-;;   :custom
-;;   (ansible-vault-password-file "~/.vault-pass") ; set to nil to prompt instead
-;;   :hook ((yaml-mode . ansible-vault-mode)
-;;          (yaml-ts-mode . ansible-vault-mode)))
 
 (use-package yaml-ts-mode
   :ensure nil  ; built-in

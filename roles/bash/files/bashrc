@@ -485,9 +485,14 @@ export FZF_CTRL_R_OPTS="
 
 # Set up fzf key bindings and fuzzy completion
 FZF_CTRL_T_COMMAND=""
-if [ -x "$(command -v fzf)"  ]
-then
-    source /usr/share/fzf/shell/key-bindings.bash
+if [ -x "$(command -v fzf)" ]; then
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        if [ -f "/opt/homebrew/opt/fzf/shell/key-bindings.bash" ]; then
+            source /opt/homebrew/opt/fzf/shell/key-bindings.bash
+        fi
+    elif [ -f "/usr/share/fzf/shell/key-bindings.bash" ]; then
+        source /usr/share/fzf/shell/key-bindings.bash
+    fi
 fi
 
 # # Set up gcloud auto complete

@@ -1363,6 +1363,7 @@ If the side window is being created, it prompts for the source buffer."
   (setq-local line-spacing 0.1)                     ; Add extra spacing between lines
   (setq-default visual-fill-column-center-text t)   ; Center text globally (affects all buffers)
   (visual-fill-column-mode 1)                       ; Enable visual-fill-column mode
+  (display-line-numbers-mode 1)
 
   ;; --- Minor Modes ---
   (org-indent-mode 1)
@@ -1374,8 +1375,7 @@ If the side window is being created, it prompts for the source buffer."
   (define-key yas-keymap [tab] 'yas-next-field-or-maybe-expand)
 
   ;; --- Corfu auto complete setup ---
-  (setq-local corfu-auto nil)
-  )
+  (setq-local corfu-auto nil))
 
 ;; ob-mermaid configuration
 (use-package ob-mermaid

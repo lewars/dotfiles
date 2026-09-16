@@ -2450,8 +2450,7 @@ Make it conversational but professional. Include transition phrases between sect
         ;; This restores the "Enter to complete" behavior
         ("RET" . corfu-insert)
         ;; Ensure the graphical Enter key works too
-        ("<return>" . corfu-insert)
-        ("C-c C-l" . completion-at-point)))
+        ("<return>" . corfu-insert)))
 
 ;; 2. VISUALS: Nerd Icons for Corfu
 ;; This replaces kind-icon or company-box

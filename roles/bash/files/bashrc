@@ -108,6 +108,9 @@ if [[ $- == *i* && -z "${CURSOR_AGENT:-}" ]]; then
       gh
       makefile
       kubectl
+      ssh
+      tmux
+      uv
     )
 
     # Which aliases would you like to load? (aliases can be found in ~/.oh-my-bash/aliases/*)
@@ -124,7 +127,6 @@ if [[ $- == *i* && -z "${CURSOR_AGENT:-}" ]]; then
     # Add wisely, as too many plugins slow down shell startup.
     plugins=(
       git
-      bashmarks
     )
 
     # Which plugins would you like to conditionally load? (plugins can be found in ~/.oh-my-bash/plugins/*)
@@ -196,6 +198,9 @@ shopt -u nocasematch
 unalias g 2>/dev/null || true
 unalias p 2>/dev/null || true
 unalias d 2>/dev/null || true
+unalias less 2>/dev/null || true
+unalias src 2>/dev/null || true
+unalias cic 2>/dev/null || true
 
 # aliases
 alias a=alias
@@ -207,7 +212,11 @@ alias g=gcloud
 alias jf='sudo journalctl --follow'
 alias qpv=fpv
 alias jcli=jenkins-cli
-alias task=go-task
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    if command -v go-task ; then
+        alias task=go-task
+    fi
+fi
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     alias open='xdg-open'

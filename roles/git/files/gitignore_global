@@ -6,3 +6,4 @@
 .claude
 .gemini
 PROMPT.md
+.env.github

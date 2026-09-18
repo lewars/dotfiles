@@ -11,7 +11,7 @@ fi
 
 {% if ansible_os_family == 'RedHat' %}
 
-export PATH=$PATH:{{ default_path }}:/usr/local/google-cloud-sdk/bin
+export PATH=$PATH:{{ default_path }}
 
 # Go environment variables
 export GOPATH="$HOME/go"
@@ -32,8 +32,6 @@ export CLICOLOR=1
 export TMPDIR=$HOME/tmp
 [ ! -d "$TMPDIR" ] && mkdir -m 700 -p "$TMPDIR" || chmod 700 "$TMPDIR"
 
-# The next line enables shell command completion for gcloud.
-if [ -f "${HOME}/bin/google-cloud-sdk/completion.bash.inc" ]; then . "${HOME}/bin/google-cloud-sdk/completion.bash.inc"; fi
 {% if ansible_os_family == 'Darwin' %}
 test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"
 {% endif %}

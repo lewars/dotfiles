@@ -213,7 +213,7 @@ alias jf='sudo journalctl --follow'
 alias qpv=fpv
 alias jcli=jenkins-cli
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    if command -v go-task ; then
+    if command -v go-task >/dev/null ; then
         alias task=go-task
     fi
 fi
@@ -469,7 +469,7 @@ except Exception as e:
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     export JAVA_HOME=/usr/local/opt/openjdk@17
-    export PATH="${HOME}/Library/Python/3.9/bin:$PATH"
+    export PATH="$PATH:${HOME}/Library/Python/3.9/bin"
 fi
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -526,17 +526,17 @@ if command -v kubectl &> /dev/null; then
     alias k=kubectl
     complete -o default -F __start_kubectl k
 fi
-export PATH="$PATH:${HOME}/.cargo/bin:${KREW_ROOT:-$HOME/.krew}/bin"
+export PATH="$PATH:${HOME}/.local/bin:${HOME}/.cargo/bin:${KREW_ROOT:-$HOME/.krew}/bin"
 
 # uv
-export PATH="${HOME}/.local/bin:$PATH"
+# export PATH="$PATH:${HOME}/.local/bin"
 
 # zoxide
 eval "$(zoxide init bash)"
 alias cd=z
 
 # opencode
-export PATH="${HOME}/.opencode/bin:$PATH"
+export PATH="$PATH:${HOME}/.opencode/bin"
 
 # hf
 export HF_HOME="${HF_HOME:-/srv/bwf/hf-cache}"

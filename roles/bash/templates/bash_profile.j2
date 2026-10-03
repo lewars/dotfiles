@@ -11,15 +11,13 @@ fi
 
 {% if ansible_os_family == 'RedHat' %}
 
-export PATH=$PATH:{{ default_path }}
-
 # Go environment variables
 export GOPATH="$HOME/go"
 export GOBIN="$GOPATH/bin"
 export PATH="$PATH:$GOBIN"
 
 {% elif ansible_os_family == 'Darwin' %}
-export PATH=$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:/usr/local/opt/grep/libexec/gnubin:{{ default_path }}:$GOBIN:/usr/local/google-cloud-sdk/bin:$PATH
+export PATH=$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:/usr/local/opt/grep/libexec/gnubin:$GOBIN:/usr/local/google-cloud-sdk/bin:$PATH:{{ default_path }}:
 {% endif %}
 export PAGER=less
 export LESS=-iXMr

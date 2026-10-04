@@ -785,9 +785,8 @@ If the side window is being created, it prompts for the source buffer."
                  ibuffer-projectile idle-highlight-mode imenu-list jinja2-mode k8s-mode latex-preview-pane lorem-ipsum lsp-java lsp-pyright lsp-ui marginalia
                  mermaid-mode multi-vterm multiple-cursors nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer ob-go ob-mermaid orderless
                  org-appear org-bullets org-roam-ui prescient py-isort python-mode pyvenv quelpa-use-package systemd terraform-mode textile-mode
-                 treemacs-all-the-icons treemacs-magit treemacs-nerd-icons treemacs-projectile typescript-mode vertico vertico-posframe visual-fill-column
+                 treemacs-all-the-icons treemacs-magit treemacs-nerd-icons treemacs-projectile vertico vertico-posframe visual-fill-column
                  whitespace-cleanup-mode yaml-pro))
- '(safe-local-variable-values '((gptel-model . gemini-3.1-pro-preview)))
  '(show-paren-context-when-offscreen t)
  '(show-paren-style 'mixed)
  '(tramp-default-method "ssh")
@@ -1150,54 +1149,22 @@ If the side window is being created, it prompts for the source buffer."
 
 (use-package flycheck
   :ensure t
-  ;; :init (global-flycheck-mode)
   :config (setq-default flycheck-checker-error-threshold 2048))
-  ;; ;; add a lambda for flycheck-rror-list-mode-hook
-  ;; (add-hook 'flycheck-error-list-mode-hook
-  ;;           (lambda ()
-  ;;             (setq tabulated-list-format `[("File" 6)
-  ;;                                           ("Line" 5 flycheck-error-list-entry-< :right-align t)
-  ;;                                           ("Col" 3 nil :right-align t)
-  ;;                                           ("Level" 5 flycheck-error-list-entry-level-<)
-  ;;                                           ("ID" 7 t)
-  ;;                                           (,(flycheck-error-list-make-last-column "Message" 'Checker) 0 t)]))))
-
-;;  :config (setq-default flycheck-disabled-checkers '(emacs-lisp)))
 
 (use-package flycheck-posframe
   :ensure t
   :after flycheck
+  :hook (flycheck-mode . flycheck-posframe-mode)
   :config
   (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
   (flycheck-posframe-configure-pretty-defaults)
-  (setq flycheck-posframe-warning-prefix "\u26a0 ")
-  (setq flycheck-posframe-error-prefix "\u26a0 "))
+  (setq flycheck-posframe-warning-prefix "⚠️ ")
+  (setq flycheck-posframe-error-prefix "❌ ")
+  (setq flycheck-posframe-border-width 1)
+  (setq flycheck-posframe-border-use-error-face t)
+  (set-face-attribute 'flycheck-posframe-error-face nil :height 0.77)
+  (set-face-attribute 'flycheck-posframe-warning-face nil :height 0.77))
 
-;; Productivity
-;; (use-package copilot
-;;   :vc
-;;   (:url "https://github.com/copilot-emacs/copilot.el"
-;;         :rev :newest
-;;         :branch "main")
-;;   :ensure t
-;;   :hook ((post-command-hook . copilot-clear-overlay))
-;;          ;;(prog-mode . copilot-mode))
-;;   :bind (("M-\\" . copilot-complete)
-;;          :map copilot-completion-map
-;;          ("C-g" . copilot-clear-overlay)
-;;          ("<ESC>" . copilot-clear-overlay)
-;;          ("C-p" . copilot-previous-completion)
-;;          ("C-n" . copilot-next-completion)
-;;          ("<tab>" . copilot-accept-completion)
-;;          ("[tab]" . copilot-accept-completion)
-;;          ("C-w" . copilot-accept-completion-by-word)
-;;          ("C-l" . copilot-accept-completion-by-line))
-;;   :config
-;;   (setq copilot-idle-delay .5)
-;;   (setq copilot-max-char-warning-disabled t)
-;;   (setq copilot-indentation-alist nil)
-;;   (setq copilot-indent-offset-warning-disable t)
-;;   (add-to-list 'copilot-indentation-alist '(org-mode . 2)))
 
 (use-package ibuffer-projectile
   :ensure t)
@@ -2529,12 +2496,12 @@ Make it conversational but professional. Include transition phrases between sect
   :ensure t
   :config (setq lsp-ui-sideline-show-diagnostics nil
                 lsp-ui-sideline-show-hover nil
-                lsp-ui-sideline-show-code-actions t
+                lsp-ui-sideline-show-code-actions nil
                 lsp-ui-sideline-update-mode 'line
                 lsp-ui-peek-enable t
                 lsp-ui-peek-show-directory t
                 lsp-ui-doc-enable t
-                lsp-ui-doc-delay 3             ; Prevent aggressive flashing while moving cursor
+                lsp-ui-doc-delay 4             ; Prevent aggressive flashing while moving cursor
                 lsp-ui-doc-show-with-cursor t    ; FIXED: Enables popup when point is on a symbol
                 lsp-ui-doc-show-with-mouse t
                 lsp-ui-doc-position 'top))
@@ -2806,14 +2773,12 @@ Make it conversational but professional. Include transition phrases between sect
 
  (setq gptel-track-response nil
        gptel-log-level nil
-       gptel-model 'gemini-lite-latest
+       gptel-model 'gemini-3.8-flash
        gptel-backend (gptel-make-gemini "Gemini"
                        :host "generativelanguage.googleapis.com"
                        :key #'gptel-api-key-from-auth-source
                        :stream t
-                       :models '(gemini-pro-latest
-                                 gemini-lite-latest
-                                 gemini-3.8-flash)))
+                       :models '(gemini-3.8-flash)))
 
 (add-to-list 'gptel-directives
              `(Anki-Card-Generator . ,(concat

@@ -42,13 +42,13 @@
                  (expand-file-name "~/org")))
 
 (require 'bookmark)
-(bookmark-store "gtd"
-                `((filename . ,(expand-file-name "gtd/gtd.org" orgdir)))
-                nil)
+(setq bookmark-watch-bookmark-file 'silent)
+(setq bookmark-save-flag 1)
+
 (defun le/open-gtd ()
-  "Open or switch to the file specified by the 'gtd' bookmark."
+  "Open or switch to the GTD file."
   (interactive)
-  (bookmark-jump "gtd"))
+  (find-file (expand-file-name "gtd/gtd.org" orgdir)))
 (global-set-key (kbd "C-c g") 'le/open-gtd)
 
 

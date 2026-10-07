@@ -172,8 +172,8 @@ The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
 
   ;; Set window size
   (setq default-frame-alist
-      '((width . 209)
-        (height . 79))))
+      '((width . 167)
+        (height . 63))))
 
 ;; Handle large file
 ;; Enable so-long mode globally (built into Emacs 27+)

@@ -1374,41 +1374,46 @@ If the side window is being created, it prompts for the source buffer."
     (local-set-key (kbd "s-S-<right>") #'windmove-right))
 
   (defun le/org-cycle-before-ellipsis ()
-    "Expand or fold entry and place point at the end of the header line."
-    (let ((target-pos
-           (save-excursion
-             (condition-case nil
-                 (cond
-                  ;; Case 1: Point is in/after invisible fold (after ellipsis or on folded child)
-                  ((or (invisible-p (point))
-                       (and (fboundp 'org-fold-folded-p) (org-fold-folded-p (point)))
-                       (and (> (point) (point-min))
-                            (or (invisible-p (1- (point)))
-                                (and (fboundp 'org-fold-folded-p) (org-fold-folded-p (1- (point)))))))
-                   (let ((p (point)))
-                     (if (or (org-at-drawer-p) (org-at-block-p))
-                         p
-                       (org-back-to-heading-or-point-min t)
-                       ;; If cursor is inside a hidden child heading, ascend to visible parent
-                       (while (and (invisible-p (point))
-                                   (org-up-heading-safe)))
-                       (when (or (org-at-heading-p)
-                                 (org-at-drawer-p)
-                                 (org-at-block-p))
-                         (point)))))
-                  ;; Case 2: Point is on a visible heading/drawer/block line (before or on ellipsis)
-                  ((or (org-at-heading-p)
-                       (org-at-drawer-p)
-                       (org-at-block-p))
-                   (point))
-                  (t nil))
-               (error nil)))))
+    "Expand or fold entry without jumping cursor to end of line if already on heading."
+    (let* ((orig-pos (point))
+           (in-fold (or (invisible-p orig-pos)
+                        (and (fboundp 'org-fold-folded-p) (org-fold-folded-p orig-pos))
+                        (and (> orig-pos (point-min))
+                             (or (invisible-p (1- orig-pos))
+                                 (and (fboundp 'org-fold-folded-p) (org-fold-folded-p (1- orig-pos)))))))
+           (target-pos
+            (save-excursion
+              (condition-case nil
+                  (cond
+                   ;; Case 1: Point is in/after invisible fold (after ellipsis or on folded child)
+                   (in-fold
+                    (let ((p (point)))
+                      (if (or (org-at-drawer-p) (org-at-block-p))
+                          p
+                        (org-back-to-heading-or-point-min t)
+                        ;; If cursor is inside a hidden child heading, ascend to visible parent
+                        (while (and (invisible-p (point))
+                                    (org-up-heading-safe)))
+                        (when (or (org-at-heading-p)
+                                  (org-at-drawer-p)
+                                  (org-at-block-p))
+                          (point)))))
+                   ;; Case 2: Point is on a visible heading/drawer/block line (before or on ellipsis)
+                   ((or (org-at-heading-p)
+                        (org-at-drawer-p)
+                        (org-at-block-p))
+                    orig-pos)
+                   (t nil))
+                (error nil)))))
       (when target-pos
         (goto-char target-pos)
         (let ((org-tab-first-hook nil))
           (org-cycle))
-        (goto-char target-pos)
-        (org-end-of-line)
+        (if in-fold
+            (progn
+              (goto-char target-pos)
+              (org-end-of-line))
+          (goto-char orig-pos))
         t)))
 
   :config

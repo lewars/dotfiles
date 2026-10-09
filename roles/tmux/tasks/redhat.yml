@@ -1,0 +1,6 @@
+---
+- name: Install tmux with dnf
+  ansible.builtin.dnf:
+    name: tmux
+    state: present
+  become: true

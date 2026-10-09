@@ -1,13 +1,63 @@
-- import_tasks: debian.yml
-  when: ansible_os_family == "Debian"
+---
+- name: Install tmux on Debian family
+  ansible.builtin.import_tasks: debian.yml
+  when: ansible_facts['os_family'] == "Debian"
 
-- name: Install tpm
-  git:
-    repo: https://github.com/tmux-plugins/tpm
-    dest: "{{dotfiles_user_home}}/.tmux/plugins/tpm"
+- name: Install tmux on RedHat family
+  ansible.builtin.import_tasks: redhat.yml
+  when: ansible_facts['os_family'] == "RedHat"
 
-- name: Symlink .tmux.conf
-  file:
-    src: "{{ dotfiles_home }}/roles/tmux/files/tmux.conf"
-    dest: "{{dotfiles_user_home}}/.tmux.conf"
+- name: Install tmux plugins
+  ansible.builtin.git:
+    repo: "{{ item.repo }}"
+    dest: "{{ dotfiles_user_home }}/.tmux/plugins/{{ item.name }}"
+  loop: "{{ tmux_plugins }}"
+
+- name: Ensure tmux configuration directory exists
+  ansible.builtin.file:
+    path: "{{ tmux_config_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Check for legacy ~/.tmux.conf
+  ansible.builtin.stat:
+    path: "{{ dotfiles_user_home }}/.tmux.conf"
+  register: legacy_tmux_conf_stat
+
+- name: Remove legacy ~/.tmux.conf symlink
+  ansible.builtin.file:
+    path: "{{ dotfiles_user_home }}/.tmux.conf"
+    state: absent
+  when:
+    - legacy_tmux_conf_stat.stat.exists
+    - legacy_tmux_conf_stat.stat.islnk
+
+- name: Back up legacy ~/.tmux.conf regular file
+  ansible.builtin.command: >-
+    mv {{ dotfiles_user_home }}/.tmux.conf
+    {{ dotfiles_user_home }}/.tmux.conf.bak.{{ ansible_facts['date_time']['iso8601'] }}
+  when:
+    - legacy_tmux_conf_stat.stat.exists
+    - not legacy_tmux_conf_stat.stat.islnk
+  changed_when: true
+
+- name: Check for existing tmux.conf in config directory
+  ansible.builtin.stat:
+    path: "{{ tmux_config_file }}"
+  register: existing_tmux_conf_stat
+
+- name: Back up existing non-symlink tmux.conf
+  ansible.builtin.command: >-
+    mv {{ tmux_config_file }}
+    {{ tmux_config_file }}.bak.{{ ansible_facts['date_time']['iso8601'] }}
+  when:
+    - existing_tmux_conf_stat.stat.exists
+    - not existing_tmux_conf_stat.stat.islnk
+  changed_when: true
+
+- name: Symlink tmux.conf to XDG config destination
+  ansible.builtin.file:
+    src: "{{ tmux_dotfiles_conf }}"
+    dest: "{{ tmux_config_file }}"
     state: link
+    force: true

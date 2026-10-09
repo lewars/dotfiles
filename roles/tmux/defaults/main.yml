@@ -1,1 +1,13 @@
-tmux_install_tmuxp: yes
+---
+tmux_xdg_config_home: "{{ lookup('ansible.builtin.env', 'XDG_CONFIG_HOME') | default(dotfiles_user_home + '/.config', true) }}"
+tmux_config_dir: "{{ tmux_xdg_config_home }}/tmux"
+tmux_config_file: "{{ tmux_config_dir }}/tmux.conf"
+tmux_dotfiles_conf: "{{ dotfiles_home }}/roles/tmux/files/tmux.conf"
+
+tmux_plugins:
+  - name: tpm
+    repo: https://github.com/tmux-plugins/tpm
+  - name: tmux-sensible
+    repo: https://github.com/tmux-plugins/tmux-sensible
+  - name: tmux-scroll-copy-mode
+    repo: https://github.com/nhdaly/tmux-scroll-copy-mode

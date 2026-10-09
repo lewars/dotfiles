@@ -105,3 +105,17 @@ tasks:
       - >-
         test -f ~/.config/Cursor/User/keybindings.json &&
         cp -v ~/.config/Cursor/User/keybindings.json roles/cursor/files/keybindings.json || true
+
+  diff-tmux:
+    internal: true
+    cmds:
+      - >-
+        diff --color=always roles/tmux/files/tmux.conf
+        "${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf" || true
+
+  save-tmux:
+    internal: true
+    cmds:
+      - >-
+        test -f "${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf" &&
+        cp -v "${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf" roles/tmux/files/tmux.conf || true

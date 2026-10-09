@@ -1,6 +1,6 @@
-
+---
 - name: Install tmux with apt
-  apt: name=tmux state=present
-  become_user: root
+  ansible.builtin.apt:
+    name: tmux
+    state: present
   become: true
-  become_method: sudo

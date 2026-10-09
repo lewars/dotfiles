@@ -10,9 +10,9 @@
       tags:
         - dnf
     - role: tmux
+      become: false
       tags:
         - tmux
-      when: false
     - role: asdf
       become: false
       tags:

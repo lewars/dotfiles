@@ -26,6 +26,23 @@
   (when (file-exists-p local-config)
     (load local-config)))
 
+;; Configure executable and environment search paths
+(defun le/add-to-path (path)
+  "Add PATH to `exec-path' and PATH environment variable if directory exists."
+  (let ((clean (directory-file-name (expand-file-name path))))
+    (when (file-directory-p clean)
+      (add-to-list 'exec-path clean)
+      (unless (member clean (parse-colon-path (getenv "PATH")))
+        (setenv "PATH" (concat clean path-separator (getenv "PATH")))))))
+
+;; Add local bin for all systems
+(le/add-to-path "~/.local/bin")
+
+;; Add macOS-specific binary directories
+(when (eq system-type 'darwin)
+  (le/add-to-path "/opt/homebrew/bin")
+  (le/add-to-path "/Library/TeX/texbin"))
+
 ;; Global settings
 (setq gc-cons-threshold 100000000)
 (defvar my-default-font-height 105)

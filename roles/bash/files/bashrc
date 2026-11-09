@@ -278,7 +278,7 @@ quicknote() {
 }
 
 # apps
-alias brave='flatpak run com.brave.Browser'
+alias brave='brave-browser'
 # alias ocs='opencode-sandbox'
 
 # functions

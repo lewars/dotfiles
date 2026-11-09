@@ -808,12 +808,12 @@ If the side window is being created, it prompts for the source buffer."
  '(package-selected-packages
    '(anki-editor ansible ansible-doc ansible-vault atomic-chrome blacken cape casual centaur-tabs colorful-mode consult-flycheck consult-gh-forge consult-lsp
                  consult-projectile consult-yasnippet corfu dashboard demap dockerfile-mode doom-modeline doom-themes dotenv-mode dumb-jump emojify
-                 eterm-256color expreg flycheck-posframe flyspell-correct fzf gcmh gnuplot go-mode gptel groovy-mode helpful highlight-indent-guides htmlize
-                 ibuffer-projectile idle-highlight-mode imenu-list jinja2-mode k8s-mode latex-preview-pane lorem-ipsum lsp-java lsp-pyright lsp-ui marginalia
-                 mermaid-mode multi-vterm multiple-cursors nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer ob-go ob-mermaid orderless
-                 org-appear org-bullets org-roam org-roam-ui posframe prescient py-isort python-mode pyvenv quelpa-use-package systemd terraform-mode
-                 textile-mode treemacs-all-the-icons treemacs-magit treemacs-nerd-icons treemacs-projectile vertico vertico-posframe visual-fill-column
-                 whitespace-cleanup-mode yaml-pro))
+                 eterm-256color expreg flycheck-grammarly flycheck-posframe flyspell-correct fzf gcmh gnuplot go-mode gptel grammarly groovy-mode helpful
+                 highlight-indent-guides htmlize ibuffer-projectile idle-highlight-mode imenu-list jinja2-mode k8s-mode latex-preview-pane lorem-ipsum lsp-java
+                 lsp-pyright lsp-ui marginalia mermaid-mode multi-vterm multiple-cursors nerd-icons-completion nerd-icons-corfu nerd-icons-dired
+                 nerd-icons-ibuffer ob-go ob-mermaid orderless org-appear org-bullets org-roam org-roam-ui posframe prescient py-isort python-mode pyvenv
+                 quelpa-use-package systemd terraform-mode textile-mode treemacs-all-the-icons treemacs-magit treemacs-nerd-icons treemacs-projectile vertico
+                 vertico-posframe visual-fill-column whitespace-cleanup-mode yaml-pro))
  '(show-paren-context-when-offscreen t)
  '(show-paren-style 'mixed)
  '(tramp-default-method "ssh")
@@ -1173,13 +1173,25 @@ If the side window is being created, it prompts for the source buffer."
 ;;   :hook (python-mode . python-black-on-save-mode-enable-dwim)) ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; (with-eval-after-load 'flycheck
-;;   (flycheck-grammarly-setup))
-;; (setq flycheck-grammarly-check-time 1.0)
-
 (use-package flycheck
   :ensure t
   :config (setq-default flycheck-checker-error-threshold 2048))
+
+(use-package grammarly
+  :ensure t
+  :defer t
+  :config
+  (grammarly-load-from-authinfo))
+
+(use-package flycheck-grammarly
+  :ensure t
+  :after (flycheck grammarly)
+  :init
+  (setq flycheck-grammarly-check-time 1.0)
+  :config
+  (with-eval-after-load 'grammarly
+    (grammarly-load-from-authinfo))
+  (flycheck-grammarly-setup))
 
 (use-package flycheck-posframe
   :ensure t

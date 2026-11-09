@@ -64,3 +64,26 @@
     owner: '{{ user }}'
   become: false
   when: 0>1
+- name: Ensure ~/.authinfo exists with secure permissions
+  ansible.builtin.file:
+    path: "{{ dotfiles_user_home }}/.authinfo"
+    state: touch
+    mode: '0600'
+    owner: '{{ user }}'
+    modification_time: preserve
+    access_time: preserve
+  become: false
+
+- name: Configure Grammarly credentials in authinfo
+  ansible.builtin.lineinfile:
+    path: "{{ dotfiles_user_home }}/.authinfo"
+    regexp: '^machine grammarly\.com '
+    line: "machine grammarly.com login {{ grammarly_username }} password {{ grammarly_password }}"
+    mode: '0600'
+    create: true
+    owner: '{{ user }}'
+  when:
+    - grammarly_username is defined
+    - grammarly_password is defined
+  no_log: true
+  become: false

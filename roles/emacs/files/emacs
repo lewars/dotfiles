@@ -1527,6 +1527,76 @@ If the side window is being created, it prompts for the source buffer."
   (org-headline-done          ((t (:foreground "#777979"))))
   (org-ellipsis               ((t (:foreground "#c79933" :inherit nil)))))
 
+;; Configure Org HTML export styling with GitHub Markdown (Light) theme
+(with-eval-after-load 'ox-html
+  (setq org-export-with-broken-links 'mark
+        org-html-htmlize-output-type 'css
+        org-html-head-include-default-style nil
+        org-html-head-include-scripts nil
+        org-html-head
+        (concat
+         "<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown-light.min.css\" />\n"
+         "<style>\n"
+         "  body {\n"
+         "    background-color: #ffffff;\n"
+         "  }\n"
+         "  .markdown-body {\n"
+         "    box-sizing: border-box;\n"
+         "    min-width: 200px;\n"
+         "    max-width: 980px;\n"
+         "    margin: 0 auto;\n"
+         "    padding: 45px;\n"
+         "  }\n"
+         "  @media (max-width: 767px) {\n"
+         "    .markdown-body { padding: 15px; }\n"
+         "  }\n"
+         "  /* High-contrast GitHub Light syntax highlighting for code fences */\n"
+         "  pre.src {\n"
+         "    background-color: #f6f8fa !important;\n"
+         "    color: #24292f !important;\n"
+         "    border: 1px solid #d0d7de !important;\n"
+         "    border-radius: 6px;\n"
+         "    padding: 16px;\n"
+         "    overflow: auto;\n"
+         "    font-size: 85%;\n"
+         "    line-height: 1.45;\n"
+         "  }\n"
+         "  .org-keyword,\n"
+         "  .org-py-import-from,\n"
+         "  .org-py-def-class,\n"
+         "  [class*=\"keyword\"],\n"
+         "  [class*=\"import-from\"],\n"
+         "  [class*=\"def-class\"] { color: #cf222e !important; font-weight: 600; }\n"
+         "  .org-function-name,\n"
+         "  .org-py-def,\n"
+         "  [class*=\"function-name\"],\n"
+         "  [class*=\"py-def\"] { color: #8250df !important; font-weight: 600; }\n"
+         "  .org-variable-name,\n"
+         "  .org-py-variable-name,\n"
+         "  [class*=\"variable-name\"] { color: #953800 !important; }\n"
+         "  .org-type,\n"
+         "  .org-builtin,\n"
+         "  .org-py-builtins,\n"
+         "  [class*=\"builtin\"],\n"
+         "  [class*=\"type\"] { color: #0550ae !important; }\n"
+         "  .org-py-decorators,\n"
+         "  [class*=\"decorator\"] { color: #116329 !important; font-weight: 600; }\n"
+         "  .org-string,\n"
+         "  [class*=\"string\"] { color: #0a3069 !important; }\n"
+         "  .org-constant,\n"
+         "  .org-py-number,\n"
+         "  [class*=\"number\"],\n"
+         "  [class*=\"constant\"] { color: #0550ae !important; }\n"
+         "  .org-operator,\n"
+         "  [class*=\"operator\"] { color: #cf222e !important; }\n"
+         "  .org-doc,\n"
+         "  .org-comment,\n"
+         "  .org-comment-delimiter,\n"
+         "  [class*=\"comment\"],\n"
+         "  [class*=\"doc\"] { color: #57606a !important; font-style: italic; }\n"
+         "</style>\n"
+         "<script>document.addEventListener(\"DOMContentLoaded\", function() { document.body.classList.add(\"markdown-body\"); });</script>")))
+
 ;; --- Custom Helper Functions for Capture Templates ---
 (defun le/org-roam-select-node (prompt &optional tags)
   "Prompt user to select a single Org-roam node with an optional list of TAGS."

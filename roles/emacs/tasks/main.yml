@@ -74,16 +74,33 @@
     access_time: preserve
   become: false
 
-- name: Configure Grammarly credentials in authinfo
-  ansible.builtin.lineinfile:
-    path: "{{ dotfiles_user_home }}/.authinfo"
-    regexp: '^machine grammarly\.com '
-    line: "machine grammarly.com login {{ grammarly_username }} password {{ grammarly_password }}"
-    mode: '0600'
-    create: true
+- name: Ensure ~/.local/bin directory exists
+  ansible.builtin.file:
+    path: "{{ dotfiles_user_home }}/.local/bin"
+    state: directory
     owner: '{{ user }}'
-  when:
-    - grammarly_username is defined
-    - grammarly_password is defined
-  no_log: true
+    mode: '0755'
+  become: false
+
+- name: Install Harper language server
+  ansible.builtin.unarchive:
+    src: "https://github.com/Automattic/harper/releases/download/v3.1.0/harper-ls-x86_64-unknown-linux-gnu.tar.gz"
+    dest: "{{ dotfiles_user_home }}/.local/bin"
+    remote_src: true
+    creates: "{{ dotfiles_user_home }}/.local/bin/harper-ls"
+    mode: '0755'
+    owner: '{{ user }}'
+  become: false
+
+- name: Remove deprecated grammarly language server
+  community.general.npm:
+    name: "@emacs-grammarly/grammarly-languageserver"
+    global: true
+    state: absent
+  become: false
+
+- name: Remove deprecated grammarly config directory
+  ansible.builtin.file:
+    path: "{{ dotfiles_user_home }}/.config/grammarly-languageserver"
+    state: absent
   become: false

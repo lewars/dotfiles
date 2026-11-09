@@ -2568,6 +2568,15 @@ Make it conversational but professional. Include transition phrases between sect
                           (require 'lsp-pyright)
                           (lsp-deferred))))
 
+(use-package eglot
+  :ensure nil
+  :hook ((text-mode . eglot-ensure)
+         (markdown-mode . eglot-ensure)
+         (org-mode . eglot-ensure))
+  :config
+  (add-to-list 'eglot-server-programs
+               '((text-mode markdown-mode org-mode) . ("harper-ls" "--stdio"))))
+
 (use-package dashboard
   :ensure t
   :after nerd-icons

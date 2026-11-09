@@ -69,16 +69,16 @@
 (global-set-key (kbd "C-c g") 'le/open-gtd)
 
 
-;; Configure Emacs to use the flatpak Brave Browser
-(defun brave-browser-flatpak (url &optional _new-window)
-  "Launch the Flatpak Brave browser.
-The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
-  (interactive "sURL: ")
-  ;; We use /usr/bin/flatpak to ensure the daemon finds the executable
-  ;; regardless of the current PATH state.
-  (start-process "brave-browser-flatpak" nil "/usr/bin/flatpak" "run" "com.brave.Browser" url))
+;; ;; Configure Emacs to use the flatpak Brave Browser
+;; (defun brave-browser-flatpak (url &optional _new-window)
+;;   "Launch the Flatpak Brave browser.
+;; The _NEW-WINDOW argument is ignored but required for browse-url compatibility."
+;;   (interactive "sURL: ")
+;;   ;; We use /usr/bin/flatpak to ensure the daemon finds the executable
+;;   ;; regardless of the current PATH state.
+;;   (start-process "brave-browser-flatpak" nil "/usr/bin/flatpak" "run" "com.brave.Browser" url))
 
-(setq browse-url-browser-function 'brave-browser-flatpak)
+;; (setq browse-url-browser-function 'brave-browser-flatpak)
 
 (require 'package)
 (setq package-archives

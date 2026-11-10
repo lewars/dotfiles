@@ -2638,11 +2638,24 @@ Make it conversational but professional. Include transition phrases between sect
                           (require 'lsp-pyright)
                           (lsp-deferred))))
 
+(defun le/toggle-harper ()
+  "Toggle Harper diagnostics on or off in the current buffer."
+  (interactive)
+  (if (bound-and-true-p flymake-mode)
+      (progn
+        (flymake-mode -1)
+        (message "Harper diagnostics disabled for %s" (buffer-name)))
+    (unless (eglot-current-server)
+      (eglot-ensure))
+    (flymake-mode 1)
+    (message "Harper diagnostics enabled for %s" (buffer-name))))
+
 (use-package eglot
   :ensure nil
   :hook ((text-mode . eglot-ensure)
          (markdown-mode . eglot-ensure)
          (org-mode . eglot-ensure))
+  :bind (("C-c H" . le/toggle-harper))
   :config
   (add-to-list 'eglot-server-programs
                '((text-mode markdown-mode org-mode) . ("harper-ls" "--stdio"))))

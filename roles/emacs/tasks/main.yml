@@ -104,3 +104,26 @@
     path: "{{ dotfiles_user_home }}/.config/grammarly-languageserver"
     state: absent
   become: false
+
+- name: Ensure Harper config directory exists
+  ansible.builtin.file:
+    path: "{{ dotfiles_user_home }}/.config/harper-ls"
+    state: directory
+    owner: '{{ user }}'
+    mode: '0755'
+  become: false
+
+- name: Install Harper dictionary sync script
+  ansible.builtin.copy:
+    src: sync-harper-dict.sh
+    dest: "{{ dotfiles_user_home }}/.local/bin/sync-harper-dict.sh"
+    owner: '{{ user }}'
+    mode: '0755'
+  become: false
+
+- name: Sync ispell personal dictionary to Harper user dictionary
+  ansible.builtin.command:
+    cmd: "{{ dotfiles_user_home }}/.local/bin/sync-harper-dict.sh"
+  register: harper_dict_sync
+  changed_when: "'CHANGED' in harper_dict_sync.stdout"
+  become: false

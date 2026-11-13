@@ -1483,7 +1483,7 @@ If the side window is being created, it prompts for the source buffer."
    org-special-ctrl-a/e nil       ; Make C-a/C-e jump to the beginning/end of headline text, not the stars.
    org-startup-indented t         ; Start Org buffers with indentation
    org-startup-with-inline-images t ; Display inline images automatically when Org mode loads a file.
-   org-startup-folded 'overview  ; Configure properties drawer to start in a closed position by default.
+   org-startup-folded 'content    ; Configure properties drawer to start in a closed position by default.
    org-agenda-use-time-grid t     ; Enable the use of a time grid in the Org agenda.
    org-use-fast-todo-selection 'buffer ; TODO workflow configuration with fast keys
    org-link-frame-setup '((file . find-file)) ; Open link in frame
@@ -2595,6 +2595,7 @@ Make it conversational but professional. Include transition phrases between sect
                 lsp-semantic-tokens-honor-refresh-requests t
                 lsp-ansible-add-on t
                 lsp-enable-symbol-highlighting t
+                lsp-enable-file-watchers nil
                 lsp-groovy-server-file (concat (getenv "HOME") "/.emacs.d/.cache/lsp/groovy-language-server-all.jar")
                 lsp-groovy-classpath (concat (getenv "HOME") "/groovy-language-server/build/libs"))
   :commands (lsp lsp-deferred))

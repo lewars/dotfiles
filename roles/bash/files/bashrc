@@ -146,7 +146,7 @@ fi
 export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
-if [[ -n $SSH_CONNECTION ]]; then
+if [[ -z "$SSH_CONNECTION" ]]; then
   export EDITOR='emacsclient -n -c'
 else
   export EDITOR='emacs -nw'
@@ -278,7 +278,7 @@ quicknote() {
 }
 
 # apps
-alias brave='brave-browser'
+alias brave='/usr/bin/brave-browser'
 # alias ocs='opencode-sandbox'
 
 # functions
